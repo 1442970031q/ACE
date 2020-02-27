@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/choose.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" class="pd-65">
+            <van-search v-bind:placeholder="language.SEARCH_PLACEHOLDER" 
+                        v-model="searchKey" 
+                        autofocus 
+                        v-bind:class="{'none_border': isSearching}"></van-search>
+            <div v-if="isSearching" class="search_content" v-cloak>
+                <ul v-if="services.length!=0" class="search_ul">
+                    <li class="clearfix" v-for="(item,index) in services" v-bind:key="index" @click="choose(item)">
+                        <img class="image" v-lazy="item.AvatarImage" />
+                        <div class="right">
+                            <p class="nickname" v-text="item.NickName"></p>
+                            <p class="member_code">
+                                <span v-text="language.SEARCH_ITEM_1"></span>
+                                <span v-html="item.MemberNoDisplay"></span>
+                            </p>
+                        </div>
+                    </li>
+                </ul>
+                <div v-else class="none-data">
+                    <p class="none-data-text" v-text="language.NOMORE"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/lodash.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            loading: '../../img/default_avatar.jpg',
+            error: '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'request': {
+                    'searchId': queryString('fromId')
+                },
+                'isSearching': false,
+                'searchKey': '',
+                'services': [],
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SEARCH_PLACEHOLDER': '',
+                    'SEARCH_ITEM_1': '',
+                    'NOMORE': ''
+                }
+            },
+            methods: {
+                'choose': function (item) {
+                    var wb = plus.webview.getWebviewById('subaccount.detailPage');
+                    wb.evalJS('_vue.confirmAccount("' + item.Id + '", "' + (item.NickName + '（' + item.MemberNo + '）') + '")');
+
+                    closeWindow();
+                },
+                'searchAjax': function () {
+                    if (!this.searchKey) return;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetNodalPersonList',
+                        data: {
+                            'account': this.searchKey,
+                            'isSon': true,
+                            'p': 1,
+                            'pageSize': 5
+                        },
+                        success: function (result) {
+                            _vue.isSearching = true;
+                            _vue.services = result.Data.List;
+                        }
+                    });
+                },
+                'Keyboard': function () {
+                    var mainPage = plus.webview.getWebviewById('mainPage');
+                    mainPage.evalJS('pageScript.popKeyboard()');
+                },
+                'changeLanguage': function () {
+                    LSE.install('choose_sub_account', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            watch: {
+                'searchKey': function (val) {
+                    this.doSearchAjax();
+                },
+                'services': function (newValue) {
+                    if (!newValue) return;
+
+                    var r = new RegExp(this.searchKey, 'g');
+                    for (var i = 0; i < newValue.length; i++) {
+                        newValue[i]['MemberNoDisplay'] = newValue[i].MemberNo.replace(r, function (c, index) {
+                            return '<font style="color:#1e81d2">' + c + '</font>';
+                        });
+                    }
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+                this.doSearchAjax = _.debounce(this.searchAjax, 500)
+            },
+            mounted: function () {
+                setTimeout(function () {
+                    _vue.Keyboard()
+                }, 250);
+            }
+        });
+    </script>
+</body>
+</html>

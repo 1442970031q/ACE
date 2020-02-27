@@ -1,0 +1,25 @@
+﻿.question_content {
+    margin-top: 5px;
+}
+
+    .question_content .question_line {
+        margin-bottom: 5px;
+    }
+
+        .question_content .question_line .text {
+            margin-bottom: 7px;
+            padding: 0 10px;
+            color: #757575;
+            font-size: .9em;
+        }
+
+.input-group .right_icon {
+    display: block;
+    float: right;
+    width: 10%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-size: 1.1em;
+    color: #ababab;
+}

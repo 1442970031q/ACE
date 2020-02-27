@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover" />
+    <title></title>
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/center/complaint.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app">
+            <div id="app-head" class="fixed van-hairline--bottom" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+                <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+                <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+            </div>
+            <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+                <div class="input_group">
+                    <div class="warn">
+                        <b class="warn_title" v-text="language.WARN_TITLE">#注意#</b>
+                        <p class="warn_text">
+                            <span v-text="language.WARN_TEXT_1">提交投訴信息將會扣除您的</span>
+                            <span v-text="numberFormat(currentUser.CollateralAmount, 0)"></span>
+                            <span v-text="language.WARN_TEXT_2"></span>
+                        </p>
+                    </div>
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_5">當前RP</span>
+                        <div class="input_control" v-text="numberFormat(currentUser.RP, 2)"></div>
+                    </div>
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_2">留言標題</span>
+                        <input type="text"
+                               maxlength="50"
+                               v-model="form.title"
+                               class="input_control"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                    </div>
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_3">上傳憑證</span>
+                        <div class="input_control r-1"
+                             v-bind:class="{'gray': !fileName}"
+                             v-text="fileName ? fileName : language.INPUT_PLACEHOLDER_3"></div>
+                        <i class="arrow iconfont icon-upload" @click="choiceImage"></i>
+                    </div>
+                    <div class="input_line full">
+                        <textarea class="full_control"
+                                  v-bind:placeholder="language.INPUT_PLACEHOLDER_4"
+                                  maxlength="500"
+                                  v-model="form.text"></textarea>
+                    </div>
+                </div>
+                <button class="confirm_button" @click="checkData">確認提交</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'fileName': '',
+                'choiceFilePath': '',
+                'display': {
+                    'typeName': ''
+                },
+                'form': {
+                    'title': '',
+                    'text': '',
+                    'type': 8,
+                    'imgBase64_1': ''
+                },
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            methods: {
+                'checkData': function () {
+                    if (this.currentUser.RP * 1 < this.currentUser.CollateralAmount * 1) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!this.form.title) {
+                        toastMsg(this.language.ERROR_2);
+                    } else if (!this.form.text) {
+                        toastMsg(this.language.ERROR_3);
+                    } else {
+                        toastLoading({ 'message': this.language.SUBMIT_TOAST_TEXT });
+
+                        if (this.choiceFilePath) {
+                            this.compressImage();
+                        } else {
+                            this.doSubmitAjax();
+                        }
+                    }
+                },
+                'compressImage': function () {
+                    plus.zip.compressImage({
+                        'src': this.choiceFilePath,
+                        'dst': '_downloads/feedback.jpg',
+                        'overwrite': true,
+                        'format': 'jpg',
+                        'width': 'auto',
+                        'height': 'auto',
+                        'quality': 90
+                    }, function (event) {
+                        _vue.compressComplete(event);
+                    }, function (error) {
+                        closeToastLoading();
+                        toastMsg(error.message);
+                    });
+                },
+                'compressComplete': function (event) {
+                    var reader = new plus.io.FileReader();
+
+                    reader.onloadend = function (e) {
+                        var base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                        _vue.form.imgBase64_1 = encodeURIComponent(base64);
+                        _vue.doSubmitAjax();
+                    };
+
+                    reader.onerror = function (fe) {
+                        closeToastLoading();
+                        toastMsg('Error:' + fe.error);
+                    };
+
+                    var f = event.target.replace('file://', '');
+                    reader.readAsDataURL(f);
+                },
+                'doSubmitAjax': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'SubmitCommits',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (CONFIG.IS_RUNTIME) {
+                                var wb = plus.webview.getWebviewById('my.complaintPage');
+                                wb.evalJS('_vue.reloadPageData()');
+                            }
+
+                            toastMsg('提交成功');
+                            closeWindow();
+                        }
+                    });
+                },
+                'choiceImage': function () {
+                    plus.key.hideSoftKeybord();
+                    setTimeout(function () {
+                        plus.gallery.pick(_vue.resolveFile);
+                    }, 100);
+                },
+                'resolveFile': function (captureFile) {
+                    plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                        var filePath = entry.toLocalURL();
+                        entry.file(function (file) {
+                            if (file.size > 5 * (1024 * 1024)) {
+                                toastMsg('截图必须在5MB以内');
+                                return;
+                            }
+
+                            _vue.fileName = file.name;
+                            _vue.choiceFilePath = filePath;
+                        });
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('new_complaint', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

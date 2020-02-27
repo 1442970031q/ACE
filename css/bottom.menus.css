@@ -1,0 +1,77 @@
+﻿.clearfix:after {
+    content: ' ';
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+
+.panel {
+    width: 100%;
+    background-color: white;
+}
+
+    .panel.pos {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+    }
+
+    .panel .menus {
+    }
+
+        .panel .menus li {
+            background-color: white;
+            float: left;
+            width: 25%;
+            height: 55px;
+            padding-top: 9px;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+            .panel .menus li.active {
+                background-color: #1e81d2;
+            }
+
+                .panel .menus li.active .iconfont,
+                .panel .menus li.active .menus-text {
+                    color: white;
+                }
+
+            .panel .menus li .iconfont {
+                margin: 0 auto;
+                display: block;
+                font-size: 1.1em;
+                width: 25px;
+                height: 25px;
+                text-align: center;
+                line-height: 25px;
+            }
+
+            .panel .menus li .menus-text {
+                text-align: center;
+                font-size: .7em;
+                line-height: 20px;
+            }
+
+#mask {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 55px;
+    background-color: rgba(0,0,0,.7);
+    z-index: 1;
+}
+
+.safe #mask {
+    height: 75px;
+}
+
+    #mask.show {
+        display: block;
+    }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/notice.detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': 45 + statusbarHeight + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div class="html_container" v-else v-cloak>
+                <p class="title" v-text="detail.Title"></p>
+                <p class="time" v-text="detail.CreateTime"></p>
+                <div class="text" v-html="detail.Text"></div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+				'currentUser': getUserModel(),
+                'request': {
+                    'nId': queryString('nId'),
+                },
+                'isLoading': true,
+                'detail': {
+                    'Id': 0,
+                    'Text': '',
+                    'Title': '',
+                    'CreateTime': ''
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADIN_TEXT': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'NoticeDetail',
+                        data: this.request,
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.detail = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('notice_detail', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

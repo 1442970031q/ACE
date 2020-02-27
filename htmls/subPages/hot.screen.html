@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/hot.screen.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="head" v-text="language.TITLE_TEXT"></div>
+        <div class="content" v-if="currentLanuage === 'cn'">
+            <p class="text">為了長久運營，使每位玩家獲得長遠收益，確保做到“低調運營、積極發展、安全第壹”的原則，請各位玩家遵守以下守則，做好整體配合，如有違規者公司將查實後對違規賬戶進行永久封號。</p>
+            <p class="text">1、嚴禁在微信朋友圈推廣ACE的LOGO、公司介紹、獎勵制度、收入截圖等相關信息。</p>
+            <p class="text">2、嚴禁在互聯網發帖推廣ACE，凡是在百度上搜到發帖信息和聯系方式的，將凍結玩家賬號。</p>
+            <p class="text">3、嚴禁惡意競爭、拉線搶線、散布消極言論，幹擾其他社群的推廣。</p>
+            <p class="text">4、不樹敵，只講自己好，不講別人不好，嚴禁言語攻擊、惡意中傷其他公司。</p>
+            <p class="text">5、ACE玩家須量力而行，閑錢投資，嚴禁誘導新玩家借款、貸款、抵押、超出自身承受範圍投資。</p>
+            <p class="text">ACE發展，人人有責！</p>
+            <p class="text">為了ACE更好的明天，請各位玩家共同遵守，共建壹個健康、有序、規範的理財平臺！</p>
+            <p class="text text-right">ACE市場部</p>
+            <p class="text text-right">2018年10月26日</p>
+        </div>
+        <div v-else class="content">
+            <p class="text">For long-lasting business, to allow each player to obtain long-term profits, and to fulfill the ‘low-key business, active development, safety first’ principle, each player must comply with the following rules and cooperate with all of them. If there are people who violate these rules, after the company conducts an investigation, they will permanently ban their accounts.</p>
+            <p class="text">1.It is strictly prohibited to use one’s WeChat friends group to advertise ACE’s logo, company profile, rewards system, income screenshot, or other relevant information.</p>
+            <p class="text">2.It is strictly prohibited to use forum posts to advertise ACE online, and the company will freeze the accounts of any player whose forum post information and contact methods are found on Baidu.</p>
+            <p class="text">3.It is strictly prohibited to engage in cut-throat competition or to threaten others to join your team, disseminate negative remarks, or interfere with other communities’ advertising.</p>
+            <p class="text">4.Do not antagonize people, only say that you are good, and do not say that other people are bad. It is strictly prohibited to engage in verbal attacks or maliciously slander other companies.</p>
+            <p class="text">5.ACE players must use their own strength when investing extra money. It is strictly prohibited to induce new players to lend money, loan money, offer up collateral, or exceed their acceptable investment limits.</p>
+            <p class="text">Everyone is Responsible for ACE’s Development!</p>
+            <p class="text">For ACE’s Better Tomorrow, Each Player Must Work Together to Comply with the Rules and Build a Healthy, Orderly, and Regulated Finance Platform!</p>
+            <p class="text text-right">ACE Marketing Department</p>
+            <p class="text text-right">October 26, 2018</p>
+        </div>
+        <button class="close_button" @click="closeWindow" v-text="language.BUTTON_1"></button>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentLanuage': LSE.currentLanguage(),
+                'language': {
+                    'TITLE_TEXT': '',
+                    'BUTTON_1': ''
+                }
+            },
+            methods: {
+                'closeWindow': function () {
+                    var wb = plus.webview.getWebviewById('mainPage');
+                    wb.evalJS('pageScript.closeMaskWindow()');
+
+                    closeWindow();
+                },
+                'changeLanguage': function () {
+                    LSE.install('hot_screen', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                window.backButton = this.closeWindow;
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

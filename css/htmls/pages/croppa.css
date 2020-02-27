@@ -1,0 +1,39 @@
+﻿html, body, #app {
+    height: 100%;
+    background-color: #000000;
+}
+
+#app-head {
+    background-color: #252525;
+    border-bottom: 0;
+}
+
+    #app-head .right-back,
+    #app-head .app-head-text,
+    #app-head .submit-button,
+    #app-head .submit-button:active {
+        color: white;
+    }
+
+#app-content {
+    height: calc(100% - 65px);
+}
+
+.center {
+    display: block;
+    margin: auto;
+    width: 300px;
+    height: 300px;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.croppa-container {
+    background-color: transparent;
+    border: 1px solid #808080;
+    border-radius: 50%;
+    overflow: hidden;
+}

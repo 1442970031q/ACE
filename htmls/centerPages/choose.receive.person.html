@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/choose.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text">選擇接收人</p>
+        </div>
+        <div id="app-content" class="pd-65">
+            <van-search placeholder="請輸入服務中心的ID" v-model="searchKey" autofocus v-bind:class="{'none_border': isSearching}"></van-search>
+            <div v-if="isSearching" class="search_content" v-cloak>
+                <div v-if="isLoading" class="loading-box">
+                    <van-loading color="black"></van-loading>
+                    <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+                </div>
+                <div v-else>
+                    <ul v-if="services.length!=0" class="search_ul">
+                        <li class="clearfix" v-for="(item,index) in services" v-bind:key="index" @click="choose(item)">
+                            <img class="image" v-lazy="item.AvatarImage" />
+                            <div class="right">
+                                <p class="line">
+                                    <span class="text big">服務中心ID：</span>
+                                    <span v-html="item.FlowNumber"></span>
+                                </p>
+                                <p class="line">
+                                    <span class="text big">服務中心暱稱：</span>
+                                    <span v-text="item.NickName"></span>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-else class="none-data">
+                        <p class="none-data-text">沒有搜索到任何數據</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            loading: '../../img/default_avatar.jpg',
+            error: '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isSearching': false,
+                'searchKey': '',
+                'services': [],
+                'request': {
+                    'fromPage': queryString('fromPage')
+                }
+            },
+            methods: {
+                'choose': function (item) {
+                    var wb = plus.webview.getWebviewById(this.request.fromPage);
+                    wb.evalJS('_vue.confirmReceive("' + item.Id + '", "' + (item.NickName + '（' + item.FlowNumber + '）') + '")');
+
+                    closeWindow();
+                },
+                'searchAjax': function () {
+                    if (!this.searchKey) return;
+
+                    this.isSearching = true;
+                    this.isLoading = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetBatchService',
+                        data: {
+                            'code': this.searchKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.services = result.Data.List;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'Keyboard': function () {
+                    var mainPage = plus.webview.getWebviewById('mainPage');
+                    mainPage.evalJS('pageScript.popKeyboard()');
+                }
+            },
+            watch: {
+                'searchKey': function (val) {
+                    if (!val) {
+                        this.isSearching = false;
+                    } else if (val.length >= 5) {
+                        this.searchAjax();
+                    }
+                },
+                'services': function (newValue) {
+                    if (!newValue || newValue.length == 0) return;
+
+                    var r = new RegExp(this.searchKey, 'g');
+                    for (var i = 0; i < newValue.length; i++) {
+                        /*newValue[i]['MemberNoDisplay'] = newValue[i].MemberNo.replace(r, function (c, index) {
+                            return '<font style="color:#1e81d2">' + c + '</font>';
+                        });*/
+                        newValue[i]['FlowNumber'] = newValue[i].FlowNumber.replace(r, function (c, index) {
+                            return '<font style="color:#1e81d2">' + c + '</font>';
+                        });
+                    }
+                }
+            },
+            created: function () {
+                //this.changeLanguage();
+                //this.doSearchAjax = _.debounce(this.searchAjax, 500)
+            },
+            mounted: function () {
+                setTimeout(this.Keyboard, 250);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/account/forgot.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-cloak>
+            <div class="text_content">
+                <p class="title" v-text="language.CONTENT_TITLE"></p>
+                <p class="line" v-text="language.CONTENT_TEXT"></p>
+            </div>
+            <div class="input-group bb">
+                <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                <input type="text" class="input-control" v-model="form.account" v-bind:placeholder="language.INPUT_PLACEHOLDER_1"
+                       maxlength="15" />
+            </div>
+            <div class="input-group bb code">
+                <span class="input-text" v-text="language.INPUT_TEXT_3">
+                </span>
+                <input type="text" class="input-control inp" v-model="form.uInput" maxlength="5" v-bind:placeholder="language.INPUT_PLACEHOLDER_3" />
+                <img v-lazy="imgSrc" class="img" @click="getCodeAjax" />
+            </div>
+            <div class="input-group">
+                <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                <div class="input-control">
+                    <div class="choice_block left" v-bind:class="{'active':form.changeType==1}" @click="form.changeType=1" v-text="language.CHECK_1"></div>
+                    <div class="choice_block right" v-bind:class="{'active':form.changeType==2}" @click="form.changeType=2" v-text="language.CHECK_2"></div>
+                </div>
+            </div>
+            <button class="confirm_button" @click="nextStep" v-text="language.BUTTON_1"></button>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../img/default_feedback.png',
+            'error': '../img/default_feedback.png'
+        });
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'statusbarHeight': 20,
+                'form': {
+                    'account': '',
+                    'uInput': '',
+                    'changeType': '1',
+                    'uk': '',
+                    'Q1': 0,
+                    'Q2': 0,
+                    'Q3': 0
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'CONTENT_TITLE': '',
+                    'CONTENT_TEXT': '',
+                    'INPUT_TEXT_1': '',
+                    'INPUT_PLACEHOLDER_1': '',
+                    'INPUT_TEXT_2': '',
+                    'CHECK_1': '',
+                    'CHECK_2': '',
+                    'BUTTON_1': '',
+                    'ERROR_1': '',
+                    'SUBMIT_TEXT': '',
+                    'ERROR_NOTSET_TEXT': '',
+                    'ERROR_NOTSET_TITLE': ''
+                },
+                'imgSrc': ''
+            },
+            methods: {
+                'nextStep': function () {
+                    if (!this.form.account) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!this.form.uInput) {
+                        toastMsg(this.language.ERROR_2);
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({
+                        'message': this.language.SUBMIT_TEXT
+                    });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ValidateAccount',
+                        data: this.form,
+                        success: function (result) {
+                            closeToastLoading();
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                            } else if (!result.IsSet) {
+                                _vue.$dialog.alert({
+                                    'title': _vue.language.ERROR_NOTSET_TITLE,
+                                    'message': _vue.language.ERROR_NOTSET_TEXT
+                                })
+                            } else {
+                                _vue.form.Q1 = result.Q1;
+                                _vue.form.Q2 = result.Q2;
+                                _vue.form.Q3 = result.Q3;
+                                gotoNewWindow('answeringPage', 'answering', {
+                                    paramObject: {
+                                        'form': _vue.form
+                                    },
+                                    openCallback: function () {
+                                        closeWindow('none');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                },
+                'getCodeAjax': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'NewCaptcha',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                            }
+
+                            _vue.form.uk = result.ImageData.substring(result.ImageData.length - 16);
+                            _vue.imgSrc = 'data:image/png;base64,' + result.ImageData.substring(0, result.ImageData.length - 16);
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('forgot', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+                this.getCodeAjax();
+            }
+        });
+    </script>
+</body>
+</html>

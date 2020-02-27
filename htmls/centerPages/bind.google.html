@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/bind.google.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="bg"></div>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div class="input_group">
+                <div class="warn" v-text="language.WARN_TEXT">請將下面的密鑰輸入到“身份驗證器”中</div>
+                <div class="input_line van-hairline--bottom">
+                    <span class="input_text" v-text="language.INPUT_TEXT_1">谷歌密鑰</span>
+                    <div class="input_control r-1" v-text="request.key"></div>
+                    <span class="arrow iconfont icon-copy" @click="copyKeyByAndroid"></span>
+                </div>
+                <div class="input_line">
+                    <span class="input_text" v-text="language.INPUT_TEXT_3">谷歌密鑰</span>
+                    <div class="input_control r-1" v-text="request.key"></div>
+                    <span class="arrow iconfont icon-copy" @click="copyKeyByApple"></span>
+                </div>
+            </div>
+            <div class="input_group">
+                <div class="warn" v-text="language.TIP_TEXT">在下方輸入“身份驗證器”對應賬戶名的驗證碼</div>
+                <div class="input_line">
+                    <span class="input_text" v-text="language.INPUT_TEXT_2">谷歌驗證碼</span>
+                    <input class="input_control"
+                           type="tel"
+                           maxlength="6"
+                           v-bind:placeholder="language.INPUT_PLACEHOLDER_2"
+                           v-model="form.gCode" />
+                </div>
+            </div>
+            <button class="confirm_button mt-15"
+                    v-text="language.BUTTON_TEXT"
+                    @click="checkData">
+                我已綁定，并開始驗證
+            </button>
+            <div class="input_group_1">
+                <p class="title" v-text="language.FLOW_PATH_TITLE"></p>
+                <div class="content">
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_1">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_2">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_3">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_4">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_5">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_6">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_7">
+                    </p>
+                    <p class="line_text" v-text="language.FLOW_PATH_CONTENT_8">
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'request': {
+                    'key': queryString('ac')
+                },
+                'form': {
+                    'gCode': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'checkData': function () {
+                    if (!this.form.gCode) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (this.form.gCode.length !== 6) {
+                        toastMsg(this.language.ERROR_2);
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'VerifyGCode',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel({
+                                'IsBindGAuthorize': true
+                            }, [{
+                                'pageName': 'center.htmlPage',
+                                'actionName': '_vue.updateInfo()'
+                            }]);
+
+                            gotoNewWindow('bind.google.successPage', 'bind.google.success', {
+                                'openCallback': function () {
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    });
+                },
+                'copyKeyByAndroid': function () {
+                    if (CONFIG.IS_RUNTIME) {
+                        var mainPage = plus.webview.getWebviewById('mainPage');
+                        if (mainPage !== null) {
+                            mainPage.evalJS('pageScript.setClipBoard("' + this.request.key + '")');
+                        }
+
+                        toastMsg(this.language.COPY_TOAST_TEXT);
+                    }
+                },
+                'copyKeyByApple': function () {
+                    if (CONFIG.IS_RUNTIME) {
+                        var mainPage = plus.webview.getWebviewById('mainPage');
+                        if (mainPage !== null) {
+                            var ks = this.request.key.replace(/=/g, '');
+                            mainPage.evalJS('pageScript.setClipBoard("' + ks + '")');
+                        }
+
+                        toastMsg(this.language.COPY_TOAST_TEXT);
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('bind_google', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

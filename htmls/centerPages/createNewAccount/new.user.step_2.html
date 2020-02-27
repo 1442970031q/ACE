@@ -1,0 +1,428 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/new.user.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <div class="input_content">
+                    <p class="warn" v-text="language.WARNING_TEXT"></p>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <input type="text" 
+                               class="input-control" 
+                               v-model="form.realName" 
+                               maxlength="20" 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="text" 
+                               class="input-control w-60" 
+                               @click="isShow=true" 
+                               v-bind:value="nationalityDisplay" 
+                               readonly 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                        <input type="text" 
+                               class="input-control w-60" 
+                               v-bind:value="typeDisplay" 
+                               readonly 
+                               @click="choiceType" 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_3" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="IDTypeDisplay.text"></span>
+                        <input type="text" class="input-control" v-model="form.idNumber" v-bind:readonly="form.idType==''" maxlength="18" v-bind:placeholder="IDTypeDisplay.placeholder" />
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="warn text-left" v-if="isFirstReport">
+                        <b>
+                            <i class="iconfont icon-warning-line"></i>
+                            <span v-text="language.FIRST_REPORT_TITLE"></span>
+                        </b>
+                        <p v-text="language.FIRST_REPORT_TEXT"></p>
+                    </div>
+                    <div class="input-group" v-bind:class="{'bb':!isFirstReport}">
+                        <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                        <input type="text"
+                               class="input-control"
+                               v-bind:readonly="isFirstReport"
+                               v-model="nodaPersonDisplay"
+                               @blur="!isFirstReport && searchPlayer()"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_4" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.PLAYER_NICKNAME">玩家昵稱</span>
+                        <van-loading v-if="isPlayerLoading" color="black" class="search_player"></van-loading>
+                        <span v-else class="input-control" v-bind:class="{'warning_color': isNotFound}" v-text="playerNickname"></span>
+                    </div>
+                    <div class="input-group" v-if="!isFirstReport">
+                        <span class="input-text" v-text="language.INPUT_TEXT_5"></span>
+                        <div class="input-control border clearfix">
+                            <div class="input-inline left" v-bind:class="{'selected':form.position==1}" @click="form.position=1">
+                                <i class="iconfont icon-duihao"></i>
+                                <span v-text="language.POSISTION_LEFT"></span>
+                            </div>
+                            <div class="input-inline right" v-bind:class="{'selected':form.position==2}" @click="form.position=2">
+                                <span v-text="language.POSISTION_RIGHT"></span>
+                                <i class="iconfont icon-duihao"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_6"></span>
+                        <input type="password" class="input-control red" 
+                               v-model="form.mPassword" 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_6" />
+                    </div>
+                </div>
+                <button class="confirm_button" @click="checkData()" v-text="language.BUTTON_1"></button>
+                <van-popup v-model="isShow" position="bottom">
+                    <van-picker v-bind:columns="country" 
+                                @cancel="isShow=false" 
+                                @confirm="selectedNationality" 
+                                show-toolbar="true" 
+                                v-bind:title="language.COUNTRY_PICKER_TITLE"></van-picker>
+                </van-popup>
+                <van-popup v-model="isShowIDTypes" position="bottom">
+                    <van-picker v-bind:columns="typeList" 
+                                @cancel="isShowIDTypes=false" 
+                                @confirm="selectedIDType" 
+                                show-toolbar="true" 
+                                v-bind:title="language.ID_PICKER_TITLE"></van-picker>
+                </van-popup>
+                <van-popup v-model="isShowConfirm" class="w-90-p" v-bind:close-on-click-overlay="false">
+                    <div class="confirm_box">
+                        <div class="confirm_inner">
+                            <h3 class="title" v-text="language.DETAIL_TITLE"></h3>
+                            <ul>
+                                <li>
+                                    <span class="text" v-text="language.DETAIL_ITEM_1"></span>
+                                    <span class="value" v-text="currentUser.NickName + '(' + currentUser.FlowNumber + ')'"></span>
+                                </li>
+                                <li>
+                                    <span class="text" v-text="language.DETAIL_ITEM_2"></span>
+                                    <span class="value" v-text="nodaPersonDisplay"></span>
+                                </li>
+                                <li>
+                                    <span class="text" v-text="language.DETAIL_ITEM_3"></span>
+                                    <span class="value" v-text="form.position==1 ? language.POSISTION_LEFT : language.POSISTION_RIGHT"></span>
+                                </li>
+                                <li>
+                                    <span class="text" v-text="language.DETAIL_ITEM_4"></span>
+                                    <span class="value" v-html="starDisplay"></span>
+                                </li>
+                                <li>
+                                    <span class="text" v-text="language.DETAIL_ITEM_5"></span>
+                                    <span class="value" v-text="form.memberNo"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="actions clearfix">
+                            <button class="action" @click="isShowConfirm=false" v-text="language.DETAIL_BUTTON_1"></button>
+                            <button class="action confirm" @click="!CONFIG.IS_DOING && confirmSubmit()" v-text="language.DETAIL_BUTTON_2"></button>
+                        </div>
+                    </div>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/country.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isShow': false,
+                'isShowIDTypes': false,
+                'isShowConfirm': false,
+                'isPlayerLoading': false,
+                'isNotFound': false,
+                'playerNickname':'',
+                'nationalityDisplay': '中国(China)',
+                'nodaPersonDisplay': '',
+                'typeDisplay': '',
+                'starDisplay': '',
+                'isFirstReport': false,
+                'IDTypeDisplay': {
+                    'text': '身份證',
+                    'placeholder': '請輸入身份證號碼'
+                },
+                'IDTypes': [{
+                    'text': '身份證',
+                    'placeholder': '請輸入身份證號碼',
+                    'value': '1'
+                }, {
+                    'text': '回鄉證',
+                    'placeholder': '請輸入回鄉證號碼',
+                    'value': '16'
+                }, {
+                    'text': '台胞證',
+                    'placeholder': '請輸入台胞證號碼',
+                    'value': '8'
+                }, {
+                    'text': '護照',
+                    'placeholder': '請輸入護照號碼',
+                    'value': '2'
+                }, {
+                    'text': '駕照',
+                    'placeholder': '請輸入駕照號碼',
+                    'value': '4'
+                }],
+                'typeList': [{
+                    'text': '身份證',
+                    'value': '1',
+                    'placeholder': '請輸入身份證號碼'
+                }],
+                'form': {
+                    'nationality': '86',
+                    'nodalPersonId':'',
+                    'realName': '',
+                    'idType': '1',
+                    'idNumber': '',
+                    'bankName': '',
+                    'bankBranchName':'',
+                    'bankCardNumber': '',
+                    'bankCardName': '',
+                    'walletAddress': '',
+                    'position': 1,
+                    'mPassword': '',
+                },
+                'request': {},
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'searchPlayer': function () {
+                    if (this.nodaPersonDisplay.length >= 5) {
+                        this.form.nodalPersonId = '';
+                        this.isPlayerLoading = true;
+
+                        ajax({
+                            url: CONFIG.BASE_URL + 'GetNodalPersonList',
+                            data: {
+                                'code': this.nodaPersonDisplay
+                            },
+                            success: function (result) {
+                                if (result.Error) {
+                                    toastMsg(result.Msg);
+                                } else if (result.Data.List.length == 0) {
+                                    _vue.isNotFound = true;
+                                    _vue.playerNickname = _vue.language.PLAYER_NOTFOUND;
+                                } else {
+                                    _vue.isNotFound = false;
+                                    _vue.playerNickname = result.Data.List[0].NickName + '(' + _vue.nodaPersonDisplay + ')';
+                                    _vue.form.nodalPersonId = result.Data.List[0].Id;
+                                }
+
+                                _vue.isPlayerLoading = false;
+                            }
+                        });
+                    }
+                },
+                //'gotoChoose': function () {
+                //    gotoNewWindow('choose.nodal.personPage', '../choose.nodal.person', {
+                //        param: 'fromPage=' + encodeURIComponent('new.user.step_2Page')
+                //    });
+                //},
+                //'confirmHandover': function (memberNo, display) {
+                //    this.nodaPersonDisplay = display;
+                //    this.form.nodalPersonId = memberNo;
+                //},
+                'checkFirstReport': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'IsFirstReport',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (result.IsFirst) {
+                                _vue.nodaPersonDisplay = result.Data.FlowNumber;
+                                _vue.playerNickname = `${result.Data.NickName}(${result.Data.FlowNumber})`;
+                                _vue.form.nodalPersonId = result.Data.Id;
+                                _vue.form.position = 1;
+                            }
+
+                            _vue.isFirstReport = result.IsFirst;
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'selectedIDType': function (item) {
+                    this.isShowIDTypes = false;
+                    this.typeDisplay = item.text;
+                    this.IDTypeDisplay.text = item.text;
+                    this.IDTypeDisplay.placeholder = item.placeholder;
+                    this.form.idType = item.value;
+                },
+                'choiceType': function () {
+                    if (this.form.nationality == '') {
+                        toastMsg(this.language.ERROR_1);
+                    } else {
+                        this.isShowIDTypes = true;
+                    }
+                },
+                'selectedNationality': function (item) {
+                    this.isShow = false;
+                    this.nationalityDisplay = item.text;
+                    this.form.nationality = item.code;
+
+                    this.form.idType = '';
+                    this.typeDisplay = '';
+                    this.form.idNumber = '';
+                    this.IDTypeDisplay.text = this.language.RESET_TEXT;
+                    this.IDTypeDisplay.placeholder = this.language.RESET_PLACEHOLDER;
+                    this.typeList = [];
+
+                    var isChina = (item.code == '86');
+                    if (isChina) {
+                        this.typeList.push(this.IDTypes[0]);
+                    } else {
+                        this.typeList.push(this.IDTypes[0]);
+                        this.typeList.push(this.IDTypes[3]);
+                    }
+                    //var startIndex = isChina ? 0 : 3;
+                    //var endIndex = isChina ? 1 : 4;
+                    //for (var i = startIndex; i < endIndex; i++) {
+                    //    this.typeList.push(this.IDTypes[i]);
+                    //}
+                },
+                'checkData': function () {
+                    if (!this.form.realName) {
+                        toastMsg(this.language.ERROR_2);
+                    } else if (!this.form.nationality) {
+                        toastMsg(this.language.ERROR_3);
+                    } else if (!this.form.idType) {
+                        toastMsg(this.language.ERROR_4);
+                    } else if (!this.form.idNumber) {
+                        toastMsg(this.IDTypeDisplay.placeholder);
+                    } else if (!this.form.nodalPersonId || this.form.nodalPersonId <= 0) {
+                        toastMsg(this.language.ERROR_5);
+                    } else if (!this.form.mPassword) {
+                        toastMsg(this.language.ERROR_6);
+                    } else {
+                        this.isShowConfirm = true;
+                    }
+                },
+                'confirmSubmit': function(){
+                    this.isShowConfirm = false;
+
+                    this.form.walletAddress = '123456';
+                    this.doSubmitAjax();
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.SUBMIT_TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'DeclarationForm',
+                        data: this.form,
+                        timeout: 30000,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            var isChange = (_vue.form.nodalPersonId != result.NodalId);
+                            if (isChange) {
+                                _vue.nodaPersonDisplay = result.NickName + '(' + result.FlowNumber + ')';
+                            }
+
+                            _vue.currentUser.RP -= _vue.form.investmentAmount;
+                            updateUserModel({
+                                'RP': _vue.currentUser.RP
+                            }, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            gotoNewWindow('new.user.successPage', '../../success/new.user.success', {
+                                param: 'mn=' + encodeURIComponent(_vue.form.memberNo) +
+                                    '&nn=' + encodeURIComponent(_vue.form.nickName) +
+                                    '&ia=' + encodeURIComponent(_vue.starDisplay) +
+                                    '&np=' + encodeURIComponent(_vue.nodaPersonDisplay) +
+                                    '&ic=' + isChange +
+                                    '&pos=' + _vue.form.position + 
+                                    '&fn=' + result.NewPersonFlowNumber,
+                                openCallback: function () {
+                                    plus.webview.getWebviewById('new.userPage').close('none');
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('new_user_step2', function (lang) {
+                        Vue.set(_vue, "language", lang);
+
+                        if (!_vue.request.fromTree) {
+                            _vue.playerNickname = lang.PLAYER_DEFAULT;
+                        }
+                       
+                        _vue.typeDisplay = _vue.language.TYPE_DISPLAY;
+                        _vue.IDTypeDisplay.text = _vue.language.TYPE_DISPLAY;
+                        _vue.IDTypeDisplay.placeholder = _vue.language.TYPE_DSIPLAY_PLACEHOLDER;
+                        _vue.typeList.text = _vue.language.TYPE_DISPLAY;
+                        _vue.typeList.placeholder = _vue.language.TYPE_DSIPLAY_PLACEHOLDER;
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+
+                var wb = plus.webview.currentWebview();
+                this.starDisplay = wb.paramObject.starDisplay;
+                this.form = Object.assign(this.form, wb.paramObject.form);
+                this.request = wb.paramObject.request;
+
+                if (this.request.fromTree) {
+                    this.form.position = this.request.pos;
+                    this.form.nodalPersonId = this.request.rId;
+                    this.nodaPersonDisplay = this.request.display;
+                    this.playerNickname = this.request.parentDisplay;
+                }
+            },
+            mounted: function () {
+                this.checkFirstReport();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/check.out.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-cloak>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else>
+                <div class="top_content center clearfix">
+                    <div class="top_block fl">
+                        <p class="txt" v-text="language.INFO_1"></p>
+                        <p class="number" v-text="numberFormat(currentUser.EP, 2)"></p>
+                    </div>
+                    <!--<div class="top_block fl">
+                        <p class="txt" v-text="language.INFO_2"></p>
+                        <p class="number" v-text="numberDisplay"></p>
+                    </div>-->
+                </div>
+                <div class="input_content">
+                    <p class="warn" v-text="language.WARNING_TEXT"></p>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <input type="text"
+                               class="input-control"
+                               @blur="searchPlayer"
+                               v-model="receiveDisplay"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.PLAYER_NICKNAME">玩家昵稱</span>
+                        <van-loading v-if="isPlayerLoading" color="black" class="search_player"></van-loading>
+                        <span v-else class="input-control" v-bind:class="{'warning_color': isNotFound}" v-text="playerNickname"></span>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="number" class="input-control"
+                               v-model="form.amount"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                        <input type="password"
+                               class="input-control"
+                               v-model="form.password"
+                               maxlength="16"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_3" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                        <input type="number"
+                               class="input-control"
+                               v-model="form.gCode"
+                               maxlength="6"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_4" />
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group">
+                        <textarea class="input-control w-100 h-80"
+                                  v-model="form.des"
+                                  maxlength="500"
+                                  v-bind:placeholder="language.REMARK_PLACEHOLDER"></textarea>
+                        <p class="input_count"><span v-text="form.des.length" class="num" v-bind:class="{'red':form.des.length==500}">0</span> / 500</p>
+                    </div>
+                </div>
+                <button class="confirm_button" @click="!CONFIG.IS_DOING && checkData()" v-text="language.BUTTON_1"></button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isPlayerLoading': false,
+                'isNotFound': false,
+                'receiveDisplay': '',
+                'playerNickname': '',
+                'numberDisplay': '0',
+                'form': {
+                    'amount': '',
+                    'password': '',
+                    'des': '',
+                    'recipientId': '',
+                    'gCode': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'searchPlayer': function () {
+                    if (this.receiveDisplay.length >= 5) {
+                        this.form.recipientId = '';
+                        this.isPlayerLoading = true;
+
+                        ajax({
+                            url: CONFIG.BASE_URL + 'GetBatchService',
+                            data: {
+                                'code': this.receiveDisplay
+                            },
+                            success: function (result) {
+                                if (result.Error) {
+                                    toastMsg(result.Msg);
+                                } else if (result.Data.List.length == 0) {
+                                    _vue.isNotFound = true;
+                                    _vue.playerNickname = _vue.language.PLAYER_NOTFOUND;
+                                } else {
+                                    _vue.isNotFound = false;
+                                    _vue.playerNickname = result.Data.List[0].NickName + '(' + _vue.receiveDisplay + ')';
+                                    _vue.form.recipientId = result.Data.List[0].Id;
+                                }
+
+                                _vue.isPlayerLoading = false;
+                            }
+                        });
+                    }
+                },
+                //'confirmReceive': function (id, display) {
+                //    this.receiveDisplay = display;
+                //    this.form.recipientId = id;
+                //},
+                //'openChoosePage': function () {
+                //    gotoNewWindow('choose.receive.personPage', 'choose.receive.person', {
+                //        param: 'fromPage=' + encodeURIComponent('ep.givePage'),
+                //        openCallback: function () {
+                //            plus.navigator.setStatusBarStyle('dark');
+                //        },
+                //        closeCallback: function () {
+                //            plus.navigator.setStatusBarStyle('light');
+                //        }
+                //    });
+                //},
+                'checkData': function () {
+                    CONFIG.IS_DOING = true;
+
+                    if (!this.form.recipientId) {
+                        toastMsg(this.language.ERROR_1);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.amount) {
+                        toastMsg(this.language.ERROR_2);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.amount * 1 < 100) {
+                        toastMsg(this.language.ERROR_3);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.amount * 1 > this.currentUser.EP * 1) {
+                        toastMsg(this.language.ERROR_4);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.password) {
+                        toastMsg(this.language.ERROR_5);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(this.language.ERROR_6);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.gCode) {
+                        toastMsg(this.language.ERROR_7);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.gCode.length < 6) {
+                        toastMsg(this.language.ERROR_8);
+                        CONFIG.IS_DOING = false;
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TransferEP',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.loadPageData(function () {
+                                gotoNewWindow('change.successPage', '../success/change.success', {
+                                    param: 'title=' + encodeURIComponent(_vue.language.PARAM_TITLE_TEXT) +
+                                        '&text=' + encodeURIComponent(_vue.language.PARAM_DES_TEXT),
+                                    openCallback: function () {
+                                        closeWindow('none');
+                                    }
+                                });
+                            });
+                        }
+                    })
+                },
+                'loadPageData': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (typeof (callback) == 'undefined') {
+                                _vue.currentUser = getUserModel();
+                                _vue.isLoading = false;
+                            } else {
+                                callback();
+                            }
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('ep_give', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                        _vue.playerNickname = lang.PLAYER_DEFAULT;
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/sell.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content">
+            <div v-if="isLoading || isLoadingAnswer" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <div class="info_content">
+                    <div class="info_inner">
+                        <ul class="info_ul clearfix">
+                            <li>
+                                <div class="line">
+                                    <p class="value" v-text="numberFormat(display.currentACECount, 0)"></p>
+                                    <p class="txt" v-text="language.DETAIL_ITEM_1"></p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="line">
+                                    <p class="value" v-text="currentUser.CurrentStockPrice"></p>
+                                    <p class="txt" v-text="language.DETAIL_ITEM_2"></p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="line">
+                                    <p class="value" v-text="display.dollarDisplay"></p>
+                                    <p class="txt" v-text="language.DETAIL_ITEM_3"></p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <input type="text" class="input-control w-60" v-model="display.accountDisplay" readonly @click="gotoChoiceSubaccount" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="number"
+                               class="input-control"
+                               v-model="form.count"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2"
+                               maxlength="20" />
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group">
+                        <p class="full-text" v-text="display.questionDisplay"></p>
+                        <input type="text"
+                               class="input-control center w-100"
+                               v-model="form.answer"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_4"
+                               maxlength="10" />
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                        <input type="text" class="input-control" v-model="form.idcard"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_5"
+                               maxlength="18" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                        <input type="password"
+                               class="input-control"
+                               v-model="form.password"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_3"
+                               maxlength="16" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_6"></span>
+                        <input type="tel"
+                               class="input-control"
+                               v-model="form.gCode"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_6"
+                               maxlength="6" />
+                    </div>
+                </div>
+                <button class="confirm_button" @click="!CONFIG.IS_DOING && confirmSell()" v-text="language.BUTTON_1"></button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'isLoading': true,
+                'isLoadingAnswer': true,
+                'currentUser': getUserModel(),
+                'display': {
+                    'currentACECount': 0,
+                    'dollarDisplay': '0.00',
+                    'accountDisplay': '',
+                    'questionDisplay': '',
+                },
+                'isSellCurrentAccount': true,
+                'form': {
+                    'count': '',
+                    'password': '',
+                    'sonId': '',
+                    'qId': 0,
+                    'answer': '',
+                    'idcard': '',
+                    'gCode': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoChoiceSubaccount': function () {
+                    plus.navigator.setStatusBarStyle('dark');
+                    gotoNewWindow('choice.subaccountPage', '../centerPages/createSubAccount/choice.subaccount', {
+                        closeCallback: function () {
+                            plus.navigator.setStatusBarStyle('light');
+                        }
+                    });
+                },
+                'confirmSubaccount': function (id, display, amount) {
+                    this.form.sonId = id;
+                    this.display.accountDisplay = display;
+                    this.display.currentACECount = amount;
+                },
+                'choiceMain': function () {
+                    this.form.sonId = '';
+                    this.display.accountDisplay = _vue.language.ACCOUNT_TYPE;
+                    this.display.currentACECount = this.currentUser.ACECount;
+                },
+                'confirmSell': function () {
+                    CONFIG.IS_DOING = true;
+
+                    if (!this.form.count || this.form.count <= 0) {
+                        toastMsg(this.language.ERROR_1);
+                        CONFIG.IS_DOING = false;
+                    } else if (!/^\d+$/.test(this.form.count)) {
+                        toastMsg(this.language.ERROR_2);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.count > this.display.currentACECount) {
+                        toastMsg(this.language.ERROR_3);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.answer) {
+                        toastMsg(this.language.ERROR_6);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.idcard) {
+                        toastMsg(this.language.ERROR_7);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.password) {
+                        toastMsg(this.language.ERROR_4);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(this.language.ERROR_5);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.gCode) {
+                        toastMsg(this.language.ERROR_8);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.gCode.length !== 6) {
+                        toastMsg(this.language.ERROR_9);
+                        CONFIG.IS_DOING = false;
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + (!this.form.sonId ? 'SellACE' : 'SellSonACE'),
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.loadPageData(function () {
+                                    gotoNewWindow('sell.successPage', '../success/sell.success', {
+                                        param: `c=${_vue.form.count}&ac=${encodeURIComponent(_vue.display.accountDisplay)}`,
+                                        openCallback: function () {
+                                            closeWindow('none');
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    })
+                },
+                'loadAnswer': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetAnswerTitle',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.display.questionDisplay = result.QTitle;
+                            _vue.form.qId = result.Qid;
+                            _vue.isLoadingAnswer = false;
+                        }
+                    })
+                },
+                'loadPageData': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (callback && typeof (callback) == 'function') {
+                                callback(result);
+                            } else {
+                                _vue.currentUser = getUserModel();
+                                _vue.display.currentACECount = getUserModel().ACECount;
+                                _vue.isLoading = false;
+                            }
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('sell', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+
+                        _vue.display.accountDisplay = _vue.language.ACCOUNT_TYPE;
+                    });
+                }
+            },
+            watch: {
+                'form.count': function (v) {
+                    if (!v) v = 0;
+
+                    var dollarNumber = this.currentUser.CurrentStockPrice * v;
+                    this.display.dollarDisplay = numberFormat(dollarNumber, 3);
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                this.loadAnswer();
+            }
+        });
+    </script>
+</body>
+</html>

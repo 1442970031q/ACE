@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/choice.subaccount.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button class="submit-button" @click="choiceMain" v-text="language.SWITCH_BUTTON_TEXT"></button>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <van-search class="left_search"
+                            v-model="searchKey"
+                            v-bind:placeholder="language.SEARCH_PLACEHOLDER"
+                            show-action
+                            @search="onSearch">
+                    <div slot="action" @click="onSearch" v-text="language.SEARCH_BUTTON"></div>
+                </van-search>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="list_content">
+                    <div v-if="isSearch" class="loading-box">
+                        <van-loading color="black"></van-loading>
+                        <p class="loading-text" v-text="language.SEARCHING_TEXT"></p>
+                    </div>
+                    <div v-else>
+                        <ul class="list_items">
+                            <li class="list_item clearfix" v-for="(item,index) in list.data" v-bind:key="index" @click="choiceItem(item)">
+                                <img v-lazy="item.AvatarImage" class="avatar" />
+                                <div class="list_middle">
+                                    <p class="fn" v-text="'ID：' + item.FlowNumber"></p>
+                                    <p class="mn" v-text="language.MEMBER_TEXT + item.MemberNo"></p>
+                                </div>
+                                <div class="list_right">
+                                    <p class="number" v-text="numberFormat(item.AceAmount, 0)"></p>
+                                    <p class="text">ACE</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <div v-if="isLoadMore" class="load_more clearfix">
+                            <van-loading color="black"></van-loading>
+                            <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                        </div>
+                        <div v-if="isLoadComplete" class="load_more_complete">
+                            <span class="load_text" v-text="language.NOMORE"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../../img/default_avatar.jpg',
+            'error': '../../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isSearch': false,
+                'searchKey': '',
+                'isLoadMore': false,
+                'isLoadComplete': false,
+                'list': {
+                    'pageIndex': 1,
+                    'pageSize': 10,
+                    'data': []
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SWITCH_BUTTON_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'SEARCH_PLACEHOLDER': '',
+                    'SEARCH_BUTTON': '',
+                    'NONE_DATA': '',
+                    'SEARCHING_TEXT': '',
+                    'MEMBER_TEXT': '',
+                    'NOMORE': '',
+                    'SUBACCOUNT_TEXT': '',
+                    'ERROR_1': '',
+                    'ERROR_2': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'choiceMain': function () {
+                    var wb = plus.webview.getWebviewById('sellPage');
+                    wb.evalJS('_vue.choiceMain()');
+
+                    closeWindow();
+                },
+                'choiceItem': function(item){
+                    var wb = plus.webview.getWebviewById('sellPage');
+                    wb.evalJS('_vue.confirmSubaccount("' + item.Id + '", "' +  this.language.SUBACCOUNT_TEXT + '（' + item.FlowNumber + ')", ' + item.AceAmount + ')');
+
+                    closeWindow();
+                },
+                'onSearch': function () {
+                    if (!this.searchKey) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!/^\d+$/.test(this.searchKey) || this.searchKey.length < 5) {
+                        toastMsg(this.language.ERROR_2);
+                    } else {
+                        this.isSearch = true;
+
+                        this.list.pageIndex = 1;
+                        this.isLoadComplete = false;
+                        this.loadPageData();
+                    }
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MySubaccount',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'account': this.searchKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.list.data = result.Data.List;
+                            _vue.isLoading = false;
+                            _vue.isSearch = false;
+                        }
+                    })
+                },
+                'loadMore': function (index) {
+                    this.isLoadMore = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MySubaccount',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'account': this.searchKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.list.data = _vue.list.data.concat(result.Data.List);
+                            _vue.isLoadMore = false;
+                            if (result.Data.List.length < _vue.list.pageSize) {
+                                _vue.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    if (!this.isLoadMore && !this.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('choice_subaccount', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

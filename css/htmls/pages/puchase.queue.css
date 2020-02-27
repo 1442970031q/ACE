@@ -1,0 +1,156 @@
+﻿#app-head {
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.loading-box {
+    padding-top: 75%;
+}
+
+.none-data {
+    padding-top: 55%;
+}
+
+.head_content {
+    border-bottom: 1px solid #f9f9f9;
+    position: fixed;
+    left: 0;
+    width: 100%;
+}
+
+    .head_content .van-field__control {
+        height: 24px;
+    }
+
+    .head_content .head {
+        width: 100%;
+        background-color: white;
+    }
+
+        .head_content .head li {
+            float: left;
+            width: 25%;
+            padding: 10px 0;
+            text-align: center;
+            line-height: 25px;
+            font-size: .9em;
+            font-weight: bold;
+        }
+
+.head li.first,
+.list_container .queue li.first {
+    width: 60px;
+}
+
+.head li.id,
+.list_container .queue li.id {
+    width: 70px;
+}
+
+.head li.time,
+.list_container .queue li.time {
+    width: 120px;
+}
+
+.head li.mo,
+.list_container .queue li.mo {
+    width: calc(100% - 250px);
+}
+
+.container {
+    padding-bottom: 50px;
+}
+
+    .container .info {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+        background-color: white;
+        box-shadow: 0px 2px 20px 0 #e2e2e2;
+    }
+
+        .container .info ul {
+            height: 50px;
+        }
+
+            .container .info ul li {
+                float: left;
+                width: 50%;
+                text-align: center;
+                padding: 5px 0;
+                height: 40px;
+            }
+
+                .container .info ul li .number {
+                    font-size: 1.1em;
+                    line-height: 25px;
+                }
+
+                .container .info ul li .text {
+                    font-size: .7em;
+                    color: #8e8e8e;
+                    line-height: 15px;
+                }
+
+.list_container {
+    padding-top: 90px;
+}
+
+    .list_container .queue {
+        color: #828282;
+        background-color: white;
+    }
+
+        .list_container .queue li {
+            float: left;
+            width: 25%;
+            padding: 10px 0;
+            line-height: 25px;
+            text-align: center;
+            font-size: .9em;
+        }
+
+        .list_container .queue.odd {
+            background-color: #f9f9f9;
+        }
+
+        .list_container .queue li.time {
+            font-size: .8em;
+        }
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.load_more_complete {
+    width: auto;
+    background-color: white;
+    text-align: center;
+    margin-top: 5px;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}

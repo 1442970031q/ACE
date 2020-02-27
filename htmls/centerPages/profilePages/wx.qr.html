@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html class="wx">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/qr.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body class="wx">
+    <div id="app">
+        <div id="app-head" class="wx">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">微信二維碼</p>
+        </div>
+        <div id="app-content" v-cloak>
+            <div class="top_content">
+                <div class="qr_box">
+                    <div v-if="isLoading" class="loading-box">
+                        <van-loading color="black"></van-loading>
+                        <p class="loading-text" v-text="language.LOADING_TEXT">正在加载...</p>
+                    </div>
+                    <div v-else>
+                        <div v-if="currentUser.WeChat2DCode==''" class="qr_border" @click="chooseImage()" v-text="language.CLICK_UPLOAD_QRCODE">點擊上傳二維碼</div>
+                        <div v-else>
+                            <p class="text" v-text="language.CLICK_QRCODE_CHANGE">點擊二維碼可更換</p>
+                            <img v-bind:src="currentUser.WeChat2DCode" class="image" @click="chooseImage()" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isPNG': false,
+                'language': {}
+            },
+            methods: {
+                'chooseImage': function () {
+                    plus.gallery.pick(function (captureFile) {
+                        plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                            _vue.currentUser.WeChat2DCode = entry.toLocalURL();
+
+                            var ext = captureFile.substring(captureFile.lastIndexOf('.') + 1);
+                            _vue.isPNG = (ext.toLowerCase() == 'png');
+
+                            entry.file(function (f) {
+                                if (f.size > (5 * (1024 * 1024))) {
+                                    closeToastLoading();
+                                    toastMsg(_vue.language.FILE_MAX_SIZE); //'文件不能超過5MB'
+                                    return;
+                                }
+
+                                toastLoading({ 'message': _vue.language.UPLOAD_PROGRESSING }); //'正在上傳，這可能需要一段時間...'
+                                var reader = new plus.io.FileReader();
+                                reader.onloadend = _vue.loadFileComplete;
+                                reader.readAsDataURL(f);
+                            });
+                        });
+                    });
+                },
+                'loadFileComplete': function (e) {
+                    var s1 = this.isPNG ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
+                    var base64 = e.target.result.toString().replace(s1, '');
+                    var encode = encodeURIComponent(base64);
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'UploadReceiveCode',
+                        data: {
+                            'base64AvatarImage': encode,
+                            'type': 'wechat'
+                        },
+                        timeout: 60000,
+                        success: function (result) {
+                            closeToastLoading();
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.$toast.success(_vue.language.UPLOAD_SUCCESS);// '上傳成功'
+                            }
+                        }
+                    })
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+                            _vue.currentUser = getUserModel();
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('wx_qr', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

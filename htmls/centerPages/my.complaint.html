@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover" />
+    <title></title>
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/feedback.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app">
+            <div id="app-head" class="fixed van-hairline--bottom" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+                <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+                <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+                <button class="submit-button" v-text="language.BUTTON_1" @click="gotoNewWindow('new.complaintPage', 'new.complaint')">創建投訴</button>
+            </div>
+            <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+                <div v-if="isLoading" class="loading-box p60">
+                    <van-loading color="black"></van-loading>
+                    <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+                </div>
+                <div v-else v-cloak>
+                    <div v-if="pageModel.list.length === 0" class="none-data p60">
+                        <i class="iconfont icon-wushuju"></i>
+                        <p class="none-data-text" v-text="language.NONE_DATA">暫無投訴記錄</p>
+                    </div>
+                    <div v-else>
+                        <ul class="list">
+                            <li v-for="(item, index) in pageModel.list"
+                                v-bind:key="index"
+                                v-bind:class="{'van-hairline--bottom' : index + 1 !== pageModel.list.length}"
+                                @click="gotoDetail(item)">
+                                <div class="first clearfix">
+                                    <span class="title" v-text="item.Title"></span>
+                                    <span class="type" v-text="getTypeName(item)"></span>
+                                </div>
+                                <p class="des" v-text="item.Text"></p>
+                                <div class="image" v-if="item.ImageAddress_1">
+                                    <img v-lazy="item.ImageAddress_1" />
+                                </div>
+                                <div class="bottom clearfix">
+                                    <span class="state c1" v-if="!item.IsReplyed" v-text="language.STATE_TEXT_1">等待回复</span>
+                                    <span class="state c2" v-else v-text="language.STATE_TEXT_2">已回复</span>
+                                    <span class="time" v-text="item.CreateTime"></span>
+                                </div>
+                            </li>
+                        </ul>
+                        <div v-if="pageModel.isLoadMore" class="load_more clearfix">
+                            <van-loading color="black"></van-loading>
+                            <span class="load_text" v-text="language.LOADING_TEXT">正在載入...</span>
+                        </div>
+                        <div v-if="pageModel.isLoadComplete" class="load_more_complete">
+                            <span class="load_text" v-text="language.NONE_MORE_DATA">沒有更多的數據了...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_feedback_img.jpg',
+            'error': '../../img/default_feedback_img.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'items': [{
+                    'text': '密碼問題',
+                    'value': 1
+                }, {
+                    'text': '充值問題',
+                    'value': 2
+                }, {
+                    'text': '資料修正',
+                    'value': 3
+                }, {
+                    'text': '其他',
+                    'value': 4
+                }],
+                'pageModel': {
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'isLoadMore': false,
+                    'isLoadComplete': false,
+                    'list': []
+                },
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            methods: {
+                'gotoDetail': function (item) {
+                    newWindow('complaint.detailPage', 'complaint.detail', {
+                        'param': 'fId=' + item.Id
+                    });
+                },
+                'getTypeName': function (item) {
+                    for (var i = 0; i < this.items.length; i++) {
+                        if (this.items[i].value === item.CommitType) {
+                            return this.items[i].text;
+                        }
+                    }
+
+                    return this.language.STATE_NONE;
+                },
+                'reloadPageData': function () {
+                    this.isLoading = true;
+                    this.isLoadMore = false;
+                    this.isLoadComplete = false;
+                    this.pageModel.pageIndex = 1;
+
+                    this.loadPageData();
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'CommitsList',
+                        data: {
+                            'p': this.pageModel.pageIndex,
+                            'pageSize': this.pageModel.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.pageIndex++;
+                            _vue.pageModel.list = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'loadMoreAjax': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'CommitsList',
+                        data: {
+                            'p': this.pageModel.pageIndex,
+                            'pageSize': this.pageModel.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.pageIndex++;
+                            _vue.pageModel.list = _vue.pageModel.list.concat(result.Data);
+                            _vue.pageModel.isLoadMore = false;
+
+                            if (result.Data.length < _vue.pageModel.pageSize) {
+                                _vue.pageModel.isLoadComplete = true;
+                            }
+                        }
+                    });
+                },
+                'windowScroll': function () {
+                    if (!this.pageModel.isLoadMore && !this.pageModel.isLoadComplete) {
+                        this.pageModel.isLoadMore = true;
+                        this.loadMoreAjax();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('my_complaint', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                window.scrollBottom = this.windowScroll;
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="font/iconfont.css" rel="stylesheet" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        .main {
+            padding-top: 40%;
+            text-align: center;
+            color: #989898;
+        }
+
+            .main h2 {
+                margin: 0;
+            }
+
+            .main .icon-nowifi {
+                font-size: 5em;
+                display: block;
+                padding: 20px 0;
+            }
+
+            .main .text {
+                margin: 0;
+                padding: 0 10px;
+                font-size: .9em;
+            }
+
+            .main .err-msg {
+                margin-top: 15px;
+                padding: 20px;
+                text-align: left;
+                background-color: white;
+            }
+
+                .main .err-msg h4 {
+                    margin: 0;
+                    margin-bottom: 5px;
+                }
+
+                .main .err-msg p {
+                    margin: 0;
+                    font-size: .9em;
+                }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <h2>連接失敗</h2>
+        <i class="iconfont icon-nowifi"></i>
+        <p class="text">APP無法連接到服務器</p>
+        <p class="text">請檢查您的網絡是否正常或点击 <span onclick="reload()" style="color:red">刷新重试</span></p>
+        <div id="msg" class="err-msg"></div>
+    </div>
+    <script type="text/javascript">
+        function loaded() {
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = "js/base.js";
+            script.onload = function () {
+            	if (CONFIG.IS_RUNTIME) {
+                	plus.navigator.setStatusBarStyle('dark');
+            	}
+            	
+                if (getItem(CONFIG.AUTO_UPGRADE_KEY) == null) {
+                    setItem(CONFIG.AUTO_UPGRADE_KEY, 'true');
+                }
+
+                //LSE.switchLanguage('cn')
+
+                var jsonText = getItem(CONFIG.USER_MODEL_KEY);
+                if (jsonText == null || jsonText == '') {
+                    gotoLogin();
+                    return;
+                }
+
+                var model = getUserModel();
+                ajax({
+                    url: CONFIG.BASE_URL + 'VerificationKey',
+                    data: {
+                        'key': model.Key
+                    },
+                    ontimeout: function () {
+                        errorLoad();
+                    },
+                    success: function (result) {
+                        try {
+                            if (result.IsAvailable) {
+                                gotoMain();
+                            } else {
+                                gotoLogin();
+                            }
+                        } catch (e) {
+                            alert('APP在啟動期間出現了一些問題：\r\n' + e.message+ '\r\n請將該信息截圖反饋給我們，感謝您對ACE王牌的幫助！');
+                        }
+                    },
+                    error: function () {
+                        errorLoad();
+                    }
+                });
+            }
+
+            document.getElementsByTagName('head')[0].appendChild(script);
+        }
+
+        function errorLoad() {
+        	try{
+        		createErrorMessage();
+            	plus.navigator.closeSplashscreen();
+        	}catch(e){
+        		alert('APP在啟動期間出現了一些問題：\r\n' + e.message+ '\r\n請將該信息截圖反饋給我們，感謝您對ACE王牌的幫助！');
+        	}
+        }
+
+        function createErrorMessage() {
+            var panel = document.getElementById('msg');
+            var title = document.createElement('h4');
+            title.innerText = '診斷信息';
+            panel.appendChild(title);
+
+            var line = null;
+            if (typeof (plus) == 'undefined') {
+                line = document.createElement('p');
+                line.innerText = 'APP版本號：' + (CONFIG.VERSION / 10);
+                panel.appendChild(line);
+
+                line = document.createElement('p');
+                line.innerText = 'Native状态：' + plus;
+                panel.appendChild(line);
+            } else {
+                line = document.createElement('p');
+                line.innerText = '手機網絡狀態：' + plus.networkinfo.getCurrentType();
+                panel.appendChild(line);
+
+                line = document.createElement('p');
+                line.innerText = 'APP版本號：' + (CONFIG.VERSION / 10);
+                panel.appendChild(line);
+
+                line = document.createElement('p');
+                line.innerText = '內部版本號：' + plus.runtime.version;
+                panel.appendChild(line);
+
+                line = document.createElement('p');
+                line.innerText = '操作系統：' + plus.os.name + '（' + plus.os.version + '）';
+                panel.appendChild(line);
+
+                line = document.createElement('p');
+                line.innerText = '設備型號：' +  plus.device.model + '（' + plus.device.vendor + '）';
+                panel.appendChild(line);
+            }
+        }
+
+        function gotoMain() {
+            gotoNewWindow('mainPage', 'htmls/main', {
+                ani: 'none',
+                openCallback: function () {
+                    plus.navigator.closeSplashscreen();
+
+                    plus.webview.getWebviewById('mainPage').evalJS('pageScript.createMaskWindow()');
+                    closeWindow('none');
+                }
+            });
+        }
+
+        function gotoLogin() {
+            gotoNewWindow('loginPage', 'htmls/account/login', {
+                ani: 'none',
+                openCallback: function () {
+                    plus.navigator.closeSplashscreen();
+                    closeWindow('none');
+                }
+            });
+        }
+
+		function reload(){
+			plus.webview.currentWebview().reload();
+		}
+
+        document.addEventListener("plusready", loaded);
+    </script>
+</body>
+</html>

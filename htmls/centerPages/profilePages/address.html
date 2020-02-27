@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/profile.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/address.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-cloak class="pd-65">
+            <p class="text wx" v-text="language.MENU_TITLE_1"></p>
+            <van-cell-group>
+                <van-cell v-bind:title="language.MENU_ITEM_1" 
+                          is-link 
+                          @click="newWindow('wx.qrPage', 'wx.qr', true)"></van-cell>
+            </van-cell-group>
+            <p class="text ali" v-text="language.MENU_TITLE_2"></p>
+            <van-cell-group>
+                <van-cell v-bind:title="language.MENU_ITEM_2" 
+                          is-link 
+                          @click="newWindow('ali.qrPage', 'ali.qr', true)"></van-cell>
+            </van-cell-group>
+            <p class="text bank" v-text="language.MENU_TITLE_3"></p>
+            <van-cell-group>
+                <van-cell v-bind:title="language.MENU_ITEM_3" v-bind:value="currentUser.BankCardName"></van-cell>
+                <!--<van-cell v-bind:title="language.MENU_ITEM_4" v-bind:value="currentUser.BankName"></van-cell>
+                <van-cell v-bind:title="language.MENU_ITEM_5" v-bind:value="currentUser.BankBranchName"></van-cell>
+                <van-cell v-bind:title="language.MENU_ITEM_6" v-bind:value="currentUser.BankCardNumber"></van-cell>
+                <van-cell v-bind:title="language.MENU_ITEM_7" @click="newWindow('change.bank.cardPage', 'change.bank.card')" is-link></van-cell>-->
+            </van-cell-group>
+            <p class="text usdt" v-text="language.MENU_TITLE_4"></p>
+            <van-cell-group>
+                <van-cell v-bind:title="language.MENU_ADDRESS" 
+                          v-bind:label="!currentUser.Usdt ? '' : currentUser.Usdt" 
+                          v-bind:value="!currentUser.Usdt ? language.DEFAULT_SET_TEXT : ''" 
+                          is-link 
+                          @click="newWindow('usdt.changePage', 'usdt.change')"></van-cell>
+            </van-cell-group>
+            <p class="text bitc" v-text="language.MENU_TITLE_5"></p>
+            <van-cell-group>
+                <van-cell v-bind:title="language.MENU_ADDRESS" 
+                          v-bind:label="!currentUser.Btc ? '' : currentUser.Btc" 
+                          v-bind:value="!currentUser.Btc ? language.DEFAULT_SET_TEXT : ''" 
+                          is-link 
+                          @click="newWindow('btc.changePage', 'btc.change')"></van-cell>
+            </van-cell-group>
+            <p class="text eth" v-text="language.MENU_TITLE_6"></p>
+            <van-cell-group>
+                <van-cell v-bind:title="language.MENU_ADDRESS" 
+                          v-bind:label="!currentUser.Eth ? '' : currentUser.Eth" 
+                          v-bind:value="!currentUser.Eth ? language.DEFAULT_SET_TEXT : ''" 
+                          is-link 
+                          @click="newWindow('eth.changePage', 'eth.change')"></van-cell>
+            </van-cell-group>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'statusbarHeight': 20,
+                'language': {
+                    'TITLE_TEXT': '',
+                    'MENU_TITLE_1': '',
+                    'MENU_ITEM_1': '',
+                    'MENU_TITLE_2': '',
+                    'MENU_ITEM_2': '',
+                    'MENU_TITLE_3': '',
+                    'MENU_ITEM_3': '',
+                    'MENU_ITEM_4': '',
+                    'MENU_ITEM_5': '',
+                    'MENU_ITEM_6': '',
+                    'MENU_ITEM_7': '',
+                    'MENU_TITLE_4': '',
+                    'MENU_ADDRESS': '',
+                    'DEFAULT_SET_TEXT': '',
+                    'MENU_TITLE_5': '',
+                    'MENU_TITLE_6': ''
+                }
+            },
+            methods: {
+                'updateCardInfo': function () {
+                    this.currentUser = getUserModel();
+                },
+                'newWindow': function (id, page, isLight) {
+                    if (isLight == true) {
+                        plus.navigator.setStatusBarStyle('light');
+                    }
+
+                    gotoNewWindow(id, page, {
+                        closeCallback: function () {
+                            plus.navigator.setStatusBarStyle('dark');
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('address', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

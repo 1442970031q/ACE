@@ -1,0 +1,54 @@
+﻿.input-group .right_icon {
+    display: block;
+    float: right;
+    width: 10%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-size: 1em;
+    color: #ababab;
+}
+
+.search_box {
+    margin-top: 15px;
+}
+
+.result_box {
+    margin-top: 15px;
+}
+
+    .result_box .title {
+        font-size: .9em;
+        padding: 0 10px;
+        margin-bottom: 5px;
+        color: #848484;
+    }
+
+        .result_box .title .red {
+            color: #1e81d2;
+            font-size: 1.5em;
+        }
+
+.van-cell__value {
+    color: #929292;
+}
+.van-cell__title, .van-cell__value {
+    -webkit-box-flex: none;
+    -webkit-flex: none;
+    flex: none;
+}
+.van-cell__title {
+    width: 70%;
+}
+    .van-cell__title .title_style {
+        font-size: 0.65em;
+        color: #aaa;
+        display: block;
+    }
+.van-cell__value {
+    line-height: 48px;
+    width: calc(30% - 12px);
+}
+.van-cell__right-icon {
+    line-height:48px;
+}

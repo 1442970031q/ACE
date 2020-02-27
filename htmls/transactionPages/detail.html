@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button v-if="pageModel.Status==1" class="submit-button" @click="isShowTip=true">
+                <i class="iconfont icon-bangzhu"></i>
+            </button>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else class="pb-50" v-cloak>
+                <div class="seller_content mt-5">
+                    <div class="top_content clearfix">
+                        <img v-lazy="pageModel.Seller.Avatar" class="avatar" />
+                        <div class="right_content">
+                            <p class="nn" v-text="pageModel.Seller.FlowNumber"></p>
+                            <div class="pay_content clearfix" v-bind:class="{'top':isShowTip}">
+                                <img src="../../img/logos/yl_pay.png" v-if="pageModel.Seller.OfflinePay.BankCardNumber" />
+                                <img src="../../img/logos/usdt_pay.png" v-if="pageModel.Seller.Usdt.Address" />
+                                <p v-if="isShowTip" class="tip-text" v-text="language.TIP_TEXT"></p>
+                                <button v-if="isShowTip" class="close_button" @click="closeTip" v-text="language.TIP_BUTTON"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info_content">
+                        <ul class="clearfix">
+                            <li>
+                                <p class="number" v-text="pageModel.Seller.TradeCount"></p>
+                                <p class="text" v-text="language.SELL_ITEM_1"></p>
+                            </li>
+                            <li>
+                                <p class="number" v-text="pageModel.Seller.CompleteCount"></p>
+                                <p class="text" v-text="language.SELL_ITEM_2"></p>
+                            </li>
+                            <li>
+                                <p class="number c" v-if="pageModel.Seller.Credit >= 5">
+                                    <i v-for="i in 5" class="iconfont icon-xin1 mr-2"></i>
+                                </p>
+                                <p class="number c" v-else-if="pageModel.Seller.Credit > 0 && pageModel.Seller.Credit < 5">
+                                    <i v-for="i in pageModel.Seller.Credit" class="iconfont icon-xin1 mr-2"></i>
+                                </p>
+                                <p class="text" v-text="language.SELL_ITEM_3"></p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="line_content mt-5">
+                    <div class="head">
+                        <p class="sell" v-text="language.EP_TITLE_TEXT"></p>
+                        <span class="number" v-text="numberFormat(pageModel.EPAmount, 0)"></span>
+                        <span class="sub">EP</span>
+                        <div class="bottom clearfix">
+                            <span class="state green" v-if="pageModel.Status==8 || pageModel.Status == 64" v-text="language.EP_STATE_1"></span>
+                            <span class="state" v-else-if="pageModel.Status==1" v-text="language.EP_STATE_2"></span>
+                            <span class="state" v-else v-text="language.EP_STATE_3"></span>
+                            <span class="time" v-text="pageModel.CreateTime"></span>
+                        </div>
+                    </div>
+                    <p class="sell" v-text="language.PRICE_TITLE_TEXT"></p>
+                    <ul class="price clearfix">
+                        <li class="line" v-if="pageModel.ReceiveType === '1'">
+                            <p class="value" v-text="pageModel.EPToRMBRate"></p>
+                            <p class="title" v-text="language.PRICE_ITEM_1"></p>
+                        </li>
+                        <li class="line" v-if="pageModel.ReceiveType === '2'">
+                            <p class="value">0.9</p>
+                            <p class="title" v-text="language.PRICE_ITEM_1"></p>
+                        </li>
+                        <li class="line" v-if="pageModel.ReceiveType === '1'">
+                            <p class="value blue" v-text="numberFormat(pageModel.EPAmount * pageModel.EPToRMBRate, 2)"></p>
+                            <p class="title" v-text="language.PRICE_ITEM_2"></p>
+                        </li>
+                        <li class="line" v-if="pageModel.ReceiveType === '2'">
+                            <p class="value blue" v-text="numberFormat(pageModel.EPAmount * .9, 2)"></p>
+                            <p class="title" v-text="language.PRICE_ITEM_3"></p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="actions" v-if="pageModel.Status == 1 && pageModel.Seller.FlowNumber == currentUser.FlowNumber">
+                    <button class="confirm_button full" @click="cancelSell" v-text="language.ACTION_BUTTON_1"></button>
+                </div>
+                <div class="actions" v-else-if="pageModel.Status == 2 || pageModel.Status==4">
+                    <button class="confirm_button full" @click="complaint" v-text="language.ACTION_BUTTON_2"></button>
+                </div>
+                <div class="actions" v-else-if="pageModel.Status==4">
+                    <button class="confirm_button full" @click="received" v-text="language.ACTION_BUTTON_3"></button>
+                </div>
+                <div class="actions" v-else-if="pageModel.Status==16 || pageModel.Status==32 || pageModel.Status == 256">
+                    <button class="confirm_button full" @click="proof" v-text="language.ACTION_BUTTON_4"></button>
+                </div>
+                <div class="actions" v-if="pageModel.Status==1 && !isPasswordInput && pageModel.Seller.FlowNumber != currentUser.FlowNumber">
+                    <button class="confirm_button full" @click="doBuyConfirm" v-text="language.BUTTON_1"></button>
+                </div>
+                <van-cell-group class="mt-5" v-if="pageModel.Status==8 || pageModel.Status == 64">
+                    <van-cell v-bind:title="language.COMPLETE_TEXT" v-bind:value="pageModel.ReceiveTime"></van-cell>
+                </van-cell-group>
+                <van-cell-group class="mt-5" v-if="pageModel.Status==1">
+                    <van-cell v-bind:title="language.RULE_ITEM_1" v-bind:value="pageModel.LimitPayment > 60 ? pageModel.LimitPayment / 60 + language.RULE_ITEM_H : pageModel.LimitPayment + language.RULE_ITEM_M"></van-cell>
+                    <van-cell v-bind:title="language.RULE_ITEM_2" v-bind:value="pageModel.LimitConfirm > 60 ? pageModel.LimitConfirm / 60 + language.RULE_ITEM_H : pageModel.LimitConfirm + language.RULE_ITEM_M"></van-cell>
+                </van-cell-group>
+                <div class="rule_content mt-5" v-if="pageModel.Status==1">
+                    <p class="title" v-text="language.RULE_TITLE_TEXT"></p>
+                    <ul>
+                        <li v-text="language.RULE_LINE_1"></li>
+                        <li v-text="language.RULE_LINE_2"></li>
+                        <li v-text="language.RULE_LINE_3"></li>
+                    </ul>
+                </div>
+                <van-dialog v-model="isPasswordInput" v-bind:title="language.DIALOG_TITLE_TEXT" v-bind:before-close="checkPassword" show-cancel-button>
+                    <input type="password" ref="passwordBox" maxlength="16" class="pwd_box"
+                           v-model="form.password"
+                           v-bind:placeholder="language.INPUT_PLACEHOLDER" />
+                </van-dialog>
+                <van-popup v-model="isShowComplaint" position="bottom">
+                    <textarea class="input-area"
+                              v-model="reason"
+                              maxlength="100"
+                              v-bind:placeholder="language.COMPLAINT_PLACEHOLDER"></textarea>
+                    <div class="bottom_buttons clearfix">
+                        <button class="btn btn_confirm" @click="failed" v-text="language.COMPLAINT_BUTTON_1"></button>
+                        <button class="btn btn_cancel" @click="isShowComplaint=false" v-text="language.COMPLAINT_BUTTON_2"></button>
+                    </div>
+                </van-popup>
+                <van-popup v-model="isShowProof" position="bottom">
+                    <div class="proof_content clearfix">
+                        <fieldset class="fieldset_content left">
+                            <legend v-text="language.PROOF_TITLE"></legend>
+                            <div class="image_items" @click="selectPictrue()">
+                                <div v-if="proofImage==null" class="add">+</div>
+                                <img v-else v-bind:src="proofImage" class="proofImage" />
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset_content right">
+                            <legend v-text="language.PROOF_TEXT"></legend>
+                            <textarea class="input-area" v-model="reason" maxlength="100"
+                                      v-bind:placeholder="language.PROOF_PLACEHOLDER"></textarea>
+                        </fieldset>
+                    </div>
+                    <div class="bottom_buttons clearfix">
+                        <button class="btn btn_confirm" @click="submitProof" v-text="language.PROOF_BUTTON_1"></button>
+                        <button class="btn btn_cancel" @click="isShowProof=false" v-text="language.PROOF_BUTTON_2"></button>
+                    </div>
+                </van-popup>
+                <div class="mask" v-if="isShowTip" @touchmove="disTouch"></div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script src="../../js/pages/detail.js"></script>
+</body>
+</html>

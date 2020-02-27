@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/ep.week.detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="`${language.FIRST_CHAR}${request.weekIndex}${language.LAST_CHAR}`"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}" v-cloak>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="list_content">
+                    <ul>
+                        <li v-for="(item,index) in list.data" v-bind:key="index">
+                            <p class="line clearfix">
+                                <span class="left" v-text="item.TypeName"></span>
+                                <span class="right number" v-text="'+' + numberFormat(item.EPAmount, 2)"></span>
+                            </p>
+                            <p class="line clearfix">
+                                <span class="right time" v-text="item.Time"></span>
+                            </p>
+                        </li>
+                    </ul>
+                    <div v-if="list.isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                    </div>
+                    <div v-if="list.isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NOMORE"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'request': {
+                    'year': queryString('year'),
+                    'month': queryString('month'),
+                    'weekIndex': queryString('weekIndex')
+                },
+                'list': {
+                    'data': [],
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'isLoadMore': false,
+                    'isLoadComplete': false
+                },
+                'language': {
+                    'FIRST_CHAR': '',
+                    'LAST_CHAR': '',
+                    'LOADING_TEXT': '',
+                    'NONE_DATA': '',
+                    'FORM_PLAYER': '',
+                    'NOMORE': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPAwardList',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'year': this.request.year,
+                            'month': this.request.month,
+                            'num': this.request.weekIndex
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.list.data = result.Data.List;
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'loadMore': function () {
+                    this.list.isLoadMore = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPAwardList',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'year': this.request.year,
+                            'month': this.request.month,
+                            'num': this.request.weekIndex
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.list.data = _vue.list.data.concat(result.Data.List);
+                            _vue.list.isLoadMore = false;
+                            if (result.Data.List.length < _vue.list.pageSize) {
+                                _vue.list.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    if (!this.list.isLoadMore && !this.list.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('ep_week_detail', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/success.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content">
+            <div class="box">
+                <i class="iconfont icon-zhengque"></i>
+                <p class="text" v-text="language.SUCCESS_TEXT"></p>
+            </div>
+            <div class="list_content">
+                <p class="title" v-text="language.DETAIL_TITLE"></p>
+                <ul>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_1"></span>
+                        <span class="last" v-text="request.fn"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_2"></span>
+                        <span class="last" v-text="request.mn"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_3"></span>
+                        <span class="last" v-text="request.nn"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_4"></span>
+                        <span class="last" v-html="request.ia"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_5"></span>
+                        <span class="last" v-text="request.np"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_6"></span>
+                        <span class="last" v-text="request.pos==1 ? language.DETAIL_ITEM_6_LEFT : language.DETAIL_ITEM_6_RIGHT"></span>
+                    </li>
+                </ul>
+                <div class="warn" v-if="request.ic=='true'">
+                    <b v-text="language.WARNING_TITLE"></b>
+                    <p v-text="language.WARNING_TEXT"></p>
+                </div>
+            </div>
+            <button class="confirm_button" @click="close()" v-text="language.BUTTON_1"></button>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'request': {
+                    'fn': queryString('fn'),
+                    'mn': queryString('mn'),
+                    'nn': queryString('nn'),
+                    'ia': queryString('ia'),
+                    'np': queryString('np'),
+                    'ic': queryString('ic'),
+                    'pos': queryString('pos')
+                },
+                'statusbarHeight': 20,
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SUCCESS_TEXT': '',
+                    'DETAIL_TITLE': '',
+                    'DETAIL_ITEM_1': '',
+                    'DETAIL_ITEM_2': '',
+                    'DETAIL_ITEM_3': '',
+                    'DETAIL_ITEM_4': '',
+                    'DETAIL_ITEM_5': '',
+                    'DETAIL_ITEM_6': '',
+                    'DETAIL_ITEM_6_LEFT': '',
+                    'DETAIL_ITEM_6_RIGHT': '',
+                    'WARNING_TITLE': '',
+                    'WARNING_TEXT': '',
+                    'BUTTON_1': ''
+                }
+            },
+            methods: {
+                'close': function () {
+                    closeWindow();
+                },
+                'changeLanguage': function () {
+                    LSE.install('new_user_success', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/check.out.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">RP轉出</p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else v-cloak>
+                <div class="top_content clearfix">
+                    <div class="top_block">
+                        <p class="txt" v-text="language.HOLDING_RP">持有RP</p>
+                        <p class="number" v-text="numberFormat(currentUser.RP, 2)"></p>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.SELECT_PLAYER">選擇玩家</span>
+                        <input type="number" class="input-control" @blur="searchPlayer" v-model="receiveDisplay" v-bind:placeholder="language.CLICK_SELECTED_PLAYER" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.PLAYER_NICKNAME">玩家昵稱</span>
+                        <van-loading v-if="isPlayerLoading" color="black" class="search_player"></van-loading>
+                        <span v-else class="input-control" v-bind:class="{'warning_color': isNotFound}" v-text="playerNickname"></span>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.TURN_OUT_AMOUNT">轉出數量</span>
+                        <input type="number" class="input-control" v-model="form.amount" v-bind:placeholder="language.CLICK_INPUT_TURN_OUT_AMOUNT" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.TRANSFER_PWD">交易密碼</span>
+                        <input type="password" class="input-control" v-model="form.password" maxlength="16" v-bind:placeholder="language.CLICK_INPUT_TRANSFER_PWD" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.TRANSFER_CODE">谷歌验证码</span>
+                        <input type="number"
+                               class="input-control"
+                               v-model="form.gCode"
+                               v-bind:placeholder="language.CLICK_INPUT_TRANSFER_CODE"
+                               maxlength="6" />
+                    </div>
+                </div>
+                <!--<div class="input_content">
+                    <div class="input-group">
+                        <p class="full-text" v-text="questionDisplay"></p>
+                        <input type="text"
+                               class="input-control center w-100"
+                               v-model="form.answer"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1"
+                               maxlength="10" />
+                    </div>
+                </div>-->
+                <div class="input_content">
+                    <div class="input-group">
+                        <textarea class="input-control w-100 h-80" v-model="form.des" maxlength="500" v-bind:placeholder="language.REMARK"></textarea>
+                        <p class="input_count"><span v-text="form.des.length" class="num" v-bind:class="{'red':form.des.length==500}">0</span> / 500</p>
+                    </div>
+                </div>
+                <button class="confirm_button" @click="!CONFIG.IS_DOING && checkData()" v-text="language.CONFIRM_TURN_OUT">確認轉出</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                //'isLoadingAnswer': true,
+                'isPlayerLoading': false,
+                'isNotFound': false,
+                'receiveDisplay': '',
+                //'questionDisplay': '',
+                'playerNickname': '',
+                'form': {
+                    //'answer': '',
+                    //'qId': 0,
+                    'amount': '',
+                    'password': '',
+                    'des': '',
+                    'recipientId': '',
+                    'gCode':''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                //'confirmReceive': function (id, display) {
+                //    this.receiveDisplay = display;
+                //    this.form.recipientId = id;
+                //},
+                //'openChoosePage': function () {
+                //    gotoNewWindow('choose.batch.personPage', 'choose.batch.person', {
+                //        param: 'fromPage=' + encodeURIComponent('rp.givePage'),
+                //        openCallback: function () {
+                //            plus.navigator.setStatusBarStyle('dark');
+                //        },
+                //        closeCallback: function () {
+                //            plus.navigator.setStatusBarStyle('light');
+                //        }
+                //    });
+                //},
+                'searchPlayer': function () {
+                    if (this.receiveDisplay.length >= 5) {
+                        this.form.recipientId = '';
+                        this.isPlayerLoading = true;
+
+                        ajax({
+                            url: CONFIG.BASE_URL + 'GetBatchUser',
+                            data: {
+                                'code': this.receiveDisplay
+                            },
+                            success: function (result) {
+                                if (result.Error) {
+                                    toastMsg(result.Msg);
+                                } else if (result.Data.List.length == 0) {
+                                    _vue.isNotFound = true;
+                                    _vue.playerNickname = _vue.language.PLAYER_NOTFOUND;
+                                } else {
+                                    _vue.isNotFound = false;
+                                    _vue.playerNickname = result.Data.List[0].NickName + '(' + _vue.receiveDisplay + ')';
+                                    _vue.form.recipientId = result.Data.List[0].Id;
+                                }
+
+                                _vue.isPlayerLoading = false;
+                            }
+                        });
+                    }
+                },
+                'checkData': function () {
+                    CONFIG.IS_DOING = true;
+
+                    if (!this.form.recipientId) {
+                        toastMsg(_vue.language.CLICK_SELECTED_PLAYER); //'請選擇玩家'
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.amount) {
+                        toastMsg(_vue.language.CLICK_INPUT_TURN_OUT_AMOUNT); //'請輸入要轉出的RP數量'
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.amount * 1 <= 0) {
+                        toastMsg(_vue.language.RP_AMOUNT_MORE_CHARS); //'RP數量必須大於0'
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.amount * 1 > this.currentUser.RP * 1) {
+                        toastMsg(_vue.language.RP_AMOUNT_NOT_ENOUGH); //'RP數量不足'
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.password) {
+                        toastMsg(_vue.language.CLICK_INPUT_TRANSFER_PWD); //'請輸入交易密碼'
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(_vue.language.TRANSFER_PWD_MORE_CHARS); //'交易密碼最少6位'
+                        CONFIG.IS_DOING = false;
+                    }else if (!this.form.gCode) {
+                        toastMsg(_vue.language.ERROR_2); //'請輸入谷歌验证密碼'
+                        CONFIG.IS_DOING = false;
+                    }else if (this.form.gCode.length < 6) {
+                        toastMsg(_vue.language.ERROR_3); //'谷歌验证密碼最少6位'
+                        CONFIG.IS_DOING = false;
+                    }
+                    //else if (!this.form.answer) {
+                    //    toastMsg(_vue.language.ERROR_1);
+                    //    CONFIG.IS_DOING = false;
+                    //}
+                    else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': _vue.language.PROGRESSING }); //'正在提交'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TransferRP',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.loadPageData(function () {
+                                gotoNewWindow('change.successPage', '../success/change.success', {
+                                    param: `title=${_vue.language.TURN_RESULT}&text=${_vue.language.TURN_SUCCESS}`,//'title=轉換結果&text=RP轉出成功',
+                                    openCallback: function () {
+                                        closeWindow('none');
+                                    }
+                                });
+                            });
+                        }
+                    })
+                },
+                'loadPageData': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (typeof (callback) == 'undefined') {
+                                _vue.currentUser = getUserModel();
+                                _vue.isLoading = false;
+                            } else {
+                                callback();
+                            }
+                        }
+                    });
+                },
+                'loadAnswer': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetAnswerTitle',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.questionDisplay = result.QTitle;
+                            _vue.form.qId = result.Qid;
+                            _vue.isLoadingAnswer = false;
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('rp_give', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                        _vue.playerNickname = lang.PLAYER_DEFAULT;
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                //this.loadAnswer();
+            }
+        });
+    </script>
+</body>
+</html>

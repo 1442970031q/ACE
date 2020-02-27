@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/success.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content">
+            <div class="box">
+                <i class="iconfont icon-zhengque"></i>
+                <p class="text" v-text="language.SUCCESS_TEXT"></p>
+            </div>
+            <div class="list_content">
+                <p class="title" v-text="language.DETAIL_TITLE_TEXT"></p>
+                <ul>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_1"></span>
+                        <span class="last" v-text="getExchangeName(request.type)"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.DETAIL_ITEM_2"></span>
+                        <span class="last" v-text="numberFormat(request.amount, 2)"></span>
+                    </li>
+                </ul>
+            </div>
+            <button class="confirm_button" @click="close()" v-text="language.BUTTON_1"></button>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'request': {
+                    'type': queryString('t'),
+                    'amount': queryString('a')
+                },
+                'statusbarHeight': 20,
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SUCCESS_TEXT': '',
+                    'DETAIL_TITLE_TEXT': '',
+                    'DETAIL_ITEM_1': '',
+                    'DETAIL_ITEM_2': '',
+                    'BUTTON_1': ''
+                }
+            },
+            methods: {
+                'getExchangeName': function(type){
+                    if (type == 1) {
+                        return 'EP' + this.language.EXCHANGE_CHAR + 'SP';
+                    } else if (type == 2) {
+                        return 'EP' + this.language.EXCHANGE_CHAR + 'RP';
+                    } else if (type == 3) {
+                        return 'RP' + this.language.EXCHANGE_CHAR + 'SP';
+                    } else if (type == 4) {
+                        return 'ACE' + this.language.EXCHANGE_CHAR + 'SP';
+                    } else {
+                        return this.language.EXCHANGE_UNKNOWN;
+                    }
+                },
+                'close': function () {
+                    closeWindow();
+                },
+                'changeLanguage': function () {
+                    LSE.install('exchange_success', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

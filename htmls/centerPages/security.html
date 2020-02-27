@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/profile.css" rel="stylesheet" />
+    <style>
+        .van-cell__label {
+            color: #9c9c9c;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">賬戶安全</p>
+        </div>
+        <div id="app-content" class="pd-10" v-cloak>
+            <van-cell-group>
+                <van-cell is-link v-bind:title="language.LOGIN_PWD" @click="newWindow('change.login.passwordPage', 'profilePages/change.login.password')"></van-cell>
+                <van-cell is-link v-bind:title="language.TRANSFER_PWD" @click="newWindow('change.trans.passwordPage', 'profilePages/change.trans.password')"></van-cell>
+            </van-cell-group>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.TITLE_TEXT">正在加载...</p>
+            </div>
+            <div v-else>
+                <van-cell-group class="mt-10" v-if="currentUser.IsSetSecurityQuestion">
+                    <van-cell v-bind:title="language.QUESTION_1" v-bind:label="getQuestionText(myQuestions.Q1)"></van-cell>
+                    <van-cell v-bind:title="language.QUESTION_2" v-bind:label="getQuestionText(myQuestions.Q2)"></van-cell>
+                    <van-cell v-bind:title="language.QUESTION_3" v-bind:label="getQuestionText(myQuestions.Q3)"></van-cell>
+                </van-cell-group>
+                <van-cell-group class="mt-10" v-if="currentUser.IsSetSecurityQuestion">
+                    <van-cell is-link v-bind:title="language.RESET_QUESTION" @click="newWindow('reset.questionPage', 'profilePages/reset.question')"></van-cell>
+                </van-cell-group>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'myQuestions': {
+                    'Q1': '',
+                    'Q2': '',
+                    'Q3': ''
+                },
+                'questionList': [],
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'newWindow': function (id, page) {
+                    gotoNewWindow(id, page);
+                },
+                'getQuestionText': function (qId) {
+                    for (var i = 0; i < this.questionList.length; i++) {
+                        if (this.questionList[i].Id == qId) return this.questionList[i].Question;
+                    }
+
+                    return null;
+                },
+                'resetQuestion': function (q1, q2, q3) {
+                    this.myQuestions.Q1 = q1;
+                    this.myQuestions.Q2 = q2;
+                    this.myQuestions.Q3 = q3;
+
+                    this.currentUser.IsSetSecurityQuestion = true;
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetMyQuestion',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.currentUser.IsSetSecurityQuestion = result.IsSet;
+                            updateUserModel({
+                                'IsSetSecurityQuestion': result.IsSet
+                            });
+                            _vue.myQuestions.Q1 = result.Q1;
+                            _vue.myQuestions.Q2 = result.Q2;
+                            _vue.myQuestions.Q3 = result.Q3;
+                            _vue.loadQuestionList();
+                        }
+                    })
+                },
+                'loadQuestionList': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'QuestionList',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.questionList = result.Data.List;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('security', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/validate.identity.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+            <button class="submit-button" v-text="language.BUTTON_2" @click="gotoLogin">返回登錄</button>
+        </div>
+        <div id="app-content">
+            <div class="warn" v-text="language.DES_TEXT"></div>
+            <div class="input-group mt-10">
+                <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                <input type="text"
+                       class="input-control"
+                       v-model="form.idCardNumber"
+                       maxlength="20"
+                       v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+            </div>
+            <button class="confirm_button" @click="checkData" v-text="language.BUTTON_1"></button>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'form': {
+                    'idCardNumber': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoLogin': function () {
+                    userExit();
+
+                    gotoNewWindow('loginPage', '../account/login', {
+                        'openCallback': function () {
+                            plus.webview.getWebviewById('mainPage').close('none');
+                            closeWindow('none');
+                        }
+                    });
+                },
+                'checkData': function () {
+                    if (!this.form.idCardNumber) {
+                        toastMsg(this.language.ERROR_1);
+                    } else {
+                        this.doValidateAjax();
+                    }
+                },
+                'doValidateAjax': function () {
+                    toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ValidIDCard',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel({
+                                'IsNewIDEncrypt': true
+                            });
+
+                            closeWindow();
+                        }
+                    });
+                },
+                'closeWindow': function () {
+                    var wb = plus.webview.getWebviewById('mainPage');
+                    wb.evalJS('pageScript.closeMaskWindow()');
+
+                    closeWindow();
+                },
+                'changeLanguage': function () {
+                    LSE.install('validate_identity', function (lang) {
+                        _vue.$set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                window.isPageControlBackButton = true;
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/google/unbind.google.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="bg"></div>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div class="confirm" v-if="!isConfirm">
+                <div class="box">
+                    <img src="../../../img/unbind_icon.png" class="icon" />
+                    <p class="des" v-text="language.BOX_DES">注：解除Google驗證后將會導致您無法進行正常的交易操作，如需解綁請點擊下方按鈕。</p>
+                </div>
+                <button class="confirm_button small" v-text="language.BUTTON_TEXT" @click="unbindConfirm">確認返回</button>
+            </div>
+            <div v-else v-cloak>
+                <div class="input_group">
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_2">交易密碼</span>
+                        <input class="input_control"
+                               type="password"
+                               maxlength="16"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2"
+                               v-model="form.pin" />
+                    </div>
+                    <div class="input_line">
+                        <span class="input_text" v-text="language.INPUT_TEXT_1">身份證號碼</span>
+                        <input class="input_control"
+                               type="text"
+                               maxlength="18"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1"
+                               v-model="form.idcard" />
+                    </div>
+                </div>
+                <button class="confirm_button"
+                        v-text="language.BUTTON_SUBMIT"
+                        @click="checkData"></button>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script src="../../../js/pages/google/unbind.google.js"></script>
+</body>
+</html>

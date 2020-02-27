@@ -1,0 +1,419 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/my.sell.ep.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else class="list_content" v-cloak>
+                <div v-if="list.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="inner">
+                    <ul>
+                        <li v-for="(item,index) in list" v-bind:key="index">
+                            <p class="line clearfix">
+                                <span class="left" v-text="item.FlowNumber"></span>
+                                <span class="right number" v-text="numberFormat(item.EPAmount, 2) + 'EP'"></span>
+                            </p>
+                            <p class="line clearfix">
+                                <span class="left txt" v-text="language.ITEM_1"></span>
+                                <span class="right time" v-text="item.CreateTime"></span>
+                            </p>
+                            <p class="line clearfix">
+                                <span v-if="item.Status==4" class="left txt" v-text="`${language.PAY_TIME_BEFORE_TEXT}${getTimeout(item)}${language.PAY_TIME_AFTER_TEXT}`"></span>
+                                <span class="right desc" v-text="item.StatusText"></span>
+                            </p>
+                            <div class="actions" v-if="item.Status!=128&&item.Status!=8&&item.Status!=64">
+                                <van-button size="small" v-if="item.Status==1" @click="cancelSell(item)" v-text="language.ACTION_BUTTON_1"></van-button>
+                                <van-button size="small" v-if="item.Status==2||item.Status==4" @click="complaint(item)" v-text="language.ACTION_BUTTON_2"></van-button>
+                                <van-button size="small" v-if="item.Status==4" @click="received(item)" v-text="language.ACTION_BUTTON_3"></van-button>
+                                <van-button size="small" v-if="item.Status==16 || item.Status==32 || item.Status == 256" @click="proof(item)" v-text="language.ACTION_BUTTON_4"></van-button>
+                            </div>
+                            <div class="arbitrate" v-if="item.Status==64">
+                                <span v-text="language.RESULT_TITLE + (item.Finally == null ? language.RESULT_EMPTY : item.Finally)"></span>
+                            </div>
+                            <div class="arbitrate" v-else-if="item.Status == 256">
+                                <span v-text="item.Finally"></span>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                    </div>
+                    <div v-if="isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NOMORE"></span>
+                    </div>
+                </div>
+                <van-popup v-model="isShowComplaint" position="bottom">
+                    <textarea class="input-area" v-model="reason" maxlength="100" 
+                              v-bind:placeholder="language.COMPLAINT_PLACEHOLDER"></textarea>
+                    <div class="bottom_buttons clearfix">
+                        <button class="btn btn_confirm" @click="failed()" v-text="language.COMPLAINT_BUTTON_1"></button>
+                        <button class="btn btn_cancel" @click="isShowComplaint=false" v-text="language.COMPLAINT_BUTTON_2"></button>
+                    </div>
+                </van-popup>
+                <van-popup v-model="isShowProof" position="bottom">
+                    <div class="proof_content clearfix">
+                        <fieldset class="fieldset_content left">
+                            <legend v-text="language.PROOF_TITLE"></legend>
+                            <div class="image_items" @click="selectPictrue()">
+                                <div v-if="proofImage==null" class="add">+</div>
+                                <img v-else v-bind:src="proofImage" class="proofImage" />
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset_content right">
+                            <legend v-text="language.PROOF_TEXT"></legend>
+                            <textarea class="input-area" v-model="reason" maxlength="100" 
+                                      v-bind:placeholder="language.PROOF_PLACEHOLDER"></textarea>
+                        </fieldset>
+                    </div>
+                    <div class="bottom_buttons clearfix">
+                        <button class="btn btn_confirm" @click="submitProof()" v-text="language.PROOF_BUTTON_1"></button>
+                        <button class="btn btn_cancel" @click="isShowProof=false" v-text="language.PROOF_BUTTON_2"></button>
+                    </div>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isShowComplaint': false,
+                'isShowProof': false,
+                'list': [],
+                'isLoading': true,
+                'isLoadComplete': false,
+                'isLoadMore': false,
+                'pageIndex': 1,
+                'pageSize': 15,
+                'reason': '',
+                'selectedItem': {},
+                'proofImage': null,
+                'proofImageEntry': null,
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'NONE_DATA': '',
+                    'ITEM_1': '',
+                    'ACTION_BUTTON_1': '',
+                    'ACTION_BUTTON_2': '',
+                    'ACTION_BUTTON_3': '',
+                    'ACTION_BUTTON_4': '',
+                    'RESULT_TITLE': '：',
+                    'RESULT_EMPTY': '',
+                    'NOMORE': '',
+                    'COMPLAINT_PLACEHOLDER': '',
+                    'COMPLAINT_BUTTON_1': '',
+                    'COMPLAINT_BUTTON_2': '',
+                    'PROOF_TITLE': '',
+                    'PROOF_TEXT': '',
+                    'PROOF_PLACEHOLDER': '',
+                    'PROOF_BUTTON_1': '',
+                    'PROOF_BUTTON_2': '',
+                    'ERROR_1': '',
+                    'ERROR_2': '',
+                    'PROOF_TOAST_TEXT': '',
+                    'PROOF_ERROR_1': '',
+                    'PROOF_SUCCESS': '',
+                    'RECEIVE_TITLE': '',
+                    'RECEIVE_MESSAGE': '',
+                    'RECEIVE_TOAST_TEXT': '',
+                    'RECEIVE_SUCCESS': '',
+                    'ERROR_3': '',
+                    'SUBMIT_TOAST_TEXT': '',
+                    'SUBMIT_SUCCESS': '！',
+                    'CANCEL_TITLE': '',
+                    'CANCEL_MESSAGE': '',
+                    'CANCEL_TOAST_TEXT': '',
+                    'CANCEL_SUCCESS': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'getTimeout': function (item) {
+                    var reg = new RegExp('/', "g")
+                    var s = item.PayTime.replace(reg, '');
+                    var payTime = eval('(new ' + s + ')');
+                    payTime.setMinutes(payTime.getMinutes() + 15);
+
+                    return `${payTime.getMonth() + 1}/${payTime.getDate()} ${payTime.getHours()}:${payTime.getMinutes()}`;
+                },
+                'submitProof': function(){
+                    if (this.proofImage == null) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!this.reason) {
+                        toastMsg(this.language.ERROR_2);
+                    } else {
+                        this.doSubmitProofAjax();
+                    }
+                },
+                'doSubmitProofAjax': function () {
+                    toastLoading({ 'message': this.language.PROOF_TOAST_TEXT });
+                    var _reason = this.reason;
+                    this.isShowProof = false;
+
+                    setTimeout(function () {
+                        _vue.proofImageEntry.file(function (file) {
+                            if (file.size > (5 * (1024 * 1024))) {
+                                closeToastLoading();
+                                toastMsg(_vue.language.PROOF_ERROR_1);
+                                return;
+                            }
+
+                            var reader = new plus.io.FileReader();
+                            reader.onloadend = function (e) {
+                                _vue.loadFileComplete(_reason, e);
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    }, 500);
+                },
+                'loadFileComplete': function (reason, e) {
+                    var base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                    var encode = encodeURIComponent(base64);
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'UploadReceiveRecord',
+                        data: {
+                            'base64AvatarImage': encode,
+                            'sId': this.selectedItem.Id,
+                            'remark': encodeURIComponent(reason)
+                        },
+                        timeout: 120000,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.pageIndex--;
+                                _vue.loadPageData();
+
+                                _vue.$toast.success(_vue.language.PROOF_SUCCESS);
+                            }
+                        }
+                    })
+                },
+                'selectPictrue': function(){
+                    plus.gallery.pick(function (captureFile) {
+                        plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                            _vue.proofImage = entry.toLocalURL();
+                            _vue.proofImageEntry = entry;
+                        });
+                    });
+                },
+                'proof': function(item){
+                    this.selectedItem = item;
+                    this.isShowProof = true;
+                    this.proofImageEntry = null;
+                },
+                'received': function(item){
+                    confirmMsg({
+                        'title': this.language.RECEIVE_TITLE,
+                        'message': this.language.RECEIVE_MESSAGE,
+                        'confirmCallback': function () {
+                            toastLoading({ 'message': _vue.language.RECEIVE_TOAST_TEXT });
+
+                            ajax({
+                                url: CONFIG.BASE_URL + 'ConfirmReceive',
+                                data: {
+                                    'sId': item.Id
+                                },
+                                success: function (result) {
+                                    if (result.Error) {
+                                        closeToastLoading();
+                                        toastMsg(result.Msg);
+                                    } else {
+                                        _vue.updateInfo(function () {
+                                            _vue.pageIndex--;
+                                            _vue.loadPageData();
+
+                                            _vue.$toast.success(_vue.language.RECEIVE_SUCCESS);
+                                        });
+                                    }
+                                }
+                            })
+                        }
+                    })
+                },
+                'failed': function(){
+                    if (!this.reason) {
+                        toastMsg(this.language.ERROR_3);
+                    } else {
+                        this.isShowComplaint = false;
+                        this.doSubmitFaile();
+                    }
+                },
+                'doSubmitFaile': function () {
+                    toastLoading({ 'message': this.language.SUBMIT_TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TransferFailed',
+                        data: {
+                            'sId': this.selectedItem.Id,
+                            'remark': encodeURIComponent(this.reason)
+                        },
+                        success: function (result) {
+                            _vue.reason = '';
+                            closeToastLoading();
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.pageIndex--;
+                                _vue.loadPageData();
+                                _vue.$toast.success(_vue.language.SUBMIT_SUCCESS);
+                            }
+                        }
+                    });
+                },
+                'complaint': function (item) {
+                    this.selectedItem = item;
+                    this.isShowComplaint = true;
+                },
+                'cancelSell': function(item){
+                    confirmMsg({
+                        'title': this.language.CANCEL_TITLE,
+                        'message': this.language.CANCEL_MESSAGE,
+                        'confirmCallback': function () {
+                            toastLoading({ 'message': _vue.language.CANCEL_TOAST_TEXT });
+
+                            ajax({
+                                url: CONFIG.BASE_URL + 'CancelSell',
+                                data: {
+                                    'sId': item.Id
+                                },
+                                success: function (result) {
+                                    closeToastLoading();
+                                    if (result.Error) {
+                                        toastMsg(result.Msg);
+                                    } else {
+                                        _vue.pageIndex--;
+                                        _vue.loadPageData();
+                                        _vue.$toast.success(_vue.language.CANCEL_SUCCESS);
+                                    }
+                                }
+                            })
+                        }
+                    })
+                },
+                'loadPageData': function () {
+                    this.pageIndex = 1;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyEPSellRecords',
+                        data: {
+                            'p': this.pageIndex,
+                            'pageSize': this.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageIndex++;
+                            _vue.list = result.Data.List;
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'updateInfo': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }, {
+                                'pageName': 'center.htmlPage',
+                                'actionName': '_vue.updateInfo()'
+                            }]);
+
+                            callback();
+                        }
+                    });
+                },
+                'loadMore': function(){
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyEPSellRecords',
+                        data: {
+                            'p': this.pageIndex,
+                            'pageSize': this.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageIndex++;
+                            _vue.list = _vue.list.concat(result.Data.List);
+                            _vue.isLoadMore = false;
+                            if (result.Data.List.length < _vue.pageSize) {
+                                _vue.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    if (!this.isLoadMore && !this.isLoadComplete) {
+                        this.isLoadMore = true;
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('my_sell_ep', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            watch:{
+                'isShowProof': function (val) {
+                    if (!val) {
+                        this.proofImage = null;
+                        this.reason = '';
+                    }
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

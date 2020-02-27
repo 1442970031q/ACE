@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/new.user.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <input type="text" class="input-control"
+                               v-model="form.memberNo"
+                               maxlength="15"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="text" class="input-control"
+                               v-model="form.nickName"
+                               maxlength="10"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                    </div>
+                    <!--<div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                        <div class="middle-select" @click="isShow=true">
+                            <span v-text="'+' + form.countryCode"></span>
+                            <i class="iconfont icon-webicon212"></i>
+                        </div>
+                        <input type="tel" class="input-control right-5"
+                               v-model="form.phone"
+                               maxlength="11"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_3" />
+                    </div>-->
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                        <div class="input-control w-60" @click="isShowMoney=true">
+                            <span v-bind:class="{'ht':form.investmentAmount==''}" v-html="starDisplay"></span>
+                        </div>
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="warn bg-gray">
+                        <p class="rule-title" v-text="language.RULE_TITLE"></p>
+                        <ul class="rule-items">
+                            <li v-text="language.RULE_ITEM_1"></li>
+                            <li v-text="language.RULE_ITEM_2"></li>
+                        </ul>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_5"></span>
+                        <input type="password" class="input-control"
+                               v-model="form.password1"
+                               maxlength="16"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_5" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_6"></span>
+                        <input type="password" class="input-control"
+                               v-model="confirmPassword1"
+                               maxlength="16"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_6" />
+                    </div>
+                    <!--<div class="input-group">
+        <span class="input-text" v-text="language.INPUT_TEXT_6"></span>
+        <input type="password" class="input-control"
+               v-model="confirmPassword1"
+               maxlength="16"
+               v-bind:placeholder="language.INPUT_PLACEHOLDER_6" />
+    </div>-->
+                </div>
+                <!--<div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_7"></span>
+                        <input type="password" class="input-control"
+                               v-model="form.password2"
+                               maxlength="16"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_7" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_8"></span>
+                        <input type="password" class="input-control"
+                               v-model="confirmPassword2"
+                               maxlength="16"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_8" />
+                    </div>
+                </div>-->
+                <p class="warn none-bg text-center">
+                    <span v-text="language.INIT_PIN"></span>
+                    <b>123456</b>
+                </p>
+                <button class="confirm_button" @click="checkData" v-text="language.BUTTON_1"></button>
+                <van-popup v-model="isShowMoney" position="bottom">
+                    <van-picker v-bind:columns="moneyList"
+                                show-toolbar="true"
+                                v-bind:title="language.LEVEL_PICKER_TITLE"
+                                v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                v-bind:cancel-button-text="language.CONFIRM_BUTTON_CANCEL_TEXT"
+                                @confirm="confirmMoney"
+                                @cancel="isShowMoney=false"></van-picker>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/country.code.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isShow': false,
+                'isShowMoney': false,
+                'isFirstReport': false,
+                'moneyList': [],
+                'starDisplay': '',
+                'confirmPassword1': '',
+                //'confirmPassword2': '',
+                'form': {
+                    'memberNo': '',
+                    'nickName': '',
+                    //'phone': '',
+                    'investmentAmount': '',
+                    'password1': '',
+                    //'password2': '',
+                    'countryCode': '86'
+                },
+                'request': {
+                    'fromTree': queryString('fromTree'),
+                    'display': queryString('display'),
+                    'rId': queryString('rId'),
+                    'pos': queryString('pos'),
+                    'parentDisplay': queryString('parentDisplay')
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'INPUT_TEXT_1': '',
+                    'INPUT_PLACEHOLDER_1': '',
+                    'INPUT_TEXT_2': '',
+                    'INPUT_PLACEHOLDER_2': '',
+                    'INPUT_TEXT_3': '',
+                    'INPUT_PLACEHOLDER_3': '',
+                    'INPUT_TEXT_4': '',
+                    'INPUT_TEXT_5': '',
+                    'INPUT_PLACEHOLDER_5': '',
+                    'INPUT_TEXT_6': '',
+                    'INPUT_PLACEHOLDER_6': '',
+                    'INPUT_TEXT_7': '',
+                    'INPUT_PLACEHOLDER_7': '',
+                    'INPUT_TEXT_8': '',
+                    'INPUT_PLACEHOLDER_8': '',
+                    'BUTTON_1': '',
+                    'COUNTRY_PICKER_TITLE': '',
+                    'LEVEL_PICKER_TITLE': '',
+                    'CONFIRM_BUTTON_TEXT': '',
+                    'SELECT_LEVEL_TEXT': '',
+                    'ERROR_1': '',
+                    'ERROR_2': '',
+                    'ERROR_3': '',
+                    'ERROR_4': '',
+                    'ERROR_5': '',
+                    'ERROR_6': '',
+                    'ERROR_7': '',
+                    'ERROR_8': '',
+                    'ERROR_9': '',
+                    'ERROR_10': '',
+                    'ERROR_11': '',
+                    'ERROR_12': '',
+                    'ERROR_13': '',
+                    'CHECK_MEMBER_TEXT': '',
+                    'ERROR_14': '',
+                    'ERROR_15': '',
+                    'RULE_TITLE': '',
+                    'RULE_ITEM_1': '',
+                    'RULE_ITEM_2': '',
+                    'INIT_PIN':''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'confirmMoney': function (item) {
+                    this.isShowMoney = false;
+                    this.starDisplay = item.text;
+                    this.form.investmentAmount = item.value;
+                },
+                'selectedItem': function (item) {
+                    this.isShow = false;
+                    this.form.countryCode = item.code;
+                },
+                'checkData': function () {
+                    if (!this.form.memberNo) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (this.form.memberNo.length < 6) {
+                        toastMsg(this.language.ERROR_2);
+                    } else if (!/^[0-9a-zA-Z]+$/.test(this.form.memberNo)) {
+                        toastMsg(this.language.ERROR_3);
+                    } else if (!this.form.nickName) {
+                        toastMsg(this.language.ERROR_4);
+                    }
+                    //else if (!this.form.phone) {
+                    //    toastMsg(this.language.ERROR_5);
+                    //}
+                    else if (!this.form.investmentAmount) {
+                        toastMsg(this.language.ERROR_6);
+                    } else if (this.form.investmentAmount <= 0) {
+                        toastMsg(this.language.ERROR_7);
+                    } else if (!this.form.password1) {
+                        toastMsg(this.language.ERROR_8)
+                    } else if (this.form.password1.length < 6) {
+                        toastMsg(this.language.ERROR_9);
+                    } else if (this.form.password1 != this.confirmPassword1) {
+                        toastMsg(this.language.ERROR_10);
+                    }
+                    //else if (!this.form.password2) {
+                    //    toastMsg(this.language.ERROR_11);
+                    //} else if (this.form.password2.length < 6) {
+                    //    toastMsg(this.language.ERROR_12);
+                    //} else if (this.form.password2 != this.confirmPassword2) {
+                    //    toastLoading(this.language.ERROR_13);
+                    //}
+                    else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.CHECK_MEMBER_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MemberIsExists',
+                        data: {
+                            'mNumber': this.form.memberNo,
+                            'password': this.form.password1
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                alertMsg(result.Msg);
+                            } else if (result.IsExis) {
+                                closeToastLoading();
+                                toastMsg(_vue.language.ERROR_14);
+                            } else if (!result.IsStrong) {
+                                closeToastLoading();
+                                toastMsg(_vue.language.ERROR_15);
+                            } else {
+                                gotoNewWindow('new.user.step_2Page', 'new.user.step_2', {
+                                    'paramObject': {
+                                        'form': _vue.form,
+                                        'request': _vue.request,
+                                        'starDisplay': _vue.starDisplay
+                                    },
+                                    openCallback: function () {
+                                        closeToastLoading();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'InvestmentAmountList',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            for (var i = 0; i < result.Data.List.length; i++) {
+                                _vue.moneyList.push({
+                                    'text': _vue.getStar(result.Data.List[i]),
+                                    'value': result.Data.List[i].InvestmentAmount,
+                                    'disabled': result.Data.List[i].IsDisable
+                                });
+                            }
+
+                            _vue.starDisplay = _vue.moneyList[0].text;
+                            _vue.form.investmentAmount = _vue.moneyList[0].value;
+
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'getStar': function (item) {
+                    var starHtml = '&nbsp;';
+                    for (var i = 0; i < item.StarNumber; i++) {
+                        starHtml += '<i class="iconfont icon-wujiaoxing1"></i>';
+                    }
+
+                    var text = item.Name + '&nbsp;' + item.InvestmentAmount +'$';
+                    return text + '&nbsp;' + starHtml;
+                },
+                'changeLanguage': function () {
+                    LSE.install('new_user', function (lang) {
+                        Object.assign(_vue.language, lang);
+
+                        _vue.starDisplay = _vue.language.SELECT_LEVEL_TEXT;
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

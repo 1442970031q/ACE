@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/activation.code.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="bg"></div>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+            <button v-if="!isActive"
+                    class="submit-button"
+                    v-text="language.SUBMIT_BUTTON"
+                    @click="gotoUnbind">
+                解除綁定
+            </button>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="!isActive">
+                <van-password-input v-bind:value="form.gCode"
+                                    v-bind:mask="false"
+                                    v-bind:focused="true"
+                                    v-bind:info="language.PASSWORD_INFO"></van-password-input>
+                <van-number-keyboard v-bind:show="true"
+                                     @input="onInput"
+                                     @delete="onDelete"
+                                     v-bind:class="{'safe': CONFIG.IsSafeArea()}"></van-number-keyboard>
+            </div>
+            <div v-else v-cloak class="box">
+                <i class="iconfont icon-jurassic_quanxian"></i>
+                <div class="key">
+                    <p class="title" v-text="language.BOX_TITLE">您的激活碼（用于协助好友激活Google验证）</p>
+                    <p v-text="pageModel.activeCode"></p>
+                </div>
+                <button class="confirm_button" v-text="language.BUTTON_TEXT" v-on:click="copyKey">複製激活碼</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isActive': false,
+                'form': {
+                    'gCode': ''
+                },
+                'pageModel': {
+                    'activeCode': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoUnbind': function () {
+                    gotoNewWindow('unbind.googlePage', 'google/unbind.google', {
+                        'openCallback': function () {
+                            closeWindow('none');
+                        }
+                    });
+                },
+                'onInput': function (value) {
+                    this.form.gCode = (this.form.gCode + value).slice(0, 6);
+                    if (this.form.gCode.length === 6) {
+                        setTimeout(this.doCheckGoogleCodeAjax, 250);
+                    }
+                },
+                'onDelete': function () {
+                    this.form.gCode = this.form.gCode.slice(0, this.form.gCode.length - 1);
+                },
+                'doCheckGoogleCodeAjax': function () {
+                    toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'LookActivedCode',
+                        data: this.form,
+                        success: function (result) {
+                            closeToastLoading();
+
+                            if (result.Error) {
+                                _vue.form.gCode = '';
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.activeCode = result.ActiveCode;
+                            _vue.isActive = true;
+                        }
+                    });
+                },
+                'copyKey': function () {
+                    if (CONFIG.IS_RUNTIME) {
+                        var mainPage = plus.webview.getWebviewById('mainPage');
+                        if (mainPage !== null) {
+                            mainPage.evalJS('pageScript.setClipBoard("' + this.pageModel.activeCode + '")');
+                        }
+
+                        toastMsg(this.language.COPY_TOAST_TEXT);
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('activation_code', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

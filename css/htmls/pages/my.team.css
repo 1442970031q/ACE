@@ -1,0 +1,234 @@
+﻿#app-head {
+    border-bottom: 1px solid #f9f9f9;
+}
+
+#app-content {
+}
+
+    #app-content .top_user {
+        position: fixed;
+        width: 100%;
+        top: 65px;
+        left: 0;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 1;
+    }
+
+.none-data {
+    padding-top: 200px;
+}
+
+.top_user_left .pd {
+    padding: 10px 15px;
+}
+
+.top_user_left .van-field__control {
+    height: 24px;
+}
+
+.top_user .top_user_right {
+    float: left;
+    width: 50px;
+    height: 128px;
+    line-height: 128px;
+    text-align: center;
+    color: #9a9a9a;
+    font-size: 2em;
+    font-style: italic;
+}
+
+.list_content {
+    padding-top: 145px;
+    padding-bottom: 0;
+}
+
+    .list_content ul {
+        margin-top: 5px;
+    }
+
+        .list_content ul li {
+            position: relative;
+            z-index: 0;
+        }
+
+.top_user {
+    background-color: white;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.list_content ul li {
+    padding: 10px 15px;
+    background-color: white;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+    .list_content ul li:active {
+        background-color: #f9f9f9;
+    }
+
+    .list_content ul li .left_content,
+    .top_user .left_content {
+        float: left;
+        width: 52px;
+        position: relative;
+    }
+
+        .list_content ul li .left_content .index,
+        .top_user .left_content .index {
+            display: block;
+            width: 40px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 1.1em;
+            color: #8e8e8e;
+            border-radius: 50%;
+            margin: 0 auto;
+            margin-top: 5px;
+        }
+
+        .list_content ul li .left_content .image,
+        .top_user .left_content .image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid #efefef;
+        }
+
+        .list_content ul li .left_content .subaccount,
+        .top_user .left_content .subaccount {
+            font-size: .65em;
+            background-color: #1e81d2;
+            color: white;
+            position: absolute;
+            right: 0;
+            top: 0;
+            padding: 2px;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            text-align: center;
+        }
+
+    .list_content ul li .right_content,
+    .top_user .right_content {
+        float: left;
+        width: calc(100% - 62px);
+        padding-left: 10px;
+        padding-top: 4px;
+    }
+
+    .list_content ul li:last-child .right_content {
+        border-bottom: 0;
+    }
+
+    .list_content ul li .right_content .nn,
+    .top_user .right_content .nn {
+        font-weight: bold;
+        font-size: 1em;
+        line-height: 20px;
+        height: 20px;
+        display: block;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+        .list_content ul li .right_content .nn .star,
+        .top_user .right_content .nn .star {
+            margin-left: 5px;
+        }
+
+            .list_content ul li .right_content .nn .star .iconfont,
+            .top_user .right_content .nn .star .iconfont {
+                color: #dcc305;
+                font-size: .9em;
+            }
+
+    .list_content ul li .right_content .member_code,
+    .top_user .right_content .member_code {
+        font-size: .8em;
+        color: #929292;
+        height: 20px;
+        line-height: 20px;
+    }
+
+        .list_content ul li .right_content .member_code .t,
+        .top_user .right_content .member_code .t {
+            display: inline-block;
+            text-align: right;
+        }
+
+        .list_content ul li .right_content .member_code .v,
+        .top_user .right_content .member_code .v {
+            display: inline-block;
+            margin-left: 15px;
+        }
+
+    .list_content ul li .info_list,
+    .top_user .info_list {
+        margin-top: 10px;
+    }
+
+        .list_content ul li .info_list .bottom,
+        .top_user .info_list .bottom {
+            font-size: .8em;
+            margin-top: 2px;
+            display: block;
+            height: 20px;
+            line-height: 20px;
+            color: #929292;
+        }
+
+            .list_content ul li .info_list .bottom .left,
+            .top_user .info_list .bottom .left {
+                float: left;
+            }
+
+                .list_content ul li .info_list .bottom .left.ti {
+                    text-indent: 1em;
+                }
+
+    .list_content ul li .time {
+        text-align: right;
+        font-size: .8em;
+        color: #b7b7b7;
+    }
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.load_more_complete {
+    background-color: white;
+}
+
+.load_more_complete {
+    width: auto;
+    text-align: center;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}

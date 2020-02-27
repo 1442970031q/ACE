@@ -1,0 +1,350 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../css/vant.css" rel="stylesheet" />
+    <link href="../css/base.css" rel="stylesheet" />
+    <link href="../css/htmls/transaction.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button class="submit-button" @click="flushList" v-text="language.BUTTON_1"></button>
+        </div>
+        <div id="app-content">
+            <van-tabs v-model="tabIndex" @change="tabChanged" v-bind:style="{'top': (45 + statusbarHeight) + 'px'}">
+                <van-tab v-bind:title="language.TAB_1">
+                    <div v-if="!pageData.tab1.isLoaded" class="loading-box">
+                        <van-loading color="black"></van-loading>
+                        <p class="loading-text" v-text="language.LOADING"></p>
+                    </div>
+                    <div v-else class="tran_box" v-cloak>
+                        <div v-if="pageData.tab1.items.length==0" class="none-data">
+                            <i class="iconfont icon-wushuju"></i>
+                            <p class="none-data-text" v-text="language.TAB_1_NONE_DATA"></p>
+                        </div>
+                        <div v-else>
+                            <ul class="list">
+                                <li class="item ep" v-for="(item,index) in pageData.tab1.items" v-bind:key="index" @click="gotoDetail(item)">
+                                    <div class="seller clearfix">
+                                        <img v-lazy="item.Seller.Avatar" class="avatar" />
+                                        <div class="right_text clearfix">
+                                            <p class="nn" v-text="item.Seller.FlowNumber"></p>
+                                            <span class="state blue" v-text="language.TAB_1_STATE"></span>
+                                        </div>
+                                    </div>
+                                    <div class="detail">
+                                        <ul class="clearfix">
+                                            <li>
+                                                <p class="number" v-text="numberFormat(item.EPAmount, 0)"></p>
+                                                <p class="txt" v-text="language.TEXT_1"></p>
+                                            </li>
+                                            <li v-if="item.ReceiveType === '1' || item.ReceiveType === null">
+                                                <p class="number" v-text="numberFormat(item.EPAmount * item.Rat, 2)"></p>
+                                                <p class="txt" v-text="language.TEXT_2"></p>
+                                            </li>
+                                            <li v-else-if="item.ReceiveType === '2'">
+                                                <p class="number" v-text="numberFormat(item.EPAmount * .9, 2)"></p>
+                                                <p class="txt" v-text="language.TEXT_3"></p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="bottom clearfix">
+                                        <div class="logos">
+                                            <img src="../img/logos/yl_pay.png" v-if="item.Seller.IsBankSupport || item.ReceiveType === null" />
+                                            <img src="../img/logos/usdt_pay.png" v-if="item.Seller.IsUsdtSupport" />
+                                        </div>
+                                        <p class="time" v-text="item.CreateTime"></p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div v-if="pageData.tab1.isLoadMore" class="load_more clearfix">
+                                <van-loading color="black"></van-loading>
+                                <span class="load_text" v-text="language.LOADING"></span>
+                            </div>
+                            <div v-if="pageData.tab1.isLoadComplete" class="load_more_complete">
+                                <span class="load_text" v-text="language.NOMORE"></span>
+                            </div>
+                        </div>
+                    </div>
+                </van-tab>
+                <van-tab v-bind:title="language.TAB_2">
+                    <div v-if="!pageData.tab2.isLoaded" class="loading-box">
+                        <van-loading color="black"></van-loading>
+                        <p class="loading-text" v-text="language.LOADING"></p>
+                    </div>
+                    <div v-else class="tran_box" v-cloak>
+                        <div v-if="pageData.tab2.items.length==0" class="none-data">
+                            <i class="iconfont icon-wushuju"></i>
+                            <p class="none-data-text" v-text="language.TAB_2_NONE_DATA"></p>
+                        </div>
+                        <div v-else>
+                            <ul class="list">
+                                <li class="item ep" v-for="(item,index) in pageData.tab2.items" v-bind:key="index" @click="gotoDetail(item)">
+                                    <div class="seller clearfix">
+                                        <img v-lazy="item.Seller.Avatar" class="avatar" />
+                                        <div class="right_text clearfix">
+                                            <p class="nn" v-text="item.Seller.FlowNumber"></p>
+                                            <span class="state blue" v-text="language.TAB_2_STATE"></span>
+                                        </div>
+                                    </div>
+                                    <div class="detail">
+                                        <ul class="clearfix">
+                                            <li>
+                                                <p class="number" v-text="numberFormat(item.EPAmount, 0)"></p>
+                                                <p class="txt" v-text="language.TEXT_1"></p>
+                                            </li>
+                                            <li v-if="item.ReceiveType === '1' || item.ReceiveType === null">
+                                                <p class="number" v-text="numberFormat(item.EPAmount * item.Rat, 2)"></p>
+                                                <p class="txt" v-text="language.TEXT_2"></p>
+                                            </li>
+                                            <li v-else-if="item.ReceiveType === '2'">
+                                                <p class="number" v-text="numberFormat(item.EPAmount * .9, 2)"></p>
+                                                <p class="txt" v-text="language.TEXT_3"></p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="bottom clearfix">
+                                        <div class="logos">
+                                            <img src="../img/logos/yl_pay.png" v-if="item.Seller.IsBankSupport || item.ReceiveType === null" />
+                                            <img src="../img/logos/usdt_pay.png" v-if="item.Seller.IsUsdtSupport" />
+                                        </div>
+                                        <p class="time" v-text="item.CreateTime"></p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div v-if="pageData.tab2.isLoadMore" class="load_more clearfix">
+                                <van-loading color="black"></van-loading>
+                                <span class="load_text" v-text="language.LOADING"></span>
+                            </div>
+                            <div v-if="pageData.tab2.isLoadComplete" class="load_more_complete">
+                                <span class="load_text" v-text="language.NOMORE"></span>
+                            </div>
+                        </div>
+                    </div>
+                </van-tab>
+                <van-tab v-bind:title="language.TAB_3">
+                    <div v-if="!pageData.tab3.isLoaded" class="loading-box">
+                        <van-loading color="black"></van-loading>
+                        <p class="loading-text" v-text="language.LOADING"></p>
+                    </div>
+                    <div v-else class="tran_box" v-cloak>
+                        <div v-if="pageData.tab3.items.length==0" class="none-data">
+                            <i class="iconfont icon-wushuju"></i>
+                            <p class="none-data-text" v-text="language.TAB_3_NONE_DATA"></p>
+                        </div>
+                        <div v-else>
+                            <ul class="list">
+                                <li class="item ep" v-for="(item,index) in pageData.tab3.items" v-bind:key="index" @click="gotoDetail(item)">
+                                    <div class="seller clearfix">
+                                        <img v-lazy="item.Seller.Avatar" class="avatar" />
+                                        <div class="right_text clearfix">
+                                            <p class="nn" v-text="item.Seller.FlowNumber"></p>
+                                            <span class="state green" v-text="language.TAB_3_STATE"></span>
+                                        </div>
+                                    </div>
+                                    <div class="detail">
+                                        <ul class="clearfix">
+                                            <li>
+                                                <p class="number" v-text="numberFormat(item.EPAmount, 0)"></p>
+                                                <p class="txt" v-text="language.TEXT_1"></p>
+                                            </li>
+                                            <li v-if="item.ReceiveType === '1' || item.ReceiveType === null">
+                                                <p class="number" v-text="numberFormat(item.EPAmount * item.Rat, 2)"></p>
+                                                <p class="txt" v-text="language.TEXT_2"></p>
+                                            </li>
+                                            <li v-else-if="item.ReceiveType === '2'">
+                                                <p class="number" v-text="numberFormat(item.EPAmount * .9, 2)"></p>
+                                                <p class="txt" v-text="language.TEXT_3"></p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="bottom clearfix">
+                                        <div class="logos">
+                                            <img src="../img/logos/yl_pay.png" v-if="item.Seller.IsBankSupport || item.ReceiveType === null" />
+                                            <img src="../img/logos/usdt_pay.png" v-if="item.Seller.IsUsdtSupport" />
+                                        </div>
+                                        <p class="time" v-text="item.CreateTime"></p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div v-if="pageData.tab3.isLoadMore" class="load_more clearfix">
+                                <van-loading color="black"></van-loading>
+                                <span class="load_text" v-text="language.LOADING"></span>
+                            </div>
+                            <div v-if="pageData.tab3.isLoadComplete" class="load_more_complete">
+                                <span class="load_text" v-text="language.NOMORE"></span>
+                            </div>
+                        </div>
+                    </div>
+                </van-tab>
+            </van-tabs>
+        </div>
+    </div>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/vant.js"></script>
+    <script src="../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../img/default_avatar.jpg',
+            'error': '../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'tabIndex': 0,
+                'pageData': {
+                    'tab1': {
+                        'isLoaded': false,
+                        'pageIndex': 1,
+                        'pageSize': 15,
+                        'type': 1,
+                        'items': [],
+                        'isLoadMore': false,
+                        'isLoadComplete': false,
+                    },
+                    'tab2': {
+                        'isLoaded': false,
+                        'pageIndex': 1,
+                        'pageSize': 15,
+                        'type': 2,
+                        'items': [],
+                        'isLoadMore': false,
+                        'isLoadComplete': false,
+                    },
+                    'tab3': {
+                        'isLoaded': false,
+                        'pageIndex': 1,
+                        'pageSize': 15,
+                        'type': 8,
+                        'items': [],
+                        'isLoadMore': false,
+                        'isLoadComplete': false,
+                    }
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'BUTTON_1': '',
+                    'LOADING':'',
+                    'TAB_1': '',
+                    'TAB_1_NONE_DATA': '',
+                    'TAB_1_STATE': '',
+                    'TEXT_1': '',
+                    'TEXT_2': '',
+                    'NOMORE': '',
+                    'TAB_2': '',
+                    'TAB_2_NONE_DATA': '',
+                    'TAB_2_STATE': '',
+                    'TAB_3': '',
+                    'TAB_3_NONE_DATA': '',
+                    'TAB_3_STATE': '',
+                },
+                'statusbarHeight':20
+            },
+            methods: {
+                'gotoDetail': function (item) {
+                    gotoNewWindow('detailPage', 'transactionPages/detail', {
+                        param: 'rId=' + item.Id
+                    });
+                },
+                'flushList': function () {
+                    this.pageData.tab1.isLoaded = false;
+                    this.pageData.tab2.isLoaded = false;
+                    this.pageData.tab3.isLoaded = false;
+
+                    this.loadTabByIndex();
+                },
+                'tabChanged': function (index) {
+                    this.tabIndex = index;
+                    var tab = this.pageData['tab' + (this.tabIndex + 1)];
+                    if (!tab.isLoaded) {
+                        this.loadTabByIndex();
+                    }
+                },
+                'loadTabByIndex': function () {
+                    var tab = this.pageData['tab' + (this.tabIndex + 1)];
+                    tab.pageIndex = 1;
+                    tab.isLoadMore = false;
+                    tab.isLoadComplete = false;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPSellRecords',
+                        data: {
+                            'p': tab.pageIndex,
+                            'pageSize': tab.pageSize,
+                            'type': tab.type
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            tab.items = result.Data.List;
+                            tab.pageIndex++;
+                            tab.isLoaded = true;
+                        }
+                    })
+                },
+                'loadMore': function () {
+                    var tab = this.pageData['tab' + (this.tabIndex + 1)];
+                    tab.isLoadMore = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPSellRecords',
+                        data: {
+                            'p': tab.pageIndex,
+                            'pageSize': tab.pageSize,
+                            'type': tab.type
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            tab.items = tab.items.concat(result.Data.List);
+
+                            _vue.$nextTick(function () {
+                                tab.pageIndex++;
+                                tab.isLoadMore = false;
+
+                                if (result.Data.List.length < tab.pageSize) {
+                                    tab.isLoadComplete = true;
+                                }
+                            });
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    var tab = this.pageData['tab' + (this.tabIndex + 1)];
+                    if (!tab.isLoadMore && !tab.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('ep_transction', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadTabByIndex();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+﻿.input_content {
+    margin-top: 5px;
+}
+
+.input-group .input-control::-webkit-input-placeholder,
+.input-group .input-control .ht {
+    color: #a0a0a0;
+}
+
+.input_content .input-group .right_icon {
+    display: block;
+    float: right;
+    width: 10%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-size: 1em;
+    color: #ababab;
+}
+
+.input_content .input-group .middle-select {
+    float: left;
+    width: 20%;
+    display: block;
+    text-align: center;
+    height: 45px;
+    line-height: 45px;
+    font-size: .9em;
+}
+
+.input_content .input-group .input-control.right-5 {
+    width: 50%;
+    float: right;
+}
+
+.van-picker-column__item--selected {
+    color: black;
+}
+
+.van-picker__toolbar {
+    height: 50px;
+    line-height: 50px;
+}
+
+.icon-wujiaoxing1 {
+    color: #f3d700;
+}
+
+.warn {
+    padding: 10px;
+    font-size: .9em;
+    margin-top: 5px;
+    color: #f9bc0b;
+    background-color: #fef7e1;
+    border-color: #fef3d2;
+    text-align: left;
+    background-image: url('../../../img/change_pin_bg.png');
+    background-position: 90% center;
+    background-repeat: no-repeat;
+    background-size: auto 80%;
+}
+
+    .warn.text-center {
+        text-align: center;
+    }
+
+    .warn.none-bg {
+        background-image: none;
+    }
+
+    .warn.bg-gray {
+        color: #333;
+        background-color: white;
+        border-bottom: 1px solid #f9f9f9;
+    }
+
+    .warn .rule-title {
+        text-align: center;
+    }
+
+    .warn .rule-items {
+        padding-left: 15px;
+        margin-top: 10px;
+        color: #7b7b7b;
+    }
+
+        .warn .rule-items li {
+            list-style-type: disc;
+            font-size: .9em;
+            line-height: 20px;
+        }
+
+    .warn.text-left {
+        text-align: left;
+    }
+
+.van-popup.w-90-p {
+    width: 90%;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.confirm_box {
+    background-color: white;
+}
+
+    .confirm_box .confirm_inner {
+        padding: 10px 20px;
+    }
+
+        .confirm_box .confirm_inner .title {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .confirm_box .confirm_inner ul {
+            padding: 10px 0;
+            padding-top: 15px;
+        }
+
+            .confirm_box .confirm_inner ul li {
+                line-height: 30px;
+                font-size: 1em;
+            }
+
+                .confirm_box .confirm_inner ul li .text {
+                    display: inline-block;
+                    text-align: right;
+                    width: 110px;
+                    font-weight: bold;
+                }
+
+                .confirm_box .confirm_inner ul li .value {
+                    color: #2e2e2e;
+                }
+
+    .confirm_box .actions {
+        height: 50px;
+        width: 100%;
+    }
+
+        .confirm_box .actions .action {
+            float: left;
+            width: 50%;
+            text-align: center;
+            line-height: 50px;
+            height: 50px;
+            font-size: .9em;
+            background-color: #f1f1f1;
+            color: #929292;
+        }
+
+            .confirm_box .actions .action:active {
+                background-color: #e6e6e6;
+            }
+
+            .confirm_box .actions .action.confirm {
+                background-color: #1e81d2;
+                color: white;
+            }
+
+                .confirm_box .actions .action.confirm:active {
+                    background-color: #176baf;
+                }
+
+.input-control.border {
+}
+
+    .input-control.border .input-inline {
+        float: left;
+        border: 1px solid #1e81d2;
+        display: inline-block;
+        padding: 0 10px;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        height: 25px;
+        line-height: 23px;
+        font-size: .9em;
+        width: 65px;
+    }
+
+        .input-control.border .input-inline.selected {
+            background-color: #1e81d2;
+            color: white;
+        }
+
+        .input-control.border .input-inline.left {
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+        }
+
+        .input-control.border .input-inline.right {
+            border-left: 0;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+        }
+
+        .input-control.border .input-inline .icon-duihao {
+            font-size: .9em;
+            color: white;
+            height: 23px;
+            line-height: 23px;
+        }

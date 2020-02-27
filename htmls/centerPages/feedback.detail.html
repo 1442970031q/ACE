@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover" />
+    <title></title>
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/feedback.detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app">
+            <div id="app-head" class="fixed van-hairline--bottom" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+                <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+                <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+            </div>
+            <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+                <div v-if="isLoading" class="loading-box p60">
+                    <van-loading color="black"></van-loading>
+                    <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+                </div>
+                <div v-else v-cloak>
+                    <ul class="list">
+                        <li class="self">
+                            <div class="container">
+                                <img class="avatar" v-lazy="userAvatar" />
+                                <div class="content">
+                                    <span class="left_arrow"></span>
+                                    <p class="title" v-text="pageModel.Title"></p>
+                                    <p class="des" v-text="pageModel.Text"></p>
+                                    <div class="image">
+                                        <img v-lazy="pageModel.ImageAddress_1" @click="viewImage(pageModel.ImageAddress_1)" />
+                                    </div>
+                                    <div class="bottom clearfix">
+                                        <span class="time" v-text="pageModel.CreateTime"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="list">
+                        <li v-for="(item,index) in pageModel.ParentList"
+                            v-bind:key="index"
+                            v-bind:class="[item.RoleType === 2 ? 'service' : 'self']">
+                            <div class="container" v-if="item.RoleType === 1">
+                                <img class="avatar" v-lazy="userAvatar" />
+                                <div class="content">
+                                    <div class="mask" v-show="item.isSubmit" v-text="language.SEND_LOADING_TEXT">正在發送中...</div>
+                                    <span class="left_arrow"></span>
+                                    <p class="des nmt" v-text="item.AskList.Text"></p>
+                                    <div class="image" v-if="item.AskList.ImageAddress_1">
+                                        <img v-lazy="item.AskList.ImageAddress_1" @click="viewImage(item.AskList.ImageAddress_1)" />
+                                    </div>
+                                    <div class="bottom clearfix">
+                                        <span class="time" v-text="item.CreateTime"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="container">
+                                <div class="content">
+                                    <span class="left_arrow"></span>
+                                    <p class="des nmt" v-text="item.AnswerList.Reply"></p>
+                                    <div class="image" v-if="item.AnswerList.ImageAddress_1">
+                                        <img v-lazy="item.AnswerList.ImageAddress_1" @click="viewImage(item.AnswerList.ImageAddress_1)" />
+                                    </div>
+                                    <div class="bottom clearfix">
+                                        <span class="time" v-text="item.CreateTime"></span>
+                                    </div>
+                                </div>
+                                <img class="avatar" src="../../img/logo_100.jpg" />
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="actions van-hairline--top">
+                        <i class="iconfont icon-tupian image" @click="choiceImage"></i>
+                        <div class="input_content">
+                            <input type="text"
+                                   maxlength="200"
+                                   class="input_text"
+                                   v-bind:placeholder="language.ASK_INPUT_PLACEHOLDER"
+                                   v-model="form.text" />
+                            <div class="temp_img" v-if="choiceFilePath">
+                                <img class="upload_image" v-bind:src="choiceFilePath" @click="removeImage" />
+                            </div>
+                        </div>
+                        <button class="send" @click="checkData" v-text="language.SEND_BUTTON_TEXT">發送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_feedback_img.jpg',
+            'error': '../../img/default_feedback_img.jpg',
+            'attempt': 1
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isWorking': false,
+                'fileName': '',
+                'choiceFilePath': '',
+                'items': [{
+                    'text': '密碼問題',
+                    'value': 1
+                }, {
+                    'text': '充值問題',
+                    'value': 2
+                }, {
+                    'text': '資料修正',
+                    'value': 3
+                }, {
+                    'text': '其他',
+                    'value': 4
+                }],
+                'request': {
+                    'id': queryString('fId')
+                },
+                'form': {
+                    'id': queryString('fId'),
+                    'text': '',
+                    'imgBase64_1': ''
+                },
+                'pageModel': {},
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            methods: {
+                'checkData': function () {
+                    if (!this.form.text) {
+                        toastMsg(this.language.ERROR_1);
+                        return;
+                    }
+
+                    if (this.isWorking) {
+                        toastMsg(this.language.ERROR_1);
+                        return;
+                    }
+
+                    this.isWorking = true;
+                    if (this.choiceFilePath) {
+                        this.compressImage();
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'compressImage': function () {
+                    plus.zip.compressImage({
+                        'src': this.choiceFilePath,
+                        'dst': '_downloads/feedback_detail.jpg',
+                        'overwrite': true,
+                        'format': 'jpg',
+                        'width': 'auto',
+                        'height': 'auto',
+                        'quality': 90
+                    }, function (event) {
+                        _vue.compressComplete(event);
+                    }, function (error) {
+                        _vue.isWorking = false;
+                        toastMsg(error.message);
+                    });
+                },
+                'compressComplete': function (event) {
+                    var reader = new plus.io.FileReader();
+
+                    reader.onloadend = function (e) {
+                        var base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                        _vue.form.imgBase64_1 = encodeURIComponent(base64);
+                        _vue.doSubmitAjax();
+                    };
+
+                    reader.onerror = function (fe) {
+                        _vue.isWorking = false;
+                        toastMsg('Error:' + fe.error);
+                    };
+
+                    var f = event.target.replace('file://', '');
+                    reader.readAsDataURL(f);
+                },
+                'doSubmitAjax': function () {
+                    var item = {
+                        'RoleType': 1,
+                        'CreateTime': this.language.SEND_TIME_DEFAULT,
+                        'AskList': {
+                            'ImageAddress_1': this.choiceFilePath,
+                            'Text': this.form.text
+                        },
+                        'isSubmit': true
+                    };
+                    this.pageModel.ParentList.push(item);
+                    this.$nextTick(function () {
+                        document.body.scrollTop = document.body.scrollHeight;
+                    });
+
+                    var postData = {};
+                    postData = Object.assign({}, postData, this.form);
+
+                    this.form.text = '';
+                    this.form.imgBase64_1 = '';
+                    this.choiceFilePath = '';
+                    this.fileName = '';
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ThenSubmitCommits',
+                        data: postData,
+                        success: function (result) {
+                            _vue.isWorking = false;
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            item.isSubmit = false;
+                        }
+                    });
+                },
+                'removeImage': function () {
+                    this.choiceFilePath = '';
+                    this.fileName = '';
+                },
+                'choiceImage': function () {
+                    plus.key.hideSoftKeybord();
+                    setTimeout(function () {
+                        plus.gallery.pick(_vue.resolveFile);
+                    }, 100);
+                },
+                'resolveFile': function (captureFile) {
+                    plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                        var filePath = entry.toLocalURL();
+                        entry.file(function (file) {
+                            if (file.size > 5 * (1024 * 1024)) {
+                                toastMsg(_vue.language.ERROR_3);
+                                return;
+                            }
+
+                            _vue.fileName = file.name;
+                            _vue.choiceFilePath = filePath;
+                        });
+                    });
+                },
+                'viewImage': function (src) {
+                    plus.nativeUI.previewImage([src]);
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'CommitsDetails',
+                        data: this.request,
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            Vue.set(_vue, 'pageModel', result.Data);
+                            _vue.isLoading = false;
+                            _vue.$nextTick(function () {
+                                document.body.scrollTop = document.body.scrollHeight;
+                            });
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('feedback_detail', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            computed: {
+                'userAvatar': function () {
+                    return {
+                        'src': this.currentUser.AvatarImage,
+                        'loading': '../../img/default_avatar.jpg',
+                        'error': '../../img/default_avatar.jpg'
+                    };
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/transaction.detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">掛賣詳情</p>
+        </div>
+        <div id="app-content" >
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else v-cloak>
+                <div class="top_content">
+                    <p class="title" v-text="language.SELL_DETAIL">出售信息</p>
+                    <div class="sell">
+                        <span class="number" v-text="numberFormat(request.count, 0)"></span>
+                        <sup class="s" v-text="language.SELL_NAME">ACE</sup>
+                        <p class="text" v-text="language.SELL_AMOUNT">出售數量</p>
+                    </div>
+                    <p class="time" v-text="request.time"></p>
+                </div>
+                <div class="buyer_content">
+                    <p class="title" v-text="language.BUYER_LIST">買家列表</p>
+                    <div v-if="list.length == 0" class="none-data">
+                        <i class="iconfont icon-wushuju"></i>
+                        <p class="none-data-text" v-text="language.NONE_BUYER_DATA_YOU_KNOW">無購買記錄(你懂的)</p>
+                    </div>
+                    <table v-else class="tab">
+                        <thead>
+                            <tr>
+                                <td v-text="language.BUYER">買家</td>
+                                <td v-text="language.BUY_AMOUNT">數量</td>
+                                <td v-text="language.BUY_PRICE">成交價</td>
+                                <td v-text="language.BUY_DATE">時間</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,index) in list" v-bind:key="index">
+                                <td v-text="`${item.Buyer.NickName}(${item.Buyer.FlowNumber})`"></td>
+                                <td v-text="numberFormat(item.AceAmount, 0)"></td>
+                                <td v-text="`$ ${item.SinglePrice}`"></td>
+                                <td v-text="item.CreateTime"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'request': {
+                    'sId': queryString('sId'),
+                    'count': queryString('count'),
+                    'time': queryString('time')
+                },
+                'list': [],
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            methods: {
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'DirectSellDetails',
+                        data: {
+                            'sId': this.request.sId
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('transaction_detail', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

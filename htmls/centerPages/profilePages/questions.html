@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/questions.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">密保問題</p>
+        </div>
+        <div id="app-content">
+            <div v-if="isLoading || isLoadingAnswer" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text"  v-text="language.LOADING_TEXT">正在加载...</p>
+            </div>
+            <div v-else v-cloak class="question_content">
+                <div class="question_line">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.QUESTION_1">問題1</span>
+                        <input type="text" class="input-control w-60" @click="chooseQuestion(1)" readonly v-model="display.q1" v-bind:placeholder="language.INPUT_QUESTION_1" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.ANSWER">答案</span>
+                        <input type="text" class="input-control" v-model="form.a1" v-bind:placeholder="language.INPUT_ANSWER_1" maxlength="10" />
+                    </div>
+                </div>
+                <div class="question_line">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.QUESTION_2">問題2</span>
+                        <input type="text" class="input-control w-60" @click="chooseQuestion(2)" readonly v-model="display.q2" v-bind:placeholder="language.INPUT_QUESTION_2" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.ANSWER">答案</span>
+                        <input type="text" class="input-control" v-model="form.a2" v-bind:placeholder="language.INPUT_ANSWER_2" maxlength="10" />
+                    </div>
+                </div>
+                <div class="question_line">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.QUESTION_3">問題3</span>
+                        <input type="text" class="input-control w-60" @click="chooseQuestion(3)" readonly v-model="display.q3" v-bind:placeholder="language.INPUT_QUESTION_3" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.ANSWER">答案</span>
+                        <input type="text" class="input-control" v-model="form.a3" v-bind:placeholder="language.INPUT_ANSWER_3" maxlength="10" />
+                    </div>
+                </div>
+                <div class="question_line">
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.TRANSFER_PWD">交易密碼</span>
+                        <input type="password" class="input-control" v-model="form.password" v-bind:placeholder="language.INPUT_TRANSFER_PWD" maxlength="16" />
+                    </div>
+                </div>
+                <div class="input_content" v-if="!request.fp">
+                    <div class="input-group">
+                        <p class="full-text" v-text="questionDisplay"></p>
+                        <input type="text"
+                               class="input-control center w-100"
+                               v-model="form.answer"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1"
+                               maxlength="10" />
+                    </div>
+                </div>
+                <van-popup v-model="isShow" position="bottom">
+                    <van-picker v-bind:columns="currnetQuestionList" @cancel="isShow=false" @confirm="selectedItem" show-toolbar="true" v-bind:title="language.SELECT_QUESTION"></van-picker>
+                </van-popup>
+                <button class="confirm_button" @click="checkInput()" v-text="language.CONFIRM">確認提交</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isLoadingAnswer': true,
+                'isShow': false,
+                'questionList': [],
+                'currnetQuestionList': [],
+                'questionIndex': 0,
+                'questionDisplay': '',
+                'display': {
+                    'q1': '',
+                    'q2': '',
+                    'q3': ''
+                },
+                'form': {
+                    'q1': '',
+                    'a1': '',
+                    'q2': '',
+                    'a2': '',
+                    'q3': '',
+                    'a3': '',
+                    'password': '',
+                    'qId': '',
+                    'answer': '',
+                },
+                'request': {
+                    'fp': queryString('fp')
+                },
+                "language": {}
+            },
+            methods: {
+                'checkInput': function () {
+                    if (!this.form.q1) {
+                        toastMsg(_vue.language.SELECT_QUESTION_1); //'請選擇問題1'
+                    } else if (!this.form.a1) {
+                        toastMsg(_vue.language.INPUT_QUESTION_1_ANSWER);//'請輸入問題1的答案'
+                    } else if (!this.form.q2) {
+                        toastMsg(_vue.language.SELECT_QUESTION_2); //'請選擇問題2'
+                    } else if (!this.form.a2) {
+                        toastMsg(_vue.language.INPUT_QUESTION_2_ANSWER);//'請輸入問題2的答案'
+                    } else if (!this.form.q3) {
+                        toastMsg(_vue.language.SELECT_QUESTION_3);// '請選擇問題3'
+                    } else if (!this.form.a3) {
+                        toastMsg(_vue.language.INPUT_QUESTION_3_ANSWER);//'請輸入問題3的答案'
+                    } else if (!this.form.password) {
+                        toastMsg(_vue.language.INPUT_TRANSFER_PWD); //'請輸入當前登錄密碼'
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(_vue.language.TRANSFER_PWD_MUST_MORE_CHARS); //'交易密碼最少6位'
+                    } else {
+                        if (!this.request.fp && !this.form.answer) {
+                            toastMsg(_vue.language.ANSWER_ERROR);
+                        } else {
+                            this.doSubmitAjax();
+                        }
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': _vue.language.SAVING }); //'正在保存'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'SetSecurityQuestion',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel({
+                                'IsSetSecurityQuestion': true
+                            });
+
+                            var wb = plus.webview.getWebviewById('securityPage');
+                            if (wb != null) {
+                                wb.evalJS('_vue.resetQuestion(' + _vue.form.q1 + ', ' + _vue.form.q2 + ', ' + _vue.form.q3 + ')');
+                            }
+
+                            if (_vue.request.fp) {
+                                var homePage = plus.webview.getWebviewById('home.htmlPage');
+                                if (homePage != null) {
+                                    homePage.evalJS('_vue.addResetCount("questions")');
+                                }
+                            }
+                            
+                            gotoNewWindow('change.successPage', '../../success/change.success', {
+                                param: 'title=' + encodeURIComponent(_vue.language.RESET_RESULT) +
+                                    '&text=' + encodeURIComponent(_vue.language.RESET_SUCCESS),
+                                openCallback: function () {
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    })
+                },
+                'chooseQuestion': function (index) {
+                    this.questionIndex = index;
+                    this.currnetQuestionList = [];
+                    for (var i = 0; i < this.questionList.length; i++) {
+                        var item = this.questionList[i];
+                        if (item.value != this.form.q1 && item.value != this.form.q2 && item.value != this.form.q3) {
+                            this.currnetQuestionList.push(this.questionList[i]);
+                        }
+                    }
+
+                    this.isShow = true;
+                },
+                'selectedItem': function (item) {
+                    var key = 'q' + this.questionIndex;
+
+                    this.display[key] = item.text;
+                    this.form[key] = item.value;
+                    this.isShow = false;
+                },
+                'loadQuestionList': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'QuestionList',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            for (var i = 0; i < result.Data.List.length; i++) {
+                                _vue.questionList.push({
+                                    'text': result.Data.List[i].Question,
+                                    'value': result.Data.List[i].Id
+                                })
+                            }
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'loadAnswer': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetAnswerTitle',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.questionDisplay = result.QTitle;
+                            _vue.form.qId = result.Qid;
+                            _vue.isLoadingAnswer = false;
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('questions', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadQuestionList();
+
+                if (!this.request.fp) {
+                    this.loadAnswer();
+                } else {
+                    this.isLoadingAnswer = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/choose.css" rel="stylesheet" />
+    <style>
+        .search_content .search_ul li .right .line .text {
+            width: 75px;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" class="pd-65">
+            <van-search v-bind:placeholder="language.SEARCH_PLACEHOLDER"
+                        v-model="searchKey"
+                        v-bind:class="{'none_border': isSearching}"
+                        autofocus></van-search>
+            <div v-if="isSearching" class="search_content" v-cloak>
+                <div v-if="isLoading" class="loading-box">
+                    <van-loading color="black"></van-loading>
+                    <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+                </div>
+                <div v-else>
+                    <ul v-if="services.length!=0" class="search_ul">
+                        <li class="clearfix" v-for="(item,index) in services" v-bind:key="index" @click="choose(item)">
+                            <img class="image" v-lazy="item.AvatarImage" />
+                            <div class="right">
+                                <p class="line">
+                                    <span class="text" v-text="language.SHOW_ITEM_1"></span>
+                                    <span v-html="item.FlowNumberDisplay"></span>
+                                </p>
+                                <p class="line">
+                                    <span class="text" v-text="language.SHOW_ITEM_2"></span>
+                                    <span v-text="item.NickName"></span>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-else class="none-data">
+                        <p class="none-data-text" v-text="language.NOMORE"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            loading: '../../img/default_avatar.jpg',
+            error: '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isSearching': false,
+                'searchKey': '',
+                'services': [],
+                'request': {
+                    'fromPage': queryString('fromPage')
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SEARCH_PLACEHOLDER': '',
+                    'SHOW_ITEM_1': '',
+                    'SHOW_ITEM_2': '',
+                    'NOMORE': '',
+                    'LOADING_TEXT':''
+                }
+            },
+            methods: {
+                'choose': function (item) {
+                    var wb = plus.webview.getWebviewById(this.request.fromPage);
+                    var js = `_vue.confirmReceive("${item.Id}", "${item.NickName}(${item.FlowNumber})")`;
+                    wb.evalJS(js);
+
+                    closeWindow();
+                },
+                'searchAjax': function () {
+                    if (!this.searchKey) return;
+
+                    this.isSearching = true;
+                    this.isLoading = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetBatchUser',
+                        data: {
+                            'code': this.searchKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.services = result.Data.List;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'Keyboard': function () {
+                    var mainPage = plus.webview.getWebviewById('mainPage');
+                    mainPage.evalJS('pageScript.popKeyboard()');
+                },
+                'changeLanguage': function () {
+                    LSE.install('choose_batch_person', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            watch: {
+                'searchKey': function (val) {
+                    if (!val) {
+                        this.isSearching = false;
+                    } else if (val.length >= 5) {
+                        this.searchAjax();
+                    }
+                },
+                'services': function (newValue) {
+                    if (!newValue || newValue.length == 0) return;
+
+                    var r = new RegExp(this.searchKey, 'g');
+                    for (var i = 0; i < newValue.length; i++) {
+                        newValue[i]['FlowNumberDisplay'] = newValue[i].FlowNumber.replace(r, function (c, index) {
+                            return '<font style="color:#1e81d2">' + c + '</font>';
+                        });
+                    }
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+                //this.doSearchAjax = _.debounce(this.searchAjax, 500)
+            },
+            mounted: function () {
+                setTimeout(this.Keyboard, 250);
+            }
+        });
+    </script>
+</body>
+</html>

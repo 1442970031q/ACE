@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../css/vant.css" rel="stylesheet" />
+    <link href="../css/base.css" rel="stylesheet" />
+    <link href="../css/htmls/transaction.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button class="submit-button" @click="initPageData" v-text="language.BUTTON_1"></button>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="!pageData.tab1.isLoaded" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING"></p>
+            </div>
+            <div class="tran_box" v-else v-cloak>
+                <div v-if="pageData.tab1.items.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else>
+                    <ul class="list">
+                        <li class="item ep" v-for="(item,index) in pageData.tab1.items" v-bind:key="index" @click="gotoDetail(item)">
+                            <div class="detail">
+                                <div class="seller ace clearfix">
+                                    <img v-lazy="item.Seller.Avatar" class="avatar" />
+                                    <div class="right_text clearfix">
+                                        <p class="nn" v-text="item.Seller.FlowNumber"></p>
+                                        <span class="state green" v-text="language.TEXT_1"></span>
+                                    </div>
+                                </div>
+                                <ul class="ace clearfix">
+                                    <li>
+                                        <p class="number" v-text="numberFormat(item.ReadonlyStockCount, 0)"></p>
+                                        <p class="txt" v-text="language.TEXT_2"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number" v-text="numberFormat(item.StockCount, 0)"></p>
+                                        <p class="txt" v-text="language.TEXT_3"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number" v-text="item.SinglePrice"></p>
+                                        <p class="txt" v-text="language.TEXT_4"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number" v-text="numberFormat(item.ReadonlyStockCount * item.SinglePrice, 3)"></p>
+                                        <p class="txt" v-text="language.TEXT_5"></p>
+                                    </li>
+                                </ul>
+                                <p v-text="item.CreateTime" class="time"></p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="pageData.tab1.isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING"></span>
+                    </div>
+                    <div v-if="pageData.tab1.isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NOMORE"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/vant.js"></script>
+    <script src="../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../img/default_avatar.jpg',
+            'error': '../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'tabIndex': 1,
+                'pageData': {
+                    'tab1': {
+                        'isLoaded': false,
+                        'pageIndex': 1,
+                        'pageSize': 15,
+                        'items': [],
+                        'isLoadMore': false,
+                        'isLoadComplete': false,
+                    }
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'BUTTON_1': '',
+                    'NONE_DATA': '',
+                    'LOADING': '',
+                    'TEXT_1': '',
+                    'TEXT_2': '',
+                    'TEXT_3': '',
+                    'TEXT_4': '',
+                    'TEXT_5': '',
+                    'NOMORE': ''
+                },
+                'statusbarHeight':20
+            },
+            methods: {
+                'gotoDetail': function (item) {
+                    gotoNewWindow('ace.transaction.detailPage', 'transactionPages/ace.transaction.detail', {
+                        param: 'tId=' + item.Id
+                    });
+                },
+                'initPageData': function () {
+                    this.pageData.tab1.isLoaded = false;
+                    this.loadTabByIndex();
+                },
+                'loadTabByIndex': function () {
+                    var tab = this.pageData['tab' + this.tabIndex];
+                    tab.pageIndex = 1;
+                    tab.isLoadMore = false;
+                    tab.isLoadComplete = false;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TradingCenter',
+                        data: {
+                            'p': tab.pageIndex,
+                            'pageSize': tab.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            tab.items = result.Data.List;
+                            tab.pageIndex++;
+                            tab.isLoaded = true;
+                        }
+                    })
+                },
+                'loadMore': function () {
+                    var tab = this.pageData['tab' + this.tabIndex];
+                    tab.isLoadMore = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TradingCenter',
+                        data: {
+                            'p': tab.pageIndex,
+                            'pageSize': tab.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            tab.pageIndex++;
+                            tab.isLoadMore = false;
+                            tab.items = tab.items.concat(result.Data.List);
+
+                            if (result.Data.List.length < tab.pageSize) {
+                                tab.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    var tab = this.pageData['tab' + this.tabIndex];
+                    if (!tab.isLoadMore && !tab.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('ace_transction', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadTabByIndex();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

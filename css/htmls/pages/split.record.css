@@ -1,0 +1,101 @@
+﻿.list_content {
+}
+
+    .list_content ul {
+    }
+
+        .list_content ul li {
+            background-color: white;
+            margin-bottom: 5px;
+        }
+
+            .list_content ul li:last-child {
+                margin-bottom: 0;
+            }
+
+            .list_content ul li .info_content {
+                padding: 10px;
+                padding-top: 15px;
+            }
+
+                .list_content ul li .info_content .line {
+                }
+
+                    .list_content ul li .info_content .line.first .bl.middle {
+                        font-size: 2.5em;
+                    }
+
+                    .list_content ul li .info_content .line.first .bl.after .number {
+                        font-weight: bold;
+                        color: red;
+                    }
+
+                    .list_content ul li .info_content .line.last {
+                        padding-top: 10px;
+                    }
+
+                    .list_content ul li .info_content .line .bl {
+                        float: left;
+                        width: 33.3333%;
+                        text-align: center;
+                    }
+
+                        .list_content ul li .info_content .line .bl .number {
+                            line-height: 30px;
+                            font-size: 1.3em;
+                        }
+
+                        .list_content ul li .info_content .line .bl .text {
+                            line-height: 20px;
+                            font-size: .75em;
+                            color: #adadad;
+                        }
+
+                    .list_content ul li .info_content .line:first-child {
+                        padding-bottom: 10px;
+                        border-bottom: 1px solid #f9f9f9;
+                    }
+
+            .list_content ul li .time {
+                text-align: center;
+                font-size: .8em;
+                padding: 15px;
+                color: #9a9a9a;
+                background-color: #f3f3f3;
+            }
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+    margin-top: 5px;
+}
+
+.load_more_complete {
+    background-color: white;
+    width: auto;
+    text-align: center;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}

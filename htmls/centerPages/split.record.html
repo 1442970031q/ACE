@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/split.record.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">拆分記錄</p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else v-cloak>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA">暫無任何拆分</p>
+                </div>
+                <div v-else class="list_content">
+                    <ul>
+                        <li v-for="(item,index) in list.data" v-bind:key="index">
+                            <p class="time" v-text="item.CreateTime"></p>
+                            <div class="info_content">
+                                <div class="line first clearfix">
+                                    <div class="bl">
+                                        <p class="number" v-text="item.BeforeAce"></p>
+                                        <p class="text" v-text="language.BEFORE_SPLIT">拆分前ACE</p>
+                                    </div>
+                                    <div class="bl middle">
+                                        <i class="iconfont icon-jiantou_zuoyouqiehuan_o"></i>
+                                    </div>
+                                    <div class="bl after">
+                                        <p class="number" v-text="item.AfterAce"></p>
+                                        <p class="text" v-text="language.AFTER_SPLIT">拆分后ACE</p>
+                                    </div>
+                                </div>
+                                <div class="line last clearfix">
+                                    <div class="bl">
+                                        <p class="number" v-text="item.Cycle"></p>
+                                        <p class="text" v-text="language.SPLIT_BATCH">拆分批次</p>
+                                    </div>
+                                    <div class="bl">&nbsp;</div>
+                                    <div class="bl">
+                                        <p class="number" v-text="item.Multiple"></p>
+                                        <p class="text" v-text="language.SPLIT_MULTIPLE">拆分倍率</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT">正在載入...</span>
+                    </div>
+                    <div v-if="isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NONE_MORE_DATA">沒有更多的數據了...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isLoadMore': false,
+                'isLoadComplete': false,
+                'list': {
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'data': []
+                },
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            methods: {
+                'loadPageData': function (isAppend) {
+                    if (isAppend) {
+                        this.isLoadMore = true;
+                    }
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'Dismantles',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+
+                            if (isAppend) {
+                                _vue.list.data = _vue.list.data.concat(result.Data);
+                                _vue.isLoadMore = false;
+                                _vue.isLoadComplete = (result.Data.length < _vue.list.pageSize);
+                            } else {
+                                _vue.list.data = result.Data;
+                                _vue.isLoading = false;
+                            }
+                        }
+                    });
+                },
+                'windowScroll': function () {
+                    if (!this.isLoadMore && !this.isLoadComplete) {
+                        this.loadPageData(true);
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('split_record', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData(false);
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

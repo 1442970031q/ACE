@@ -1,0 +1,237 @@
+﻿#app-head {
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.van-tab--active {
+    color: #1e81d2;
+}
+
+.van-tabs__line {
+    background-color: #1e81d2;
+}
+
+.van-tabs--line .van-tabs__wrap {
+    position: fixed;
+    top: inherit;
+}
+
+.van-hairline--top-bottom::after {
+    border-top: 0;
+}
+
+.van-pull-refresh {
+    overflow: visible;
+}
+
+.tran_box {
+    position: relative;
+}
+
+    .tran_box .list {
+        margin-top: 5px;
+        padding-bottom: 5px;
+    }
+
+        .tran_box .list .item {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 5px;
+        }
+
+            .tran_box .list .item.ep {
+                padding: 0;
+            }
+
+                .tran_box .list .item.ep .detail {
+                    padding: 10px 5px;
+                    padding-top: 5px;
+                }
+
+                .tran_box .list .item.ep:active {
+                    background-color: #f9f9f9;
+                }
+
+                .tran_box .list .item.ep .seller {
+                    padding: 15px;
+                }
+
+                .tran_box .list .item.ep .seller.ace{
+                    padding:10px;
+                }
+
+                    .tran_box .list .item.ep .seller .avatar {
+                        float: left;
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        border: 1px solid #efefef;
+                    }
+
+                    .tran_box .list .item.ep .seller .right_text {
+                        float: left;
+                        height: 30px;
+                        line-height: 30px;
+                        width: calc(100% - 40px);
+                        padding-left: 10px;
+                        font-size: .9em;
+                        color: #949494;
+                    }
+
+                        .tran_box .list .item.ep .seller .right_text .nn {
+                            float: left;
+                        }
+
+                        .tran_box .list .item.ep .seller .right_text .state {
+                            float: right;
+                            font-size: .9em;
+                            padding-right: 5px;
+                        }
+
+                            .tran_box .list .item.ep .seller .right_text .state.blue {
+                                color: #1e81d2;
+                            }
+
+                            .tran_box .list .item.ep .seller .right_text .state.green {
+                                color: green;
+                            }
+
+                .tran_box .list .item.ep .bottom {
+                    height: 30px;
+                    line-height: 30px;
+                    padding: 0 5px;
+                }
+
+                    .tran_box .list .item.ep .bottom .logos {
+                        float: left;
+                    }
+
+                        .tran_box .list .item.ep .bottom .logos img {
+                            width: 20px;
+                            height: 20px;
+                            margin-top: 5px;
+                            float: left;
+                        }
+
+                    .tran_box .list .item.ep .bottom .time {
+                        float: right;
+                        text-align: right;
+                        font-size: .8em;
+                        padding: 0 15px;
+                        color: #bdbdbd;
+                    }
+
+                .tran_box .list .item.ep .detail ul li .number {
+                    font-weight: normal;
+                    line-height: 25px;
+                }
+
+                .tran_box .list .item.ep .detail ul li .txt {
+                    margin-top: 0;
+                    font-size: .75em;
+                }
+
+            .tran_box .list .item:last-child {
+                margin-bottom: 0;
+            }
+
+            .tran_box .list .item > .number {
+                border-bottom: 1px solid #f9f9f9;
+                padding-bottom: 10px;
+                color: #1e81d2;
+            }
+
+                .tran_box .list .item > .number .count {
+                    font-size: 1.3em;
+                    font-weight: bold;
+                }
+
+                .tran_box .list .item > .number .text {
+                    font-size: .75em;
+                    color: gray;
+                }
+
+            .tran_box .list .item .detail {
+                position: relative;
+            }
+
+                .tran_box .list .item .detail ul {
+                    text-align: center;
+                    padding: 5px 0;
+                }
+
+                    .tran_box .list .item .detail ul li {
+                        float: left;
+                    }
+
+            .tran_box .list .item.ep .detail ul li {
+                width: 50%;
+            }
+
+            .tran_box .list .item .detail ul.ace li {
+                width: 25%;
+            }
+
+            .tran_box .list .item .detail ul li .number {
+                color: #1e81d2;
+                font-size: 1.3em;
+                line-height: 30px;
+            }
+
+            .tran_box .list .item .detail ul li .txt {
+                font-size: .7em;
+                color: #afafaf;
+                line-height: 20px;
+            }
+
+            .tran_box .list .item .detail .time {
+                text-align: right;
+                padding: 10px 15px;
+                padding-bottom: 0;
+                color: #b1b1b1;
+                font-size: .8em;
+            }
+
+            .tran_box .list .item .detail .icon-gengduo {
+                position: absolute;
+                right: 5px;
+                height: 85px;
+                line-height: 85px;
+                top: 0;
+                color: #d0d0d0;
+            }
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.load_more_complete {
+    width: auto;
+    background-color: white;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}

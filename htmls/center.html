@@ -1,0 +1,372 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../css/vant.css" rel="stylesheet" />
+    <link href="../css/base.css" rel="stylesheet" />
+    <link href="../css/htmls/center.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="top_content van-hairline--bottom" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <div class="title">
+                <span class="text" v-text="language.TITLE_TEXT"></span>
+                <span class="right_link"
+                      v-if="(currentUser.LevelNumber >= currentUser.MinCommitLevelNumber) || currentUser.IsService"
+                      v-text="language.FEEDBACK_TEXT"
+                      @click="newWindow('feedbackPage', 'centerPages/feedback')">留言</span>
+            </div>
+            <div class="info clearfix" @click="gotoProfile">
+                <img v-lazy="currentUser.AvatarImage" class="avatar" />
+                <div class="middle_content">
+                    <p class="nickname" v-text="currentUser.NickName"></p>
+                    <p class="member_number" v-text="language.PLAYER + (currentUser.IsFixed ? '2' + currentUser.FlowNumber : currentUser.FlowNumber)"></p>
+                </div>
+                <div class="right_content">
+                    <i class="iconfont icon-gengduo"></i>
+                </div>
+            </div>
+            <div class="level" v-cloak>
+                <ul class="clearfix">
+                    <li>
+                        <p class="c" v-if="currentUser.Credit >= 5">
+                            <i v-for="i in 5" class="iconfont icon-xin1 mr-2"></i>
+                        </p>
+                        <p class="c" v-else-if="currentUser.Credit > 0 && currentUser.Credit < 5">
+                            <i v-for="i in currentUser.Credit" class="iconfont icon-xin1 mr-2"></i>
+                        </p>
+                        <p class="c" v-else-if="currentUser.Credit === 0">
+                            <span>无</span>
+                        </p>
+                        <p v-else>
+                            <i>error</i>
+                        </p>
+                        <p class="txt" v-text="language.TOP_TEXT_1"></p>
+                    </li>
+                    <li>
+                        <p class="c" v-if="currentUser.InvestmentLevel.StarNumber>=5">
+                            <i v-for="i in 5" class="iconfont icon-wujiaoxing1 mr-2"></i>
+                        </p>
+                        <p class="c" v-else-if="currentUser.InvestmentLevel.StarNumber>0 && currentUser.InvestmentLevel.StarNumber<5">
+                            <i v-for="i in currentUser.InvestmentLevel.StarNumber" class="iconfont icon-wujiaoxing1 mr-2"></i>
+                        </p>
+                        <p v-else>
+                            <i>error</i>
+                        </p>
+                        <p class="txt" v-text="language.TOP_TEXT_2"></p>
+                    </li>
+                    <li>
+                        <span class="c hn" v-text="regTime()"></span>
+                        <p class="txt" v-text="language.TOP_TEXT_3"></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="blocks" v-cloak v-bind:style="{'paddingTop':  (190 + statusbarHeight) + 'px'}">
+            <div class="block">
+                <p class="title" v-text="language.BLOCK_1"></p>
+                <div class="container my">
+                    <ul class="first clearfix">
+                        <li @click="newWindow('sellPage', 'transactionPages/sell', true)">
+                            <i class="iconfont icon-ziyuan"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_1"></p>
+                        </li>
+                        <li @click="newWindow('sellEPPage', 'transactionPages/sellEP', true)">
+                            <i class="iconfont icon-iconfontzhizuobiaozhunbduan27"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_2"></p>
+                        </li>
+                        <li @click="newWindow('exchange.rpPage', 'centerPages/exchange.rp', true)">
+                            <i class="iconfont icon-duihuanqingkuang"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_3"></p>
+                        </li>
+                        <li @click="newWindow('ep.to.spPage', 'centerPages/ep.to.sp', true)">
+                            <i class="iconfont icon-duihuanqingkuang"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_4"></p>
+                        </li>
+                        <li @click="newWindow('rp.to.spPage', 'centerPages/rp.to.sp', true)">
+                            <i class="iconfont icon-duihuanqingkuang"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_5"></p>
+                        </li>
+                        <li @click="newWindow('rp.givePage', 'centerPages/rp.give', true)">
+                            <i class="iconfont icon-zengsong"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_6"></p>
+                        </li>
+                        <li @click="newWindow('ep.givePage', 'centerPages/ep.give', true)">
+                            <i class="iconfont icon-zengsong"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_7"></p>
+                        </li>
+                        <li v-if="(currentUser.LevelNumber >= currentUser.MinCommitLevelNumber) || currentUser.IsService"
+                            @click="newWindow('new.rechargePage', 'centerPages/new.recharge')">
+                            <i class="iconfont icon-USDT"></i>
+                            <p class="txt" v-text="language.BLOCK_1_ITEM_8"></p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="block">
+                <p class="title" v-text="language.BLOCK_2"></p>
+                <div class="container team">
+                    <ul class="clearfix">
+                        <li v-if="!currentUser.IsSon" @click="newWindow('subaccountPage', 'centerPages/subaccount')">
+                            <i class="iconfont icon-account c12"></i>
+                            <p class="txt" v-text="language.BLOCK_2_ITEM_2"></p>
+                        </li>
+                        <li @click="newWindow('my.teamPage', 'centerPages/my.team')">
+                            <i class="iconfont icon-tongxunlu c3"></i>
+                            <p class="txt" v-text="language.BLOCK_2_ITEM_3"></p>
+                        </li>
+                        <li @click="newWindow('my.tree.newPage', 'centerPages/my.tree.new')">
+                            <i class="iconfont icon-iconset0280 c4"></i>
+                            <p class="txt" v-text="language.BLOCK_2_ITEM_4"></p>
+                        </li>
+                        <li @click="newWindow('my.treePage', 'centerPages/my.tree')">
+                            <i class="iconfont icon-iconset0280 c6"></i>
+                            <p class="txt" v-text="language.BLOCK_2_ITEM_5"></p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="block">
+                <p class="title" v-text="language.BLOCK_3"></p>
+                <div class="container team">
+                    <ul class="clearfix">
+                        <li @click="newWindow('rp.recordPage', 'centerPages/rp.record')">
+                            <i class="iconfont icon-zimur c4"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_1"></p>
+                        </li>
+                        <li @click="newWindow('sp.recordPage', 'centerPages/sp.record')">
+                            <i class="iconfont icon-zimus c3"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_2"></p>
+                        </li>
+                        <li @click="newWindow('ep.recordPage', 'centerPages/ep.record')">
+                            <i class="iconfont icon-zimue c5"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_11"></p>
+                        </li>
+                        <li @click="newWindow('ep.outPage', 'centerPages/ep.out')">
+                            <i class="iconfont icon-chuku c2"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_3"></p>
+                        </li>
+                        <li @click="newWindow('ep.inPage', 'centerPages/ep.in')">
+                            <i class="iconfont icon-ruku c1"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_10"></p>
+                        </li>
+                        <li @click="newWindow('income.detailPage', 'centerPages/income.detail')">
+                            <i class="iconfont icon-48 c13"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_4"></p>
+                        </li>
+                        <li @click="newWindow('my.sell.epPage', 'centerPages/my.sell.ep')">
+                            <i class="iconfont icon-icon6 c11"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_5"></p>
+                        </li>
+                        <li @click="newWindow('my.buy.epPage', 'centerPages/my.buy.ep')">
+                            <i class="iconfont icon-maichu c10"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_6"></p>
+                        </li>
+                        <li @click="newWindow('transaction.recordPage', 'centerPages/transaction.record')">
+                            <i class="iconfont icon-mai1 c2"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_7"></p>
+                        </li>
+                        <li @click="newWindow('ace.buy.recordPage', 'centerPages/ace.buy.record')">
+                            <i class="iconfont icon-mai c11"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_8"></p>
+                        </li>
+                        <li @click="newWindow('split.recordPage', 'centerPages/split.record')">
+                            <i class="iconfont icon-771bianjiqi_chaifendanyuange c8"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_9"></p>
+                        </li>
+                        <!--<li @click="newWindow('split.recordPage', 'centerPages/upload.pictures')">
+                            <i class="iconfont icon-chuku c3"></i>
+                            <p class="txt" v-text="language.BLOCK_3_ITEM_12"></p>
+                        </li>-->
+                    </ul>
+                </div>
+            </div>
+            <div class="block">
+                <p class="title" v-text="language.BLOCK_4"></p>
+                <div class="container team">
+                    <ul class="clearfix">
+                        <li v-if="currentUser.IsBindGAuthorize"
+                            @click="newWindow('activation.codePage', 'centerPages/activation.code')">
+                            <i class="iconfont icon-jurassic_quanxian c1"></i>
+                            <p class="txt" v-text="language.BLOCK_2_ITEM_6"></p>
+                        </li>
+                        <li v-else @click="newWindow('google.authPage', 'centerPages/google.auth')">
+                            <i class="iconfont icon-web__gugeyanzheng c1"></i>
+                            <p class="txt" v-text="language.BLOCK_4_ITEM_5"></p>
+                        </li>
+                        <li @click="newWindow('my.complaintPage', 'centerPages/my.complaint')">
+                            <i class="iconfont icon-tousu c7"></i>
+                            <p class="txt" v-text="language.BLOCK_4_ITEM_6"></p>
+                        </li>
+                        <li @click="newWindow('change.login.passwordPage', 'centerPages/profilePages/change.login.password')">
+                            <i class="iconfont icon-icon-test1 c4"></i>
+                            <p class="txt" v-text="language.BLOCK_4_ITEM_2"></p>
+                        </li>
+                        <li @click="newWindow('change.trans.passwordPage', 'centerPages/profilePages/change.trans.password')">
+                            <i class="iconfont icon-wallet-unlock c5"></i>
+                            <p class="txt" v-text="language.BLOCK_4_ITEM_3"></p>
+                        </li>
+                        <li @click="newWindow('set.upPage', 'centerPages/setting/set.up')">
+                            <i class="iconfont icon-shezhi c2"></i>
+                            <p class="txt" v-text="language.BLOCK_4_ITEM_1"></p>
+                        </li>
+                        <li @click="logout()">
+                            <i class="iconfont icon-tuichu c3"></i>
+                            <p class="txt" v-text="language.BLOCK_4_ITEM_4"></p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <van-dialog v-model="isPassowrdShow"
+                    show-cancel-button
+                    @cancel="cancelDialog"
+                    v-bind:before-close="confirmDialog"
+                    v-bind:confirm-button-text="language.DIALOG_BUTTON_1"
+                    v-bind:cancel-button-text="language.DIALOG_BUTTON_2">
+            <h4 class="dialog_title" v-text="language.DIALOG_TITLE"></h4>
+            <van-field v-model="form.pin"
+                       type="password"
+                       v-bind:label="language.DIALOG_LABEL"
+                       v-bind:placeholder="language.DIALOG_PLACEHOLDER" />
+        </van-dialog>
+    </div>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/vant.js"></script>
+    <script src="../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../img/default_avatar.jpg',
+            'error': '../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isPassowrdShow': false,
+                'form': {
+                    'pin': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'confirmDialog': function (action, done) {
+                    if (action === 'confirm') {
+                        if (!this.form.pin) {
+                            done(false);
+                            toastMsg(this.language.DIALOG_ERROR_1);
+                        } else if (this.form.pin.length < 6) {
+                            done(false);
+                            toastMsg(this.language.DIALOG_ERROR_2);
+                        } else {
+                            done();
+                            this.doCheckPINAjax();
+                        }
+                    } else {
+                        this.form.pin = '';
+                        done();
+                    }
+                },
+                'doCheckPINAjax': function () {
+                    toastLoading({ 'message': this.language.DIALOG_TOAST });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ValidPin',
+                        data: this.form,
+                        success: function (result) {
+                            _vue.form.pin = '';
+                            closeToastLoading();
+                            if (CONFIG.IS_RUNTIME) {
+                                plus.webview.getWebviewById('mainPage').evalJS('pageScript.setMask(false)');
+                            }
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            newWindow('profilePage', 'centerPages/profile');
+                        }
+                    });
+                },
+                'cancelDialog': function () {
+                    if (CONFIG.IS_RUNTIME) {
+                        plus.webview.getWebviewById('mainPage').evalJS('pageScript.setMask(false)');
+                    }
+                },
+                'gotoProfile': function () {
+                    if (CONFIG.IS_RUNTIME) {
+                        plus.webview.getWebviewById('mainPage').evalJS('pageScript.setMask(true)');
+                    }
+
+                    this.isPassowrdShow = true;
+                },
+                'logout': function () {
+                    plus.nativeUI.confirm(this.language.CONFIRM_TEXT, function (e) {
+                        if (e.index == 1) return;
+
+                        plus.nativeUI.showWaiting(_vue.language.WAITING);
+
+                        ajax({
+                            url: CONFIG.BASE_URL + 'Logout',
+                            success: function (result) {
+                                userExit();
+
+                                gotoNewWindow('loginPage', 'account/login', {
+                                    openCallback: function () {
+                                        plus.webview.getWebviewById('mainPage').close('none')
+                                    }
+                                });
+
+                                plus.nativeUI.closeWaiting();
+                            }
+                        })
+                    }, this.language.CONFIRM_TITLE);
+                },
+                'updateInfo': function () {
+                    this.currentUser = getUserModel();
+                },
+                'newWindow': function (id, page, isChangeColor) {
+                    if (isChangeColor) {
+                        plus.navigator.setStatusBarStyle('light');
+                    }
+
+                    gotoNewWindow(id, page, isChangeColor ? {
+                        closeCallback: function () {
+                            plus.navigator.setStatusBarStyle('dark');
+                        }
+                    } : {});
+                },
+                'regTime': function () {
+                    var date = this.currentUser.CreateTime.replace(/\//g, '/');
+                    var regDate = new Date(date);
+
+                    var lang = LSE.currentLanguage();
+                    if (lang === 'cn') {
+                        return regDate.getFullYear() + '年' + (regDate.getMonth() + 1) + '月' + regDate.getDate() + '日';
+                    } else {
+                        return regDate.getFullYear() + '/' + (regDate.getMonth() + 1) + '/' + regDate.getDate();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('center', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                        _vue.regTime();
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

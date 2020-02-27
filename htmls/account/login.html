@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover" />
+    <title></title>
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/account/login.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app" @click="hideDropdownlist">
+        <div id="app-head" class="fixed bg-none" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <button class="right-back" @click="switchLanguage" v-text="language.CHANGE_LANGUAGE"></button>
+        </div>
+        <div class="bg"></div>
+        <div class="top_content"></div>
+        <div class="text_content">
+            <img src="../../img/logo_400.png" class="logo" />
+            <p v-if="request.closeOnly" class="des text-left">
+                <span v-text="language.RELOGIN_TEXT"></span>
+                <span v-text="language.RELOGIN_ACTION" class="blue" @click="plus.runtime.restart()"></span>
+            </p>
+        </div>
+        <div class="input_content" v-bind:class="{'top': !request.canclose}">
+            <div class="input_line">
+                <i class="iconfont icon-myfill lefticon"></i>
+                <input type="text" v-model="form.account" maxlength="10" class="input_control r-1" v-bind:placeholder="language.INPUT_TEXT_1" />
+                <i class="iconfont r-content" v-bind:class="[!isDropdownList ? 'icon-icon-test11' : 'icon-icon-test3']" @click.stop="isDropdownList = !isDropdownList"></i>
+                <div class="dropdown_list" v-show="isDropdownList" v-cloak>
+                    <ul v-if="localList.length > 0">
+                        <li v-for="(item, index) in localList"
+                            v-bind:key="index"
+                            @click="choiceList(item)">
+                            <span class="player_id" v-text="item.account"></span>
+                            <i class="iconfont icon-baseline-close-px close" @click.stop="removeAccount(item)"></i>
+                        </li>
+                    </ul>
+                    <p v-else class="none-local" v-text="language.NONE_LOCAL_TEXT"></p>
+                </div>
+            </div>
+            <div class="input_line" v-show="!isDropdownList">
+                <i class="iconfont icon-suo lefticon"></i>
+                <input type="password" v-model="form.password" maxlength="16" class="input_control" v-bind:placeholder="language.INPUT_TEXT_2" />
+            </div>
+            <div class="middle clearfix" v-show="!isDropdownList">
+                <van-checkbox v-model="isRemember" class="remember">
+                    <span v-text="language.MIDDLE_TEXT_1"></span>
+                    <i slot="icon"
+                       class="iconfont"
+                       slot-scope="props"
+                       v-bind:class="[props.checked ? 'icon-checkboxchecked' : 'icon-checkboxunchecked']"></i>
+                </van-checkbox>
+                <p class="forgot" v-text="language.MIDDLE_TEXT_2" @click="!isLogin && gotoNewWindow('forgotPage', 'forgot')"></p>
+            </div>
+            <div class="action" v-cloak v-show="!isDropdownList">
+                <div class="login color4" v-if="!isLogin">
+                    <span class="inner"></span>
+                    <i class="iconfont icon-you" @click="checkInput"></i>
+                </div>
+                <van-loading class="big" v-else></van-loading>
+            </div>
+            <div class="bottom" v-bind:style="{'top': (screenHeight - 149) + 'px'}" v-cloak>
+                <!--<img src="../../content/img/login/bottom_left_bg.png" class="bottom_bg" />-->
+                <p class="ver" v-bind:class="{'safe': CONFIG.IsSafeArea()}" v-text="publicVersion"></p>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script src="../../js/pages/account/login.js"></script>
+</body>
+</html>

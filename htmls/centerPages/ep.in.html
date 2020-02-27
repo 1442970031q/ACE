@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/rp.record.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="list_content">
+                    <ul>
+                        <li v-for="(item,index) in list.data" v-bind:key="index">
+                            <p class="line clearfix">
+                                <span class="left">
+                                    <b v-text="(item.OperationType == 1 ? '+' : '-') + numberFormat(item.EPAmount, 2)" v-bind:class="[item.OperationType == 1 ? 'red' : 'green']"></b>
+                                </span>
+                                <span class="right number">
+                                    <span class="txt" v-text="item.TypeName"></span>
+                                </span>
+                            </p>
+                            <p class="line clearfix">
+                                <span class="left txt" v-text="item.Des"></span>
+                                <span class="right time" v-text="item.Time"></span>
+                            </p>
+                            <div v-if="item.Remark" class="line des" v-bind:class="{'all' : item.IsAll == true}">
+                                <p v-text="language.REMARK_TEXT + item.Remark"></p>
+                                <p class="more" v-if="item.Remark.length > 50" @click="showAll(item, index)">
+                                    <span v-text="language.REMARK_BUTTON"></span><i class="iconfont icon-webicon212"></i>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                    </div>
+                    <div v-if="isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NOMORE"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isLoadMore': false,
+                'isLoadComplete': false,
+                'type': 4096,
+                'list': {
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'data': []
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'NONE_DATA': '',
+                    'REMARK_TEXT': '',
+                    'REMARK_BUTTON': '',
+                    'NOMORE': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'showAll': function (item, index) {
+                    item['IsAll'] = true;
+                    this.$set(this.list.data, index, item);
+                },
+                'loadPageData': function (isAppend) {
+                    if (isAppend) {
+                        this.isLoadMore = true;
+                    }
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPRecordList',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'type': this.type
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+
+                            if (isAppend) {
+                                _vue.list.data = _vue.list.data.concat(result.Data.List);
+                                _vue.isLoadMore = false;
+                                _vue.isLoadComplete = (result.Data.List.length < _vue.list.pageSize);
+                            } else {
+                                _vue.list.data = result.Data.List;
+                                _vue.isLoading = false;
+                            }
+                        }
+                    });
+                },
+                'windowScroll': function () {
+                    if (!this.isLoadMore && !this.isLoadComplete) {
+                        this.loadPageData(true);
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('ep_in', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData(false);
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/income.detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-cloak>
+            <div class="input-group mt-5">
+                <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                <input type="text" @click="isShowDateTime=true" 
+                       class="input-control w-60" 
+                       readonly 
+                       v-model="dateTimeObj.display" 
+                       v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+                <i class="iconfont icon-gengduo right_icon"></i>
+            </div>
+            <div v-if="isSearchMode" class="search_box">
+                <div v-if="dateTimeObj.isLoading" class="loading-box">
+                    <van-loading color="black"></van-loading>
+                    <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+                </div>
+                <div v-else class="result_box">
+                    <p class="title">
+                        <span   v-text="dateTimeObj.month"></span>
+                        <span v-text="language.RESULT_TITLE"></span>
+                        <b class="red" v-text="numberFormat(result.MonthTotalMoney, 2)"></b>
+                        <span>EP</span>
+                    </p>
+                    <van-cell-group>
+                        <van-cell v-bind:value="numberFormat(result.FirstWeek, 2)" is-link @click="gotoDetail(1)">
+                            <div slot="title" >
+                                <span v-text="language.WEEK_1"></span>
+                                <span  class="title_style" v-text="result.FirstBegin+'--'+result.FirstEnd"> </span>
+                            </div>
+                        </van-cell>
+                        <van-cell   v-bind:value="numberFormat(result.SecondWeek, 2)" is-link @click="gotoDetail(2)">
+                            <div slot="title">
+                                <span v-text="language.WEEK_2"></span>
+                                <span  class="title_style" v-text="result.SecondBegin+'--'+result.SecondEnd"> </span>
+                            </div>
+                        </van-cell>
+                        <van-cell   v-bind:value="numberFormat(result.ThirdWeek, 2)" is-link @click="gotoDetail(3)">
+                            <div slot="title">
+                                <span v-text="language.WEEK_3"></span>
+                                <span  class="title_style" v-text="result.ThirdBegin+'--'+result.ThirdEnd"> </span>
+                            </div>
+                        </van-cell>
+                        <van-cell   v-bind:value="numberFormat(result.FourWeek, 2)" is-link @click="gotoDetail(4)">
+                            <div slot="title">
+                                <span v-text="language.WEEK_4"></span>
+                                <span class="title_style" v-text="result.FourBegin+'--'+result.FourEnd"> </span>
+                            </div>
+                        </van-cell>
+                        <van-cell   v-bind:value="numberFormat(result.FiveWeek, 2)" is-link @click="gotoDetail(5)">
+                            <div slot="title">
+                                <span v-text="language.WEEK_5"></span>
+                                <span class="title_style" v-text="result.FiveBegin+'--'+result.FiveEnd"> </span>
+                            </div>
+                        </van-cell>
+                    </van-cell-group>
+                </div>
+            </div>
+            <van-popup v-model="isShowDateTime" position="bottom">
+                <van-datetime-picker v-model="dateTimeObj.value"
+                                     type="year-month"
+                                     v-bind:min-date="dateTimeObj.minDate"
+                                     v-bind:max-date="dateTimeObj.maxDate"
+                                     v-bind:formatter="formatter"
+                                     v-bind:confirm-button-text="language.DATETIME_PICKER_BUTTON"
+                                     @cancel="isShowDateTime=false"
+                                     @confirm="confirmDateTime" />
+            </van-popup>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isShowDateTime': false,
+                'isSearchMode': false,
+                'dateTimeObj': {
+                    'display': '',
+                    'value': new Date(),
+                    'minDate': new Date(2018, 0),
+                    'maxDate': new Date(new Date().getFullYear() + ' ' + (new Date().getMonth() + 2)),
+                    'isLoading': false,
+                    'month':''
+                },
+                'result': {
+                    'MonthTotalMoney': '',
+                    'FirstWeek': '',
+                    'SecondWeek': '',
+                    'ThirdWeek': '',
+                    'FourWeek': '',
+                    'FiveWeek':''
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'INPUT_TEXT_1': '',
+                    'INPUT_PLACEHOLDER_1': '',
+                    'LOADING_TEXT': '',
+                    'RESULT_TITLE': '',
+                    'WEEK_1': '',
+                    'WEEK_2': '',
+                    'WEEK_3': '',
+                    'WEEK_4': '',
+                    'WEEK_5': '',
+                    'DATETIME_PICKER_BUTTON': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoDetail': function (weekIndex) {
+                    gotoNewWindow('ep.week.detailPage', 'ep.week.detail', {
+                        param: `year=${this.dateTimeObj.value.getFullYear()}&month=${this.dateTimeObj.value.getMonth() + 1}&weekIndex=${weekIndex}`
+                    })
+                },
+                'confirmDateTime': function (value) {
+                    this.isShowDateTime = false;
+
+                    var y = value.getFullYear();
+                    var m = value.getMonth();
+            
+                    if (y === new Date().getFullYear() && m === (new Date().getMonth() + 2)) {
+                        m = value.getMonth();
+                    } else {
+                        m = value.getMonth() + 1;
+                    }
+
+                    this.dateTimeObj.month = m;
+                    this.dateTimeObj.display = `${y}/${m}`;
+                    this.loadDataByDate(y, m);
+                },
+                'loadDataByDate': function (y, m) {
+                    this.isSearchMode = true;
+                    this.dateTimeObj.isLoading = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPAward',
+                        data: {
+                            'year': y,
+                            'month': m
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.result = Object.assign(_vue.result, result.Data);
+                            _vue.dateTimeObj.isLoading = false;
+                        }
+                    })
+                },
+                'formatter': function (type, value) {
+                    if (type === 'year') {
+                        return `${value}`;
+                    } else if (type === 'month') {
+                        return `${value}`
+                    }
+                    return value;
+                },
+                'changeLanguage': function () {
+                    LSE.install('income_detail', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                } 
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

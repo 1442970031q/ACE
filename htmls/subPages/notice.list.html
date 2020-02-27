@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/notice.list.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': 45 + statusbarHeight + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div class="html_container" v-else v-cloak>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="notice_content">
+                    <ul>
+                        <li v-for="(item, index) in list.data" v-bind:key="index" @click="gotoDetail(item)">
+                            <div class="clearfix">
+                                <div class="left_content">
+                                    <p class="title" v-text="item.Title"></p>
+                                    <p class="text" v-text="item.Text"></p>
+                                    <div class="time clearfix">
+                                        <span class="time_txt" v-text="item.CreateTime"></span>
+                                        <i class="iconfont icon-icon-" v-if="item.IsService"></i>
+                                    </div> 
+                                </div>
+                                <div class="right_content">
+                                    <i class="iconfont icon-gengduo"></i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="list.isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                    </div>
+                    <div v-if="list.isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NONE_MORE_DATA"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'list': {
+                    'isLoadMore': false,
+                    'isLoadComplete': false,
+                    'data': [],
+                    'pageIndex': 1,
+                    'pageSize': 10
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'NONE_MORE_DATA':''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoDetail': function (item) {
+                    newWindow('notice.detailPage', 'notice.detail', {
+                        param: `nId=${item.Id}`
+                    });
+                },
+                'loadPageData': function (isAppend) {
+                    if (isAppend) {
+                        this.list.isLoadMore = true;
+                    }
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'NoticeList',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+
+                            if (isAppend) {
+                                _vue.list.data = _vue.list.data.concat(result.Data.List);
+                                _vue.list.isLoadMore = false;
+                                _vue.list.isLoadComplete = (result.Data.List.length < _vue.list.pageSize);
+                            } else {
+                                _vue.list.data = result.Data.List;
+                                _vue.isLoading = false;
+                            }
+                        }
+                    });
+                },
+                'windowScroll': function () {
+                    if (!this.list.isLoadMore && !this.list.isLoadComplete) {
+                        this.loadPageData(true);
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('notice_list', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

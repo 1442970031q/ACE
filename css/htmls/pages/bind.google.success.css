@@ -1,0 +1,38 @@
+﻿html, body {
+    background-color: white;
+}
+
+#app-head.fixed {
+    border-bottom: 0;
+}
+
+.box {
+    margin-top: 30%;
+}
+
+    .box .icon {
+        display: block;
+        width: 100px;
+        margin: 0 auto;
+    }
+
+    .box .caption {
+        font-size: 1.1em;
+        text-align: center;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .box .des {
+        font-size: .9em;
+        text-align: center;
+        width: 80%;
+        margin: 0 auto;
+        margin-top: 15px;
+        color: #a9a9a9;
+    }
+
+.confirm_button {
+    width: 80%;
+    margin-top: 30px;
+}

@@ -1,0 +1,117 @@
+﻿.list {
+    margin-top: 5px;
+}
+
+    .list li {
+        background-color: white;
+        padding: 10px;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        margin-bottom: 5px;
+    }
+
+        .list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .list li .line {
+            min-height: 25px;
+            line-height: 25px;
+            font-size: .9em;
+        }
+
+            .list li .line.hash {
+                text-align: left;
+                margin-bottom: 5px;
+            }
+
+            .list li .line.reject {
+                padding: 10px;
+                font-size: .8em;
+                background-color: #f9f9f9;
+                margin-bottom: 10px;
+                height: initial;
+                line-height: initial;
+                color: #808080;
+            }
+
+            .list li .line .type_name {
+                float: left;
+            }
+
+            .list li .line .reply_state {
+                float: right;
+            }
+
+                .list li .line .reply_state.red {
+                    color: #bd0000;
+                }
+
+                .list li .line .reply_state.green {
+                    color: #11a700;
+                }
+
+                .list li .line .reply_state.yellow {
+                    color: #a75e00;
+                }
+
+            .list li .line.text {
+                color: #a2a2a2;
+                margin: 10px 0;
+                height: initial;
+                line-height: initial;
+            }
+
+            .list li .line .amount {
+                float: left;
+                color: green;
+                font-weight: bold;
+            }
+
+            .list li .line .time {
+                float: right;
+            }
+
+            .list li .line.images {
+                height: 50px;
+                margin-top: 5px;
+                margin-bottom: 10px;
+                display: flex;
+            }
+
+                .list li .line.images .image {
+                    width: 50px;
+                    height: 50px;
+                    position: relative;
+                    overflow: hidden;
+                    background-color: #f9f9f9;
+                    margin-right: 10px;
+                }
+
+                    .list li .line.images .image img {
+                        position: absolute;
+                        width: 100%;
+                        left: 0;
+                        right: 0;
+                        top: 0;
+                        bottom: 0;
+                        margin: auto;
+                    }
+
+            .list li .line.reply {
+                height: initial;
+                line-height: initial;
+                margin-bottom: 10px;
+                background-color: #f9f9f9;
+                padding: 10px;
+            }
+
+                .list li .line.reply .title {
+                    margin-bottom: 5px;
+                    font-weight: bold;
+                }
+
+                .list li .line.reply .content {
+                    color: #909090;
+                }

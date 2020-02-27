@@ -1,0 +1,753 @@
+{
+    "@platforms" : [ "android", "iPhone", "iPad" ],
+    "id" : "H5C1517A2", /*应用的标识，创建应用时自动生成，勿手动修改*/
+    "name" : "ACE王牌", /*应用名称，程序桌面图标名称*/
+    "version" : {
+        "name" : "7.1", /*应用版本名称*/
+        "code" : ""
+    },
+    "description" : "", /*应用描述信息*/
+    "icons" : {
+        "72" : "icon.png"
+    },
+    "launch_path" : "index.html", /*应用的入口页面，默认为根目录下的index.html；支持网络地址，必须以http://或https://开头*/
+    "developer" : {
+        "name" : "", /*开发者名称*/
+        "email" : "", /*开发者邮箱地址*/
+        "url" : "" /*开发者个人主页地址*/
+    },
+    "permissions" : {
+        "Cache" : {
+            "description" : "管理应用缓存"
+        },
+        "Console" : {
+            "description" : "跟踪调试输出日志"
+        },
+        "Events" : {
+            "description" : "应用扩展事件"
+        }
+    },
+    "plus" : {
+        "splashscreen" : {
+            "autoclose" : false, /*是否自动关闭程序启动界面，true表示应用加载应用入口页面后自动关闭；false则需调plus.navigator.closeSplashscreen()关闭*/
+            "waiting" : false /*是否在程序启动界面显示等待雪花，true表示显示，false表示不显示。*/
+        },
+        "statusbar" : {
+            "immersed" : true
+        },
+        "popGesture" : "close", /*设置应用默认侧滑返回关闭Webview窗口，"none"为无侧滑返回功能，"hide"为侧滑隐藏Webview窗口。参考http://ask.dcloud.net.cn/article/102*/
+        "runmode" : "liberate", /*应用的首次启动运行模式，可取liberate或normal，liberate模式在第一次启动时将解压应用资源（Android平台File API才可正常访问_www目录）*/
+        "signature" : "Sk9JTiBVUyBtYWlsdG86aHIyMDEzQGRjbG91ZC5pbw==", /*可选，保留给应用签名，暂不使用*/
+        "distribute" : {
+            "apple" : {
+                "appid" : "", /*iOS应用标识，苹果开发网站申请的appid，如io.dcloud.HelloH5*/
+                "mobileprovision" : "", /*iOS应用打包配置文件*/
+                "password" : "", /*iOS应用打包个人证书导入密码*/
+                "p12" : "", /*iOS应用打包个人证书，打包配置文件关联的个人证书*/
+                "devices" : "universal", /*iOS应用支持的设备类型，可取值iphone/ipad/universal*/
+                "urltypes" : [
+                    {
+                        "urlidentifier" : "io.dcloud.H5AF3B31A",
+                        "urlschemes" : [ "aceking" ]
+                    }
+                ],
+                "frameworks" : [] /*调用Native.js调用原生Objective-c API需要引用的FrameWork，如需调用GameCenter，则添加"GameKit.framework"*/
+            },
+            "google" : {
+                "packagename" : "", /*Android应用包名，如io.dcloud.HelloH5*/
+                "keystore" : "", /*Android应用打包使用的密钥库文件*/
+                "password" : "", /*Android应用打包使用密钥库中证书的密码*/
+                "aliasname" : "", /*Android应用打包使用密钥库中证书的别名*/
+                "schemes" : [ "aceking" ],
+                "permissions" : [
+                    "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
+                    "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+                    "<uses-permission android:name=\"android.permission.VIBRATE\"/>",
+                    "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
+                    "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
+                ]
+            },
+            /*使用Native.js调用原生安卓API需要使用到的系统权限*/
+            "orientation" : [ "portrait-primary" ], /*应用支持的方向，portrait-primary：竖屏正方向；portrait-secondary：竖屏反方向；landscape-primary：横屏正方向；landscape-secondary：横屏反方向*/
+            "icons" : {
+                "ios" : {
+                    "prerendered" : true, /*应用图标是否已经高亮处理，在iOS6及以下设备上有效*/
+
+                    /*应用图标，分辨率：512x512，用于自动生成各种尺寸程序图标*/
+                    "iphone" : {
+                        "normal" : "", /*iPhone3/3GS程序图标，分辨率：57x57*/
+                        "retina" : "", /*iPhone4程序图标，分辨率：114x114*/
+
+                        /*iPhone4S/5/6程序图标，分辨率：120x120*//*iPhone6 Plus程序图标，分辨率：180x180*/
+                        "spotlight-normal" : "", /*iPhone3/3GS Spotlight搜索程序图标，分辨率：29x29*/
+                        "spotlight-retina" : "", /*iPhone4 Spotlight搜索程序图标，分辨率：58x58*/
+
+                        /*iPhone4S/5/6 Spotlight搜索程序图标，分辨率：80x80*/
+                        "settings-normal" : "", /*iPhone4设置页面程序图标，分辨率：29x29*/
+
+                        /*iPhone4S/5/6设置页面程序图标，分辨率：58x58*/
+                        "app@2x" : "unpackage/res/icons/120x120.png",
+                        "app@3x" : "unpackage/res/icons/180x180.png",
+                        "settings@3x" : "unpackage/res/icons/87x87.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png",
+                        "spotlight@3x" : "unpackage/res/icons/120x120.png",
+                        "notification@3x" : "unpackage/res/icons/60x60.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png" /*iPhone6Plus设置页面程序图标，分辨率：87x87*/
+                    },
+                    "ipad" : {
+                        "normal" : "", /*iPad普通屏幕程序图标，分辨率：72x72*/
+                        "retina" : "", /*iPad高分屏程序图标，分辨率：144x144*/
+
+                        /*iPad iOS7程序图标，分辨率：76x76*//*iPad iOS7高分屏程序图标，分辨率：152x152*/
+                        "spotlight-normal" : "", /*iPad Spotlight搜索程序图标，分辨率：50x50*/
+                        "spotlight-retina" : "", /*iPad高分屏Spotlight搜索程序图标，分辨率：100x100*/
+
+                        /*iPad iOS7 Spotlight搜索程序图标，分辨率：40x40*//*iPad iOS7高分屏Spotlight搜索程序图标，分辨率：80x80*//*iPad设置页面程序图标，分辨率：29x29*/
+                        "app" : "unpackage/res/icons/76x76.png",
+                        "app@2x" : "unpackage/res/icons/152x152.png",
+                        "settings" : "unpackage/res/icons/29x29.png",
+                        "proapp@2x" : "unpackage/res/icons/167x167.png",
+                        "spotlight" : "unpackage/res/icons/40x40.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png",
+                        "notification" : "unpackage/res/icons/20x20.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png" /*iPad高分屏设置页面程序图标，分辨率：58x58*/
+                    },
+                    "appstore" : "E:/C# Project/ACE/ACE资源/logo.png"
+                },
+                "android" : {
+                    "mdpi" : "unpackage/res/icons/48x48.png", /*普通屏程序图标，分辨率：48x48*/
+                    "ldpi" : "unpackage/res/icons/48x48.png", /*大屏程序图标，分辨率：48x48*/
+                    "hdpi" : "unpackage/res/icons/72x72.png", /*高分屏程序图标，分辨率：72x72*/
+                    "xhdpi" : "unpackage/res/icons/96x96.png", /*720P高分屏程序图标，分辨率：96x96*/
+                    "xxhdpi" : "unpackage/res/icons/144x144.png",
+                    "xxxhdpi" : "unpackage/res/icons/192x192.png" /*1080P 高分屏程序图标，分辨率：144x144*/
+                }
+            },
+            "splashscreen" : {
+                "ios" : {
+                    "iphone" : {
+                        "default" : "",
+                        "iphonex" : "E:/C# Project/ACE/ACE资源/ios/1125_2436.png",
+                        "retina47" : "E:/C# Project/ACE/ACE资源/ios/750_1334.png",
+                        "iphonexl" : "",
+                        "retina35" : "E:/C# Project/ACE/ACE资源/ios/640_960.png",
+                        "retina40" : "E:/C# Project/ACE/ACE资源/ios/640_1136.png",
+                        "retina55" : "E:/C# Project/ACE/ACE资源/ios/1242_2208.png",
+                        "retina55l" : "E:/C# Project/ACE/ACE资源/ios/2208_1242.png"
+                    },
+                    "ipad" : {
+                        "portrait" : "E:/C# Project/ACE/ACE资源/ios/768_1004.png",
+                        "landscape" : "E:/C# Project/ACE/ACE资源/ios/1024_748.png",
+                        "portrait7" : "E:/C# Project/ACE/ACE资源/ios/768_1024.png",
+                        "landscape7" : "E:/C# Project/ACE/ACE资源/ios/1024_768.png",
+                        "portrait-retina" : "E:/C# Project/ACE/ACE资源/ios/1536_2008.png",
+                        "portrait-retina7" : "E:/C# Project/ACE/ACE资源/ios/1536_2048.png",
+                        "landscape-retina" : "E:/C# Project/ACE/ACE资源/ios/2048_1496.png",
+                        "landscape-retina7" : "E:/C# Project/ACE/ACE资源/ios/2048_1536.png"
+                    }
+                },
+                /*iPad竖屏启动图片，分辨率：768x1004*//*iPad高分屏竖屏图片，分辨率：1536x2008*//*iPad横屏启动图片，分辨率：1024x748*//*iPad高分屏横屏启动图片，分辨率：2048x1496*//*iPad iOS7竖屏启动图片，分辨率：768x1024*//*iPad iOS7高分屏竖屏图片，分辨率：1536x2048*//*iPad iOS7横屏启动图片，分辨率：1024x768*//*iPad iOS7高分屏横屏启动图片，分辨率：2048x1536*/
+                "android" : {
+                    "mdpi" : "", /*普通屏启动图片，分辨率：240x282*/
+                    "ldpi" : "", /*大屏启动图片，分辨率：320x442*/
+                    "hdpi" : "E:/C# Project/ACE/ACE资源/480.png", /*高分屏启动图片，分辨率：480x762*/
+                    "xhdpi" : "E:/C# Project/ACE/ACE资源/720.png", /*720P高分屏启动图片，分辨率：720x1242*/
+                    "xxhdpi" : "E:/C# Project/ACE/ACE资源/1080.png" /*1080P高分屏启动图片，分辨率：1080x1882*/
+                }
+            }
+        },
+        "adid" : "129390110407"
+    },
+    "dependencies" : {
+        "pages" : {
+            "index.html" : {
+                "resources" : [ "font/iconfont.css", "js/base.js", "js/fast.click.js" ],
+                "refer" : [ "htmls/main.html", "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/main.html" : {
+                "resources" : [
+                    "css/vant.css",
+                    "css/bottom.menus.css",
+                    "css/base.css",
+                    "font/iconfont.css",
+                    "js/base.js",
+                    "js/pages/main.js",
+                    "htmls/center.html"
+                ],
+                "refer" : [
+                    "htmls/home.html",
+                    "htmls/ace.transction.html",
+                    "htmls/ep.transaction.html",
+                    "htmls/subPages/hot.screen.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/center.html" : {
+                "resources" : [ "img/default_avatar.jpg" ],
+                "refer" : [
+                    "htmls/centerPages/profile.html",
+                    "htmls/transactionPages/sell.html",
+                    "htmls/centerPages/new.user.html",
+                    "htmls/centerPages/recharge.html",
+                    "htmls/centerPages/buy.stocks.html",
+                    "htmls/centerPages/exchange.rp.html",
+                    "htmls/centerPages/upgrade.html",
+                    "htmls/centerPages/my.team.html",
+                    "htmls/centerPages/my.tree.html",
+                    "htmls/centerPages/recharg.record.html",
+                    "htmls/centerPages/exchange.record.html",
+                    "htmls/centerPages/transaction.record.html",
+                    "htmls/centerPages/my.ep.html",
+                    "htmls/transactionPages/sellEP.html",
+                    "htmls/centerPages/my.sell.ep.html",
+                    "htmls/centerPages/my.buy.ep.html",
+                    "htmls/centerPages/subaccount.html",
+                    "htmls/centerPages/createNewAccount/new.user.html",
+                    "htmls/centerPages/ep.to.sp.html",
+                    "htmls/transactionPages/check.out.html",
+                    "htmls/centerPages/check.out.record.html",
+                    "htmls/centerPages/ep.record.html",
+                    "htmls/centerPages/rp.give.html",
+                    "htmls/centerPages/setting/set.up.html",
+                    "htmls/centerPages/income.detail.html",
+                    "htmls/centerPages/sp.record.html",
+                    "htmls/centerPages/rp.record.html",
+                    "htmls/centerPages/ep.give.html",
+                    "htmls/centerPages/rp.to.sp.html",
+                    "htmls/account/login.html",
+                    "htmls/centerPages/profilePages/change.login.password.html",
+                    "htmls/centerPages/profilePages/change.trans.password.html",
+                    "htmls/centerPages/my.tree.new.html",
+                    "htmls/centerPages/split.record.html",
+                    "htmls/centerPages/ace.buy.record.html",
+                    "htmls/centerPages/guide.sell.record.html",
+                    "htmls/centerPages/feedback.html",
+                    "htmls/centerPages/new.recharge.html",
+                    "htmls/centerPages/google.auth.html",
+                    "htmls/centerPages/activation.code.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/transaction.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/transactionPages/detail.html",
+                    "htmls/transactionPages/sell.html",
+                    "htmls/account/login.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/new.user.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/choose.nodal.person.html",
+                    "htmls/centerPages/new.user.step_2.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/account/login.html" : {
+                "resources" : [
+                    "css/vant.css",
+                    "font/vant-icon-76f274.ttf",
+                    "img/gradient-circle-black.png",
+                    "img/gradient-circle-white.png",
+                    "css/base.css",
+                    "font/iconfont.css",
+                    "font/iconfont.eot",
+                    "font/iconfont.ttf",
+                    "font/iconfont.svg",
+                    "css/htmls/account/login.css",
+                    "img/top_bg.png",
+                    "js/vue.min.js",
+                    "js/vant.js",
+                    "js/base.js",
+                    "img/logo_white_530.png"
+                ],
+                "refer" : [
+                    "htmls/main.html",
+                    "htmls/account/forgot.html",
+                    "htmls/subPages/language.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profile.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/account/login.html",
+                    "htmls/centerPages/profilePages/change.login.password.html",
+                    "htmls/centerPages/profilePages/change.trans.password.html",
+                    "htmls/centerPages/croppa.html",
+                    "htmls/centerPages/profilePages/bank.card.html",
+                    "htmls/centerPages/profilePages/change.nickname.html",
+                    "htmls/centerPages/profilePages/address.html",
+                    "htmls/centerPages/security.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/home.html" : {
+                "resources" : [
+                    "css/base.css",
+                    "css/vant.css",
+                    "css/htmls/home.css",
+                    "js/vue.min.js",
+                    "js/vant.js",
+                    "js/hightcharts.js",
+                    "js/highcharts-zh_CN.js",
+                    "js/base.js",
+                    "js/pages/home.js"
+                ],
+                "refer" : [
+                    "htmls/subPages/notice.detail.html",
+                    "htmls/account/login.html",
+                    "htmls/centerPages/profilePages/questions.html",
+                    "htmls/subPages/notice.list.html",
+                    "htmls/centerPages/profilePages/change.trans.password.html",
+                    "htmls/subPages/purchase.queue.html",
+                    "htmls/subPages/language.html",
+                    "htmls/centerPages/profilePages/change.login.password.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/transactionPages/sell.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/success/sell.success.html",
+                    "htmls/account/login.html",
+                    "htmls/centerPages/createSubAccount/choice.subaccount.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/exchange.rp.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/exchange.success.html", "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/buy.stocks.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/buy.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/upgrade.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/upgrade.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/bank.card.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/profilePages/change.bank.card.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/change.trans.password.html" : {
+                "resources" : [
+                    "css/vant.css",
+                    "font/vant-icon-76f274.ttf",
+                    "img/gradient-circle-black.png",
+                    "img/gradient-circle-white.png",
+                    "css/base.css",
+                    "font/iconfont.css",
+                    "font/iconfont.eot",
+                    "font/iconfont.ttf",
+                    "font/iconfont.svg",
+                    "css/htmls/pages/change.trans.password.css",
+                    "img/change_pin_bg.png",
+                    "js/vue.min.js",
+                    "js/vant.js",
+                    "js/base.js"
+                ],
+                "refer" : [
+                    "htmls/success/change.success.html",
+                    "htmls/centerPages/profilePages/questions.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/change.nickname.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/new.user.step_2.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/new.user.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/change.bank.card.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/address.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/profilePages/change.bank.card.html",
+                    "htmls/centerPages/profilePages/wx.qr.html",
+                    "htmls/centerPages/profilePages/ali.qr.html",
+                    "htmls/centerPages/profilePages/usdt.change.html",
+                    "htmls/centerPages/profilePages/eth.change.html",
+                    "htmls/centerPages/profilePages/btc.change.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/success/buy.ep.success.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/my.buy.ep.html" ],
+                "priority" : 0
+            },
+            "htmls/transactionPages/detail.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/buy.ep.success.html", "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/my.buy.ep.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/seller.info.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/subaccount.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/createSubAccount/create.account.html",
+                    "htmls/centerPages/subaccount.detail.html",
+                    "htmls/account/login.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/createSubAccount/create.account.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/choose.nodal.person.html",
+                    "htmls/centerPages/createSubAccount/create.account_2.html",
+                    "htmls/success/new.user.success.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/createSubAccount/create.account_2.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/new.user.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/subaccount.detail.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/choose.nodal.person.html",
+                    "htmls/centerPages/choose.sub.account.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/security.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/profilePages/questions.html",
+                    "htmls/centerPages/profilePages/change.login.password.html",
+                    "htmls/centerPages/profilePages/change.trans.password.html",
+                    "htmls/account/login.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/account/forgot.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/answering.html" ],
+                "priority" : 0
+            },
+            "htmls/account/answering.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/reset.password.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/questions.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/ep.to.sp.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/exchange.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/ep.record.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/ep.week.detail.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/rp.give.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/choose.receive.person.html",
+                    "htmls/success/change.success.html",
+                    "htmls/centerPages/choose.batch.person.html",
+                    "htmls/account/login.html",
+                    "htmls/centerPages/profilePages/change.trans.password.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/income.detail.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/ep.week.detail.html", "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/ep.give.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/choose.receive.person.html",
+                    "htmls/account/login.html",
+                    "htmls/success/change.success.html",
+                    "htmls/centerPages/profilePages/questions.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/createNewAccount/new.user.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/choose.nodal.person.html",
+                    "htmls/centerPages/createNewAccount/new.user.step_2.html",
+                    "htmls/account/login.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/createNewAccount/new.user.step_2.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/success/new.user.success.html",
+                    "htmls/centerPages/choose.nodal.person.html",
+                    "htmls/account/login.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/transactionPages/sellEP.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/success/sell.success.html",
+                    "htmls/account/login.html",
+                    "htmls/centerPages/profilePages/change.trans.password.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/my.team.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/my.tree.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/account/login.html",
+                    "htmls/centerPages/createNewAccount/new.user.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/rp.to.sp.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/exchange.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/ep.week.detail.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/rp.record.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/my.sell.ep.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/ep.transaction.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/transactionPages/detail.html", "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/ace.transction.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/account/login.html",
+                    "htmls/transactionPages/ace.transaction.detail.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/my.tree.new.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/account/login.html",
+                    "htmls/centerPages/createNewAccount/new.user.html",
+                    "htmls/centerPages/createSubAccount/create.account.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/choose.nodal.person.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/split.record.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/transactionPages/ace.transaction.detail.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/createSubAccount/choice.subaccount.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/subPages/notice.list.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/subPages/notice.detail.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/usdt.change.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/subPages/purchase.queue.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/transaction.record.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/account/login.html",
+                    "htmls/centerPages/transaction.detail.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/btc.change.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/eth.change.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/profilePages/change.login.password.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html", "htmls/success/change.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/recharge.html" : {
+                "resources" : [],
+                "refer" : [
+                    "htmls/centerPages/my.recharge.html",
+                    "htmls/centerPages/new.recharge.html",
+                    "htmls/centerPages/recharge.calc.html"
+                ],
+                "priority" : 0
+            },
+            "htmls/centerPages/new.recharge.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/success/submit.recharge.success.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/activation.code.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/account/login.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/google.auth.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/bind.google.html" ],
+                "priority" : 0
+            },
+            "htmls/centerPages/bind.google.html" : {
+                "resources" : [],
+                "refer" : [ "htmls/centerPages/bind.google.success.html" ],
+                "priority" : 0
+            }
+        },
+        "idle" : {
+            "resources" : [
+                "css/htmls/vue-croppa.min.css",
+                "css/htmls/pages/upgrade.css",
+                "css/htmls/pages/profile.css",
+                "css/htmls/pages/income.detail.css",
+                "css/htmls/pages/detail.css",
+                "lang/en.json",
+                "css/htmls/pages/sell.css",
+                "js/tree.js",
+                "orgchart/fonts/fontawesome-webfont.woff",
+                "css/htmls/account/forgot.css",
+                "css/htmls/pages/my.tree.new.css",
+                "css/htmls/pages/seller.info.css",
+                "css/htmls/pages/success.css",
+                "img/logos/yl_pay.png",
+                "img/logos/usdt_pay.png",
+                "css/htmls/center.css",
+                "css/htmls/pages/transaction.detail.css",
+                "css/htmls/pages/new.user.css",
+                "css/htmls/pages/questions.css",
+                "img/logos/wx_pay.png",
+                "css/htmls/pages/choice.subaccount.css",
+                "orgchart/css/jquery.orgchart.css",
+                "js/lodash.min.js",
+                "css/htmls/pages/ace.transaction.detail.css",
+                "css/htmls/pages/address.css",
+                "css/htmls/pages/my.buy.ep.css",
+                "css/htmls/pages/check.out.record.css",
+                "css/htmls/pages/check.out.css",
+                "css/htmls/pages/sellEP.css",
+                "css/htmls/pages/buy.stocks.css",
+                "orgchart/fonts/fontawesome-webfont.ttf",
+                "orgchart/fonts/fontawesome-webfont.eot",
+                "css/htmls/pages/my.sell.ep.css",
+                "css/htmls/pages/qr.css",
+                "css/htmls/pages/my.tree.css",
+                "css/htmls/pages/exchange.record.css",
+                "js/vue-croppa.min.js",
+                "img/logos/eth_pay.png",
+                "js/country.code.js",
+                "css/htmls/pages/choose.css",
+                "img/flags/ko.jpg",
+                "css/htmls/pages/subaccount.css",
+                "js/country.js",
+                "css/htmls/pages/recharg.record.css",
+                "lang/cn.json",
+                "css/htmls/pages/my.team.css",
+                "img/flags/en.jpg",
+                "css/htmls/pages/language.css",
+                "css/htmls/pages/notice.detail.css",
+                "css/htmls/pages/hot.screen.css",
+                "css/htmls/pages/split.record.css",
+                "img/logos/bit_pay.png",
+                "css/htmls/pages/transaction.record.css",
+                "img/bank_card_bg.png",
+                "css/htmls/pages/notice.list.css",
+                "orgchart/css/font-awesome.min.css",
+                "css/htmls/pages/puchase.queue.css",
+                "orgchart/js/jquery.orgchart.js",
+                "css/htmls/pages/answering.css",
+                "css/htmls/pages/ep.week.detail.css",
+                "orgchart/js/jquery.min.js",
+                "js/vue-lazyload.js",
+                "css/htmls/pages/subaccount.detail.css",
+                "img/logos/ali_pay.png",
+                "img/tip_tree.png",
+                "css/htmls/transaction.css",
+                "css/htmls/pages/croppa.css",
+                "font/iconfont.woff",
+                "orgchart/fonts/FontAwesome.otf",
+                "css/htmls/pages/exchange.rp.css",
+                "orgchart/fonts/fontawesome-webfont.woff2",
+                "css/htmls/pages/rp.record.css",
+                "img/flags/cn.jpg",
+                "orgchart/fonts/fontawesome-webfont.svg",
+                "css/htmls/pages/recharge.css"
+            ]
+        }
+    }
+}

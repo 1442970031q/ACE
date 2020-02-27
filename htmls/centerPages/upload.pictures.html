@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+    <style>
+        .info {
+            font-size: .9em;
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .upload_items li {
+            width: 220px;
+            height: 270px;
+            position: relative;
+            margin: 25px auto;
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 0 10px 0 #e8e8e8;
+        }
+
+            .upload_items li.none {
+                -moz-box-shadow: none;
+                -webkit-box-shadow: none;
+                box-shadow: none;
+                height: inherit;
+                margin-bottom: 0;
+            }
+
+                .upload_items li.none .confirm_button {
+                    width: 100%;
+                    margin: 0;
+                }
+
+                    .upload_items li.none .confirm_button.dis {
+                        background-color: #94bbdb;
+                    }
+
+            .upload_items li.reason {
+                -moz-box-shadow: none;
+                -webkit-box-shadow: none;
+                box-shadow: none;
+                height: inherit;
+                margin-bottom: 0;
+                padding: 10px;
+                background-color: #f7eca1;
+                border: 1px solid #f5e78a;
+                margin-top: 15px;
+                width: 80%;
+            }
+
+                .upload_items li.reason .caption {
+                    font-size: .9em;
+                    font-weight: 600;
+                    color: #636363;
+                }
+
+                .upload_items li.reason .text {
+                    font-size: .8em;
+                    margin-top: 5px;
+                    color: #827c53;
+                }
+
+            .upload_items li .tip_box {
+                width: 220px;
+                height: 270px;
+                position: relative;
+            }
+
+                .upload_items li .tip_box .id_img {
+                    width: 100%;
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                }
+
+                .upload_items li .tip_box .img {
+                    height: 270px;
+                    width: auto;
+                    max-width: 220px;
+                    padding: 10px;
+                    box-sizing: border-box;
+                    border-radius: 15px;
+                }
+
+                .upload_items li .tip_box .bg {
+                    position: absolute;
+                    width: 220px;
+                    height: 270px;
+                    z-index: 0;
+                }
+
+                .upload_items li .tip_box .text {
+                    position: absolute;
+                    width: 220px;
+                    height: 270px;
+                    text-align: center;
+                    background: white;
+                }
+
+                    .upload_items li .tip_box .text.mask {
+                        background-color: rgba(255, 255, 255, 0.7);
+                    }
+
+                        .upload_items li .tip_box .text.mask .txt {
+                            font-weight: 600;
+                            margin-top: 90px;
+                        }
+
+                        .upload_items li .tip_box .text.mask .upload {
+                            padding: 5px 10px;
+                            background-color: #1e81d2;
+                            color: white;
+                            margin-top: 10px;
+                            border-radius: 5px;
+                        }
+
+                            .upload_items li .tip_box .text.mask .upload:active {
+                                background-color: #145f9d;
+                            }
+
+                    .upload_items li .tip_box .text .iconfont {
+                        display: block;
+                        font-size: 1.6em;
+                        background-color: #1e81d2;
+                        padding: 10px;
+                        border-radius: 5px;
+                        color: white;
+                        margin: 0 auto;
+                        margin-top: 30px;
+                        width: 30px;
+                        height: 30px;
+                        line-height: 30px;
+                    }
+
+                    .upload_items li .tip_box .text .txt {
+                        height: 20px;
+                        line-height: 20px;
+                        color: #1e81d2;
+                        margin-top: 10px;
+                        font-size: .9em;
+                    }
+
+        .safe-area .van-actionsheet__cancel {
+            padding-bottom: constant(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .uploaded_state {
+            width: 80%;
+            padding: 10px;
+            background-color: white;
+            margin: 0 auto;
+            margin-top: 40%;
+            border-radius: 5px;
+        }
+
+            .uploaded_state .has_uploaded {
+                padding: 15px;
+            }
+
+                .uploaded_state .has_uploaded .caption {
+                    text-align: center;
+                    font-weight: 600;
+                    padding-bottom: 20px;
+                }
+
+                .uploaded_state .has_uploaded .has_content {
+                    margin-top: 20px;
+                    text-align: center;
+                }
+
+                    .uploaded_state .has_uploaded .has_content .iconfont {
+                        font-size: 3em;
+                        color: #7563eb;
+                    }
+
+                        .uploaded_state .has_uploaded .has_content .iconfont.success {
+                            background-color: #7563eb;
+                            color: white;
+                            border-radius: 50%;
+                            padding: 10px;
+                        }
+
+                    .uploaded_state .has_uploaded .has_content .text {
+                        font-size: .9em;
+                        margin-top: 20px;
+                        color: #969696;
+                    }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <div class="app-head-text" v-text="language.TITLE_TEXT">收款码</div>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box p50">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在加载...</p>
+            </div>
+            <div v-else v-cloak>
+                <p class="info" v-text="language.IINFO_TEXT1">注意：收款码一旦上传不可更改 </p>
+                <ul class="upload_items">
+                    <li v-if="images.alipay.zfb">
+                        <div class="tip_box">
+                            <div class="text">
+                                <img v-bind:src="images.alipay.image" class="img" />
+                            </div>
+                        </div>
+                    </li>
+                    <li v-else @click="openSheet('alipay')">
+                        <div class="tip_box" v-if="!images.alipay.image">
+                            <div class="text">
+                                <img classs="iconfont" style="width:40px;margin-top:90px;" src="../../img/logos/zfb_pay_2.png" />
+                                <p class="txt" v-text="language.IINFO_TEXT3">点击上传支付宝收款码</p>
+                            </div>
+                        </div>
+                        <div v-else class="tip_box">
+                            <img v-bind:src="images.alipay.image" class="id_img" />
+                            <div class="text mask">
+                                <p class="txt" v-text="language.IINFO_TEXT4">已选择</p>
+                                <button class="upload" v-on:click.stop="doUploadAjax" v-text="language.BUTTON_TEXT1">上传</button>
+                            </div>
+                        </div>
+                    </li>
+                    <li v-if="images.wechat.wx">
+                        <div class="tip_box">
+                            <div class="text">
+                                <img v-bind:src="images.wechat.image" class="img" />
+                            </div>
+                        </div>
+                    </li>
+                    <li v-else @click="openSheet('wechat')">
+                        <div class="tip_box" v-if="!images.wechat.image">
+                            <div class="text">
+                                <img classs="iconfont" style="width:40px;margin-top:90px;" src="../../img/logos/wx_pay_2.png" />
+                                <p class="txt" v-text="language.IINFO_TEXT5">点击上传微信收款码</p>
+                            </div>
+                        </div>
+                        <div v-else class="tip_box">
+                            <img v-bind:src="images.wechat.image" class="id_img" />
+                            <div class="text mask">
+                                <p class="txt" v-text="language.IINFO_TEXT4">已选择</p>
+                                <button class="upload" v-on:click.stop="doUploadAjax" v-text="language.BUTTON_TEXT1">上传</button>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <van-actionsheet v-bind:class="{'safe-area': CONFIG.IsSafeArea()}" v-model="isActionsheet" v-bind:actions="actions"
+                                 :cancel-text="language.BUTTON_TEXT2"></van-actionsheet>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    'currentUser': getUserModel(),
+                    'statusbarHeight': 20,
+                    'imageType': '',
+                    'isLoading': true,
+                    'isActionsheet': false,
+                    'uploadState': 0,
+                    'reason': '',
+                    'actions': [{
+                        'name': '拍照選取',
+                        'callback': this.openCamera
+                    }, {
+                        'name': '從相冊選取',
+                        'callback': this.openGallery
+                    }],
+                    'images': {
+                        'alipay': {
+                            'image': '',
+                            'base64': '',
+                            'zfb': ''
+                        },
+                        'wechat': {
+                            'image': '',
+                            'base64': '',
+                            'wx': ''
+                        }
+                    },
+                    'language': {}
+                };
+            },
+            methods: {
+                'doUploadAjax': function () {
+                    toastLoading({
+                        'message': this.language.LOADING_TEXT1
+                    });
+                    var url = this.images[this.imageType].image;
+                    plus.zip.compressImage({
+                        'src': url,
+                        'dst': "_downloads/front.jpg",
+                        'overwrite': true,
+                        'format': 'jpg',
+                        'width': 'auto',
+                        'height': 'auto',
+                        'quality': 40
+                    }, function (event) {
+                        _vue.compressCompleted(event, _vue.imageType);
+                    });
+                },
+                'compressCompleted': function (event, type) {
+                    var reader = new plus.io.FileReader();
+                    reader.onloadend = function (e) {
+                        _vue.images[type].base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                        _vue.doSubmitAjax();
+                    };
+                    reader.readAsDataURL(event.target.replace('file://', ''));
+                },
+                'doSubmitAjax': function () {
+                    var base64 = encodeURIComponent(this.images[this.imageType].base64);
+                    ajax({
+                        url: CONFIG.BASE_URL + 'UploadReceiveCode',
+                        data: {
+                            'base64AvatarImage': base64,
+                            'type': this.imageType,
+                            'key': this.currentUser.Key
+                        },
+                        success: function (result) {
+                            closeToastLoading();
+
+                            if (result.Error) {
+                                _vue.images[_vue.imageType].base64 = '';
+                                _vue.images[_vue.imageType].base64 = '';
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.loadPageData();
+                        }
+                    });
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+
+                            _vue.images.alipay.zfb = result.Data.IsAlipayCode;
+                            _vue.images.wechat.wx = result.Data.IsWechatCode;
+                            if (_vue.images.alipay.zfb) {
+                                _vue.images.alipay.image = result.Data.Alipay2DCode;
+                            }
+                            if (_vue.images.wechat.wx) {
+                                _vue.images.wechat.image = result.Data.WeChat2DCode;
+                            }
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'openSheet': function (type) {
+                    this.imageType = type;
+                    this.isActionsheet = true;
+                },
+                'openCamera': function () {
+                    this.isActionsheet = false;
+
+                    var camera = plus.camera.getCamera();
+                    camera.captureImage(this.resolveFile);
+                },
+                'openGallery': function () {
+                    this.isActionsheet = false;
+                    plus.gallery.pick(this.resolveFile);
+                },
+                'resolveFile': function (captureFile) {
+                    plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                        _vue.images[_vue.imageType].image = entry.toLocalURL();
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('upload_pictures', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

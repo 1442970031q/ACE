@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/transaction.record.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">ACE掛賣記錄</p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="list.isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else class="list_content" v-cloak>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA">暫無掛賣記錄</p>
+                </div>
+                <div v-else>
+                    <ul>
+                        <li v-for="(item,index) in list.data" v-bind:key="index" @click="gotoDetail(item)">
+                            <p class="title" v-if="item.TradeType == 2" 
+                               v-text="`${language.THE_NO} ${getGuideIndex(index)} ${language.THE_NO_OF_DSELL}`"></p>
+                            <p class="line clearfix">
+                                <span class="left number" v-text="numberFormat(item.TotalStockCount, 0) + ' ACE'"></span>
+                                <span class="right number" v-text="item.SurplusStockCount<=0? language.SELL_COMPLETE : numberFormat(item.SurplusStockCount, 0) + ' ACE'"></span>
+                            </p>
+                            <p class="line clearfix">
+                                <span class="left" v-text="language.TOTAL_SELL_AMOUNT">掛賣總數</span>
+                                <span class="right" v-text="language.SURPLUS_AMOUNT">剩余</span>
+                            </p>
+                            <p class="line clearfix">
+                                <span class="right" v-text="language.TYPE_NAME + item.TypeName"></span>
+                            </p>
+                            <p class="line clearfix">
+                                <span class="left bg green" v-if="item.Status==2" v-text="item.StatusName"></span>
+                                <span class="left bg red" v-else-if="item.Status==8" v-text="item.StatusName"></span>
+                                <span class="left bg green" v-else-if="item.Status==64" v-text="language.TRADE_COMPLETE">交易完成</span>
+                                <span class="left bg blue" v-else v-text="item.StatusName"></span>
+                                <span class="left bg blue son" v-if="item.IsSon" v-text="language.SON_ACCOUNT+'(' + item.FlowNumber + ')'"></span>
+                                <span class="right time" v-text="item.Time"></span>
+                            </p>
+                        </li>
+                    </ul>
+                    <div v-if="list.isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT">正在載入...</span>
+                    </div>
+                    <div v-if="list.isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NONE_MORE_DATA">沒有更多的數據了...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var rowIndex = 0;
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'list': {
+                    'guideCount': 0,
+                    'isLoading': true,
+                    'isLoadMore': false,
+                    'isLoadComplete': false,
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'data': []
+                },
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            methods: {
+                'gotoDetail': function (item) {
+                    gotoNewWindow('transaction.detailPage', 'transaction.detail', {
+                        param: `sId=${item.Id}&count=${item.TotalStockCount}&time=${encodeURIComponent(item.Time)}`
+                    });
+                },
+                'loadPageAjax': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'BuyAndSellList',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'type': 2
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (_vue.list.pageIndex == 1) {
+                                _vue.list.guideCount = result.Data.GuideCount;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.list.data = result.Data.List;
+                            _vue.list.isLoading = false;
+                        }
+                    })
+                },
+                'loadMore': function () {
+                    this.list.isLoadMore = true;
+                    
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'BuyAndSellList',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize,
+                            'type': 2
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            rowIndex = 0;
+                            _vue.list.pageIndex++;
+                            _vue.list.data.concat(result.Data.List);
+                            _vue.list.isLoadMore = false;
+                            if (result.Data.List.length < _vue.list.pageSize) {
+                                _vue.list.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    if (!this.list.isLoadMore && !this.list.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'getGuideIndex': function (rIndex) {
+                    var index = this.list.guideCount - rowIndex;
+                    rowIndex++;
+
+                    return index;
+                },
+                'changeLanguage': function () {
+                    LSE.install('transaction_record', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            mounted: function () {
+                this.loadPageAjax();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

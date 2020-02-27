@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/exchange.rp.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-cloak>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else>
+                <div class="top_content clearfix">
+                    <div class="top_block">
+                        <p class="number" v-text="numberFormat(currentUser.EP, 2)"></p>
+                        <p class="txt" v-text="language.INFO_1"></p>
+                    </div>
+                    <div class="top_block">
+                        <p class="number">1:1</p>
+                        <p class="txt" v-text="language.INFO_2"></p>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <input type="number" 
+                               class="input-control" 
+                               v-model="form.amount" 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="password" 
+                               class="input-control" 
+                               v-model="form.password" 
+                               maxlength="16" 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                    </div>
+                </div>
+                <button class="confirm_button" @click="!CONFIG.IS_DOING && checkData()" v-text="language.BUTTON_1"></button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'form': {
+                    'amount': '',
+                    'password': '',
+                    'type': 1
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'INFO_1': '',
+                    'INFO_2': '',
+                    'INPUT_TEXT_1': '',
+                    'INPUT_PLACEHOLDER_1': '',
+                    'INPUT_TEXT_2': '',
+                    'INPUT_PLACEHOLDER_2': '',
+                    'BUTTON_1': '',
+                    'ERROR_1': '',
+                    'ERROR_2': '',
+                    'ERROR_3': '',
+                    'ERROR_4': '',
+                    'TOAST_TEXT': ''
+                },
+                'statusbarHeight': 20
+            },
+            methods: {
+                'checkData': function () {
+                    CONFIG.IS_DOING = false;
+
+                    if (!this.form.amount) {
+                        toastMsg(this.language.ERROR_1);
+                        CONFIG.IS_DOING = false;
+                    } else if(this.form.amount <= 0){
+                        toastMsg(this.language.ERROR_2);
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.password) {
+                        toastMsg(this.language.ERROR_3);
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(this.language.ERROR_4);
+                        CONFIG.IS_DOING = false;
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ExchangeRP',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.loadPageData(function () {
+                                    closeToastLoading();
+
+                                    gotoNewWindow('exchange.successPage', '../success/exchange.success', {
+                                        param: 't=1&a=' + _vue.form.amount,
+                                        openCallback: function () {
+                                            closeWindow('none');
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    })
+                },
+                'loadPageData': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (typeof(callback) == 'undefined') {
+                                _vue.currentUser = getUserModel();
+                                _vue.isLoading = false;
+                            } else {
+                                callback();
+                            }
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('ep_to_sp', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

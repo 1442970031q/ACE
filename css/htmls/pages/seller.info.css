@@ -1,0 +1,92 @@
+﻿.container {
+    margin-top: 5px;
+}
+
+    .container .seller_info {
+        padding: 10px;
+        background-color: white;
+    }
+
+        .container .seller_info .pn {
+            margin-top: 5px;
+        }
+
+            .container .seller_info .pn .number {
+                color: #21BBFE;
+            }
+
+    .container .van-cell__title {
+        font-size: 1em;
+    }
+
+    .container .van-collapse-item__content {
+        background-color: #f9f9f9;
+    }
+
+    .container .card {
+        border-radius: 5px;
+        background: linear-gradient(135deg, #21BBFE, #2C6FD1);
+        color: white;
+        overflow: hidden;
+    }
+
+        .container .card .bg {
+            padding: 15px 20px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            box-shadow: 0 0 20px 0 #b1b1b1;
+            background-image: url('../../../img/bank_card_bg.png');
+            background-position: left center;
+            background-repeat: no-repeat;
+        }
+
+        .container .card .line {
+            font-size: 1em;
+        }
+
+            .container .card .line p {
+                text-shadow: 0 0 5px #424242;
+            }
+
+            .container .card .line.number {
+                margin: 15px 0;
+            }
+
+                .container .card .line.number .value {
+                    text-align: left;
+                    font-size: 1.5em;
+                    font-weight: bold;
+                }
+
+            .container .card .line .text {
+                font-weight: bold;
+            }
+
+            .container .card .line:last-child {
+                border-bottom: 0;
+                margin-bottom: 0;
+            }
+
+    .container .wx .van-collapse-item__content {
+        background-color: #24aa39;
+    }
+
+    .container .ali .van-collapse-item__content {
+        background-color: #019fe8;
+    }
+
+    .container .usdt .van-collapse-item__content {
+        background-color: #f9f9f9;
+    }
+
+        .container .usdt .van-collapse-item__content .text-center {
+            text-align: center;
+            padding:15px 0;
+        }
+
+    .container img.image {
+        width: 290px;
+        height: 390px;
+        margin: 0 auto;
+        display: block;
+    }

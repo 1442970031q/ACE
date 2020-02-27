@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../orgchart/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../../orgchart/css/jquery.orgchart.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/my.tree.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">粉絲列表</p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <form action="/">
+                <van-search class="fixed_top"
+                            v-bind:style="{'top': (45 + statusbarHeight) + 'px'}"
+                            v-model="searchKey"
+                            v-bind:placeholder="language.INPUT_PLAYER_ID"
+                            show-action
+                            @search="onSearch"
+                            @cancel="onCancel"
+                            @blur="isFocus = false"
+                            @focus="isFocus = true">
+                    <div slot="action" @click="onSearch" v-text="language.SEARCH">搜索</div>
+                </van-search>
+            </form>
+            <div v-show="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-show="!isLoading" v-cloak id="chart-container">
+                
+            </div>
+            <div v-show="!isLoading && !isFocus" class="actions clearfix">
+                <button class="btn up"
+                        v-bind:class="{'enable': historyList.length != 0}"
+                        @click="historyList.length != 0 && gotoBack()"
+                        v-text="language.BUTTON_1"></button>
+                <button class="btn up enable"
+                        @click="gotoUpLayer"
+                        v-text="language.BUTTON_3"></button>
+                <button class="btn left_down" @click="myLeftDown" v-text="language.BUTTON_2"></button>
+            </div>
+        </div>
+        <van-popup v-cloak v-model="isShow" class="panel">
+            <p class="title" v-text="language.POPUP_TITLE">注册类型</p>
+            <van-radio-group v-model="radioType">
+                <van-cell-group>
+                    <van-cell class="type_cell" v-bind:title="language.POPUP_ITEM_1" clickable @click="radioType = '1'">
+                        <van-radio name="1" />
+                    </van-cell>
+                    <van-cell class="type_cell" v-bind:title="language.POPUP_ITEM_2" clickable @click="radioType = '2'">
+                        <van-radio name="2" />
+                    </van-cell>
+                </van-cell-group>
+            </van-radio-group>
+            <div class="type_action clearfix">
+                <button class="confirm_button type_btn cancel" @click="isShow = false" v-text="language.POPUP_BUTTON_1">關閉</button>
+                <button class="confirm_button type_btn" @click="typeConfirm" v-text="language.POPUP_BUTTON_2">確定</button>
+            </div>
+        </van-popup>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../orgchart/js/jquery.min.js"></script>
+    <script src="../../orgchart/js/jquery.orgchart.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var sysName = systemName();
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'searchKey': '',
+                'isFocus': false,
+                'ajaxURLs': {},
+                'isLoading': true,
+                'historyList': [],
+                'currentFlowNumber': '',
+                'currentNFlow':0,
+                'isShow': false,
+                'radioType': '1',
+                'currentReport': {
+                    'pId': 0,
+                    'pos': 0
+                },
+                'language': {},
+                'statusbarHeight': 44
+            },
+            methods: {
+                'myLeftDown': function () {
+                    toastLoading({ 'message': _vue.language.LOADING_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetLowerLeft',
+                        success: function (result) {
+                            closeToastLoading();
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (_vue.currentFlowNumber != result.FlowNumber) {
+                                _vue.loadNextLayer(result.FlowNumber);
+                            }
+                        }
+                    });
+                },
+                'gotoBack': function () {
+                    var index = this.historyList.length - 1;
+                    var flowNumber = this.historyList[index];
+                    this.historyList.splice(index, 1);
+                    this.currentFlowNumber = flowNumber;
+
+                    this.loadPageData();
+                },
+                'gotoUpLayer': function () {
+                    this.currentFlowNumber = this.currentNFlow;
+                    this.loadPageData();
+                },
+                'onSearch': function () {
+                    if (!this.searchKey) {
+                        toastMsg(_vue.language.INPUT_PLAYER_ID);//'請輸入玩家ID'
+                    } else {
+                        this.historyList.push(this.currentFlowNumber);
+                        this.currentFlowNumber = this.searchKey;
+
+                        this.loadPageData();
+                    }
+                },
+                'onCancel': function () {
+                    if (this.searchKey) {
+                        this.historyList = [];
+                        this.currentFlowNumber = this.currentUser.FlowNumber;
+                        this.loadPageData();
+                    }
+                },
+                'newReport': function (pId, pos) {
+                    this.currentReport.pId = pId;
+                    this.currentReport.pos = pos;
+                    this.isShow = true;
+                },
+                'typeConfirm': function () {
+                    if (this.radioType == '1') {
+                        this.reportByNew();
+                    } else {
+                        this.reportBySub();
+                    }
+
+                    this.isShow = false;
+                },
+                'reportByNew': function () {
+                    toastLoading({ 'message': _vue.language.READY_DATA }); //'正在準備數據'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetNodalPerson',
+                        data: {
+                            'nId': this.currentReport.pId
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            gotoNewWindow('new.userPage', 'createNewAccount/new.user', {
+                                param: 'rId=' + _vue.currentReport.pId +
+                                    '&display=' + result.Data.FlowNumber + 
+                                    '&parentDisplay=' + encodeURIComponent(result.Data.NickName + '(' + result.Data.FlowNumber + ')') +
+                                    '&fromTree=true' +
+                                    '&pos=' + _vue.currentReport.pos,
+                                'openCallback': function () {
+                                    closeToastLoading();
+                                },
+                                'closeCallback': function () {
+                                    _vue.loadPageData();
+                                }
+                            });
+                        }
+                    });
+                },
+                'reportBySub': function () {
+                    toastLoading({ 'message': _vue.language.AUDIT_RULES }); //'正在檢查規則'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'IsCanSonDeclarationForm',
+                        data: {
+                            'pId': this.currentReport.pId
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (!result.CanCreate) {
+                                closeToastLoading();
+                                _vue.$dialog.alert({
+                                    'message': _vue.language.AUDIT_FAIL_MESSAGE_1 + result.CanCreateDate + _vue.language.AUDIT_FAIL_MESSAGE_2,
+                                    'title': _vue.language.AUDIT_FAIL//'不符合規則'
+                                });
+                                return;
+                            }
+
+                            try {
+                                var displayText = result.Data.NickName + '(' + result.Data.FlowNumber + ')';
+                                gotoNewWindow('create.accountPage', 'createSubAccount/create.account', {
+                                    param: 'fromTree=true' +
+                                        '&parentId=' + _vue.currentReport.pId +
+                                        '&display=' + result.Data.FlowNumber +
+                                        '&parentDisplay=' + encodeURIComponent(displayText) +
+                                        '&pos=' + _vue.currentReport.pos,
+                                    'openCallback': function () {
+                                        closeToastLoading();
+                                    },
+                                    'closeCallback': function () {
+                                        _vue.loadPageData();
+                                    }
+                                });
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    })
+                },
+                'loadNextLayer': function (id) {
+                    this.historyList.push(this.currentFlowNumber);
+                    this.currentFlowNumber = id;
+
+                    this.loadPageData();
+                },
+                'loadPageData': function () {
+                    this.isLoading = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'RelationDiagram',
+                        data: {
+                            'id': this.currentFlowNumber,
+                        },
+                        success: function (result) {
+                            _vue.isLoading = false;
+
+                            if (result.Error) {
+                                var index = _vue.historyList.length - 1;
+                                _vue.historyList.splice(index, 1);
+
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.currentNFlow = result.Source.nFlow;
+                                $('#chart-container').html('');
+                                _vue.$nextTick(function () {
+                                    $('#chart-container').orgchart({
+                                        'data': result.Source,
+                                        'ajaxURL': _vue.ajaxURLs,
+                                        'nodeContent': 'title',
+                                        'nodeId': 'id'
+                                    });
+                                });
+                            }
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('my_tree', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.currentFlowNumber = this.currentUser.FlowNumber;
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

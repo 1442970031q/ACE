@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/exchange.rp.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">RP轉SP</p>
+        </div>
+        <div id="app-content" v-cloak>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else>
+                <div class="top_content clearfix">
+                    <div class="top_block">
+                        <p class="number" v-text="numberFormat(currentUser.RP, 2)"></p>
+                        <p class="txt" v-text="language.HOLDING_RP">持有RP</p>
+                    </div>
+                    <div class="top_block">
+                        <p class="number">1:1</p>
+                        <p class="txt" v-text="language.EXCHANGE_RATE">兌換比例</p>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.RP_AMOUNT">RP數量</span>
+                        <input type="number" class="input-control" v-model="form.amount" v-bind:placeholder="language.INPUT_RP_AMOUNT" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.TRANSFER_PWD">交易密碼</span>
+                        <input type="password" class="input-control" v-model="form.password" maxlength="16" v-bind:placeholder="language.INPUT_TRANSFER_PWD" />
+                    </div>
+                </div>
+                <button class="confirm_button" @click="!CONFIG.IS_DOING && checkData()" v-text="language.CONFIRM_EXCHANGE">確定兌換</button>
+            </div>
+
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'form': {
+                    'amount': '',
+                    'password': ''
+                },
+                "language": {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'checkData': function () {
+                    CONFIG.IS_DOING = true;
+
+                    if (!this.form.amount) {
+                        toastMsg(_vue.language.PLEASE_INPUT_RP_AMOUNT); //'請輸入RP數量'
+                        CONFIG.IS_DOING = false;
+                    } else if (!this.form.password) {
+                        toastMsg(_vue.language.PLEASE_INPUT_TRANSFER_PWD); //'請輸入交易密碼'
+                        CONFIG.IS_DOING = false;
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(_vue.language.TRANSFER_PWD_MORE_CHARS); //'交易密碼必須大於6位'
+                        CONFIG.IS_DOING = false;
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': _vue.language.EXCHANG_PROGRESSING }); //'正在兌換'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'RPExchangeSP',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.loadPageData(function () {
+                                    closeToastLoading();
+
+                                    gotoNewWindow('exchange.successPage', '../success/exchange.success', {
+                                        param: 't=3&a=' + _vue.form.amount,
+                                        openCallback: function () {
+                                            closeWindow('none');
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    })
+                },
+                'loadPageData': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (typeof(callback) == 'undefined') {
+                                _vue.currentUser = getUserModel();
+                                _vue.isLoading = false;
+                            } else {
+                                callback();
+                            }
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('rp_to_sp', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

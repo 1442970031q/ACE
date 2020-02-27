@@ -1,0 +1,12 @@
+{
+  "htmls/account/login.html": {
+    "href": "htmls/account/login.html",
+    "resources": [],
+    "priority": 0
+  },
+  "htmls/centerPages/profilePages/change.trans.password.html": {
+    "href": "htmls/centerPages/profilePages/change.trans.password.html",
+    "resources": [],
+    "priority": 1
+  }
+}

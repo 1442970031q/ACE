@@ -1,0 +1,443 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/my.tree.new.css" rel="stylesheet" />
+    <style>
+        #app-head {
+            border-bottom: 0;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">粉絲列表</p>
+            <button class="submit-button" @click="isShowTip=true"><i class="iconfont icon-bangzhu"></i></button>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else>
+                <form action="/">
+                    <van-search class="left_search"
+                                v-model="searchKey"
+                                v-bind:placeholder="language.SERCH_PLAYER_ID"
+                                show-action
+                                @search="onSearch"
+                                @focus="isFocus=true"
+                                @blur="isFocus=false">
+                        <div slot="action" @click="onSearch" v-text="language.SEARCH">搜索</div>
+                    </van-search>
+                </form>
+                <div class="head">
+                    <ul class="clearfix">
+                        <li class="first"><span v-text="language.SORT">序號</span></li>
+                        <li class="l2"><span v-text="language.ID">ID</span></li>
+                        <li class="l3"><span v-text="language.NICKNAME">暱稱</span></li>
+                        <li class="l4"><span v-text="language.L_AREA">L(总)</span></li>
+                        <li class="l5"><span v-text="language.R_AREA">R(总)</span></li>
+                    </ul>
+                </div>
+                <div class="list">
+                    <ul class="clearfix">
+                        <li class="first"><span>1.1</span></li>
+                        <li class="l2" v-text="layer.FirstLayer.FlowNumber"><span></span></li>
+                        <li class="l3" v-text="layer.FirstLayer.NickName"><span></span></li>
+                        <li class="l4" v-text="numberFormat(layer.FirstLayer.LTotal, 0)"><span></span></li>
+                        <li class="l5" v-text="numberFormat(layer.FirstLayer.RTotal, 0)"><span></span></li>
+                    </ul>
+                    <hr class="line" />
+                    <ul class="clearfix" v-if="layer.SecondLayer[0].Id==0">
+                        <li class="first"><span>2.1</span></li>
+                        <li class="l2 blue full">
+                            <span class="btn" @click="reportByNew(layer.SecondLayer[0])" v-text="language.REGISTER_NEW_ACCOUNT">註冊新玩家</span>
+                            <span class="btn" @click="reportBySub(layer.SecondLayer[0])" v-text="language.REGISTER_SUB_ACCOUNT">新增子帳戶</span>
+                        </li>
+                    </ul>
+                    <ul class="clearfix" v-else>
+                        <li class="first"><span>2.1</span></li>
+                        <li class="l2 blue"><span v-text="layer.SecondLayer[0].FlowNumber" @click="loadList(layer.SecondLayer[0])"></span></li>
+                        <li class="l3"><span v-text="layer.SecondLayer[0].NickName"></span></li>
+                        <li class="l4"><span v-text="numberFormat(layer.SecondLayer[0].LTotal, 0)"></span></li>
+                        <li class="l5"><span v-text="numberFormat(layer.SecondLayer[0].RTotal, 0)"></span></li>
+                    </ul>
+                    <ul class="clearfix" v-if="layer.SecondLayer[1].Id==0">
+                        <li class="first"><span>2.2</span></li>
+                        <li class="l2 blue full">
+                            <span class="btn" @click="reportByNew(layer.SecondLayer[1])" v-text="language.REGISTER_NEW_ACCOUNT">註冊新玩家</span>
+                            <span class="btn" @click="reportBySub(layer.SecondLayer[1])" v-text="language.REGISTER_SUB_ACCOUNT">新增子帳戶</span>
+                        </li>
+                    </ul>
+                    <ul class="clearfix" v-else>
+                        <li class="first"><span>2.2</span></li>
+                        <li class="l2 blue"><span v-text="layer.SecondLayer[1].FlowNumber" @click="loadList(layer.SecondLayer[1])"></span></li>
+                        <li class="l3"><span v-text="layer.SecondLayer[1].NickName"></span></li>
+                        <li class="l4"><span v-text="numberFormat(layer.SecondLayer[1].LTotal, 0)"></span></li>
+                        <li class="l5"><span v-text="numberFormat(layer.SecondLayer[1].RTotal, 0)"></span></li>
+                    </ul>
+                    <div v-if="isEmptyParent">
+                        <hr class="line" />
+                        <ul class="clearfix" v-if="layer.ThirdLayer[0].Id==0&&layer.ThirdLayer[0].FlowNumber==language.CONT_REGISTER">
+                            <li class="first"><span>3.1</span></li>
+                            <li class="l2"><span>-</span></li>
+                            <li class="l3"><span>-</span></li>
+                            <li class="l4"><span>-</span></li>
+                            <li class="l5"><span>-</span></li>
+                        </ul>
+                        <ul class="clearfix" v-else-if="layer.ThirdLayer[0].Id==0">
+                            <li class="first"><span>3.1</span></li>
+                            <li class="l2 blue full">
+                                <span class="btn" @click="reportByNew(layer.ThirdLayer[0])" v-text="language.REGISTER_NEW_ACCOUNT">註冊新玩家</span>
+                                <span class="btn" @click="reportBySub(layer.ThirdLayer[0])" v-text="language.REGISTER_SUB_ACCOUNT">新增子帳戶</span>
+                            </li>
+                        </ul>
+                        <ul class="clearfix" v-else>
+                            <li class="first"><span>3.1</span></li>
+                            <li class="l2 blue"><span v-text="layer.ThirdLayer[0].FlowNumber" @click="loadList(layer.ThirdLayer[0])"></span></li>
+                            <li class="l3"><span v-text="layer.ThirdLayer[0].NickName"></span></li>
+                            <li class="l4"><span v-text="numberFormat(layer.ThirdLayer[0].LTotal, 0)"></span></li>
+                            <li class="l5"><span v-text="numberFormat(layer.ThirdLayer[0].RTotal, 0)"></span></li>
+                        </ul>
+                        <ul class="clearfix" v-if="layer.ThirdLayer[1].Id==0&&layer.ThirdLayer[1].FlowNumber==language.CONT_REGISTER">
+                            <li class="first"><span>3.2</span></li>
+                            <li class="l2"><span>-</span></li>
+                            <li class="l3"><span>-</span></li>
+                            <li class="l4"><span>-</span></li>
+                            <li class="l5"><span>-</span></li>
+                        </ul>
+                        <ul class="clearfix" v-else-if="layer.ThirdLayer[1].Id==0">
+                            <li class="first"><span>3.2</span></li>
+                            <li class="l2 blue full">
+                                <span class="btn" @click="reportByNew(layer.ThirdLayer[1])" v-text="language.REGISTER_NEW_ACCOUNT">註冊新玩家</span>
+                                <span class="btn" @click="reportBySub(layer.ThirdLayer[1])" v-text="language.REGISTER_SUB_ACCOUNT">新增子帳戶</span>
+                            </li>
+                        </ul>
+                        <ul class="clearfix" v-else>
+                            <li class="first"><span>3.2</span></li>
+                            <li class="l2 blue"><span v-text="layer.ThirdLayer[1].FlowNumber" @click="loadList(layer.ThirdLayer[1])"></span></li>
+                            <li class="l3"><span v-text="layer.ThirdLayer[1].NickName"></span></li>
+                            <li class="l4"><span v-text="numberFormat(layer.ThirdLayer[1].LTotal, 0)"></span></li>
+                            <li class="l5"><span v-text="numberFormat(layer.ThirdLayer[1].RTotal, 0)"></span></li>
+                        </ul>
+                        <ul class="clearfix" v-if="layer.ThirdLayer[2].Id==0&&layer.ThirdLayer[2].FlowNumber==language.CONT_REGISTER">
+                            <li class="first"><span>3.3</span></li>
+                            <li class="l2"><span>-</span></li>
+                            <li class="l3"><span>-</span></li>
+                            <li class="l4"><span>-</span></li>
+                            <li class="l5"><span>-</span></li>
+                        </ul>
+                        <ul class="clearfix" v-else-if="layer.ThirdLayer[2].Id==0">
+                            <li class="first"><span>3.3</span></li>
+                            <li class="l2 blue full">
+                                <span class="btn" @click="reportByNew(layer.ThirdLayer[2])" v-text="language.REGISTER_NEW_ACCOUNT">註冊新玩家</span>
+                                <span class="btn" @click="reportBySub(layer.ThirdLayer[2])" v-text="language.REGISTER_SUB_ACCOUNT">新增子帳戶</span>
+                            </li>
+                        </ul>
+                        <ul class="clearfix" v-else>
+                            <li class="first"><span>3.3</span></li>
+                            <li class="l2 blue"><span v-text="layer.ThirdLayer[2].FlowNumber" @click="loadList(layer.ThirdLayer[2])"></span></li>
+                            <li class="l3"><span v-text="layer.ThirdLayer[2].NickName"></span></li>
+                            <li class="l4"><span v-text="numberFormat(layer.ThirdLayer[2].LTotal, 0)"></span></li>
+                            <li class="l5"><span v-text="numberFormat(layer.ThirdLayer[2].RTotal, 0)"></span></li>
+                        </ul>
+                        <ul class="clearfix" v-if="layer.ThirdLayer[3].Id==0&&layer.ThirdLayer[3].FlowNumber==language.CONT_REGISTER">
+                            <li class="first"><span>3.4</span></li>
+                            <li class="l2"><span>-</span></li>
+                            <li class="l3"><span>-</span></li>
+                            <li class="l4"><span>-</span></li>
+                            <li class="l5"><span>-</span></li>
+                        </ul>
+                        <ul class="clearfix" v-else-if="layer.ThirdLayer[3].Id==0">
+                            <li class="first"><span>3.4</span></li>
+                            <li class="l2 blue full">
+                                <span class="btn" @click="reportByNew(layer.ThirdLayer[3])" v-text="language.REGISTER_NEW_ACCOUNT">註冊新玩家</span>
+                                <span class="btn" @click="reportBySub(layer.ThirdLayer[3])" v-text="language.REGISTER_SUB_ACCOUNT">新增子帳戶</span>
+                            </li>
+                        </ul>
+                        <ul class="clearfix" v-else>
+                            <li class="first"><span>3.4</span></li>
+                            <li class="l2 blue"><span v-text="layer.ThirdLayer[3].FlowNumber" @click="loadList(layer.ThirdLayer[3])"></span></li>
+                            <li class="l3"><span v-text="layer.ThirdLayer[3].NickName"></span></li>
+                            <li class="l4"><span v-text="numberFormat(layer.ThirdLayer[3].LTotal, 0)"></span></li>
+                            <li class="l5"><span v-text="numberFormat(layer.ThirdLayer[3].RTotal, 0)"></span></li>
+                        </ul>
+                    </div>
+                    <div v-if="historyList.length!=0" class="actions">
+                        <button class="btn van-hairline--right" @click="gotoBack" v-text="language.PREVIOUS">向上翻页</button>
+                        <button class="btn" @click="gotoUpLayer" v-text="language.UP_LAYER">上一层</button>
+                    </div>
+                    <button v-if="!isFocus" class="bottom_button" @click="myLeftDown" v-text="language.MY_LEFT_UNDEREST">我的最左下</button>
+                </div>
+                <van-popup v-model="isShowTip" v-bind:close-on-click-overlay="false">
+                    <div class="tip">
+                        <h4 v-text="language.FANS_LIST_MAPPING_SHARP">粉丝列表对应图</h4>
+                        <img src="../../img/tip_tree.png" class="image" />
+                        <p class="msg" v-text="language.FANS_SHARP_MESSAGE">頁面列表顯示的關係如上圖所示，請注意選擇位置。</p>
+                    </div>
+                    <div class="tip_bottom">
+                        <van-checkbox v-model="showAgainCheckValue">
+                            <span v-text="language.DONT_SHOW"></span>
+                            <i slot="icon"
+                               class="iconfont"
+                               slot-scope="props"
+                               v-bind:class="[props.checked ? 'icon-checked' : 'icon-uncheck']"></i>
+                        </van-checkbox>
+                    </div>
+                    <button class="confirm_button" @click="isShowTip=false" v-text="language.CONFIRM">確認</button>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'searchKey': '',
+                'isLoading': true,
+                'isFirst': true,
+                'isShowTip': false,
+                'isFocus': false,
+                'showAgainCheckValue': false,
+                'isEmptyParent': false,
+                'layer': {
+                    'FirstLayer': {},
+                    'SecondLayer': [],
+                    'ThirdLayer': []
+                },
+                'historyList': [],
+                'currentFlowNumber': '',
+                'currentNFlow': '',
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoUpLayer': function () {
+                    this.currentFlowNumber = this.currentNFlow;
+                    this.loadPageData();
+                },
+                'myLeftDown': function () {
+                    toastLoading({ 'message': _vue.language.SEARCHING }); //'正在搜索'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetLowerLeft',
+                        success: function (result) {
+                            closeToastLoading();
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (_vue.currentFlowNumber != result.FlowNumber) {
+                                _vue.historyList.push(_vue.currentFlowNumber);
+                                _vue.currentFlowNumber = result.FlowNumber;
+                                _vue.loadPageData();
+                            }
+                        }
+                    });
+                },
+                'gotoBack': function () {
+                    var index = this.historyList.length - 1;
+                    var flowNumber = this.historyList[index];
+                    this.historyList.splice(index, 1);
+                    this.currentFlowNumber = flowNumber;
+
+                    this.loadPageData();
+                },
+                'reportByNew': function (item) {
+                    toastLoading({ 'message': _vue.language.READY_DATA }); //'正在準備數據'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetNodalPerson',
+                        data: {
+                            'nId': item.NodalPersonId
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            var paramStr = 'rId=' + item.NodalPersonId + '&display=' + result.Data.FlowNumber + '&parentDisplay=' + encodeURIComponent(result.Data.NickName + '(' + result.Data.FlowNumber + ')') + '&fromTree=true&pos=' + item.Position;
+                            gotoNewWindow('new.userPage', 'createNewAccount/new.user', {
+                                param: paramStr,
+                                openCallback: function () {
+                                    closeToastLoading();
+                                },
+                                closeCallback: function () {
+                                    _vue.loadPageData();
+                                }
+                            });
+                        }
+                    });
+                },
+                'reportBySub': function (item) {
+                    toastLoading({ 'message': _vue.language.AUDIT_RULES }); //'正在檢查規則'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'IsCanSonDeclarationForm',
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (!result.CanCreate) {
+                                closeToastLoading();
+                                _vue.$dialog.alert({
+                                    'message': _vue.language.AUDIT_FAIL_MESSAGE_1 + result.CanCreateDate + _vue.language.AUDIT_FAIL_MESSAGE_2,
+                                    'title': _vue.language.AUDIT_FAIL
+                                });
+                                return;
+                            }
+
+                            try {
+                                var parentNode = _vue.getDisplay(item.NodalPersonId);
+                                var paramStr = 'fromTree=true&parentId=' + item.NodalPersonId + '&display=' + parentNode.FlowNumber + '&parentDisplay=' + encodeURIComponent(parentNode.NickName + '(' + parentNode.FlowNumber + ')') + '&pos=' + item.Position;
+
+                                gotoNewWindow('create.accountPage', 'createSubAccount/create.account', {
+                                    param: paramStr,
+                                    openCallback: function () {
+                                        closeToastLoading();
+                                    },
+                                    closeCallback: function () {
+                                        _vue.loadPageData();
+                                    }
+                                });
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    })
+                },
+                'getDisplay': function (pId) {
+                    if (this.layer.FirstLayer.Id == pId)
+                        return {
+                            'NickName': this.layer.FirstLayer.NickName,
+                            'FlowNumber': this.layer.FirstLayer.FlowNumber
+                        };;
+
+                    for (var i = 0; i < this.layer.SecondLayer.length; i++) {
+                        if (this.layer.SecondLayer[i].Id == pId) {
+                            return {
+                                'NickName': this.layer.SecondLayer[i].NickName,
+                                'FlowNumber': this.layer.SecondLayer[i].FlowNumber
+                            };
+                        }
+                    }
+
+                    return null;
+                },
+                'loadList': function (item) {
+                    this.historyList.push(this.currentFlowNumber);
+                    this.currentFlowNumber = item.FlowNumber;
+
+                    this.loadPageData();
+                },
+                'loadPageData': function () {
+                    this.isLoading = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'RelationList',
+                        data: {
+                            'id': this.currentFlowNumber
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                var index = _vue.historyList.length - 1;
+                                _vue.historyList.splice(index, 1);
+                                _vue.isLoading = false;
+
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.currentNFlow = result.Data.nFlow;
+                            _vue.layer = Object.assign(_vue.layer, result.Data);
+                            _vue.isEmptyParent = _vue.isThirdLayerNotEmpty();
+                            _vue.isLoading = false;
+
+                            if (_vue.isFirst && _vue.isShowAgain) {
+                                _vue.isFirst = false;
+                                _vue.isShowTip = true;
+                            }
+                        }
+                    });
+                },
+                'isThirdLayerNotEmpty': function () {
+                    for (var i = 0; i < _vue.layer.ThirdLayer.length; i++) {
+                        if (_vue.layer.ThirdLayer[i].NodalPersonId != 0) return true;
+                    }
+
+                    return false;
+                },
+                'findFlowNumber': function (item) {
+                    for (var i = 0; i < _vue.historyList.length; i++) {
+                        if (_vue.historyList[i] == _vue.currentFlowNumber) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                },
+                'onSearch': function () {
+                    if (!this.searchKey) {
+                        toastMsg(_vue.language.INPUT_PLAYER_ID);// '請輸入玩家ID'
+                    } else if (!/^\d+$/.test(this.searchKey) || this.searchKey.length < 5) {
+                        toastMsg(_vue.language.PLAYER_ID_RULES); //'玩家ID只能是整數且最少5位'
+                    } else {
+                        this.historyList.push(this.currentFlowNumber);
+                        this.currentFlowNumber = this.searchKey;
+
+                        this.loadPageData();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('my_tree_new', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            watch: {
+                'showAgainCheckValue': function (v) {
+                    setItem(CONFIG.TIP_SHOW_AGAIN, (!v).toString());
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+                var showAgain = getItem(CONFIG.TIP_SHOW_AGAIN);
+                if (showAgain == null) {
+                    showAgain = true;
+                }
+
+                this.showAgainCheckValue = (showAgain == 'false');
+                this.isShowTip = !this.showAgainCheckValue;
+            },
+            mounted: function () {
+                this.currentFlowNumber = this.currentUser.FlowNumber;
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <style>
+        .input_content {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">修改暱稱</p>
+            <button class="submit-button" @click="checkData()" v-text="language.CONFIRM_MODIFY">確認更改</button>
+        </div>
+        <div id="app-content">
+            <div class="input_content">
+                <div class="input-group bb">
+                    <span class="input-text" v-text="language.NEW_NICKNAME">新暱稱</span>
+                    <input ref="newNickname" type="text" class="input-control" autofocus v-model="form.nickName" maxlength="10" v-bind:placeholder="language.INPUT_NEW_NICKNAME" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'form': {
+                    'nickName': ''
+                },
+                "language": {}
+            },
+            methods: {
+                'checkData': function () {
+                    if (!this.form.nickName) {
+                        toastMsg(_vue.language.INPUT_NEW_NICKNAME); //'請輸入新的暱稱'
+                    } else if (this.form.nickName == this.currentUser.NickName) {
+                        toastMsg(_vue.language.NEW_NICKNAME_CANT_SAME_CURRENT); //'新暱稱不能與當前暱稱一致'
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': _vue.language.SUBMIT_PROGRESSING });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ChangeNickName',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel({
+                                'NickName': _vue.form.nickName
+                            }, [{
+                                'pageName': 'profilePage',
+                                'actionName': '_vue.updateInfo()'
+                            }, {
+                                'pageName': 'center.htmlPage',
+                                'actionName': '_vue.updateInfo()'
+                            }]);
+
+                            gotoNewWindow('change.successPage', '../../success/change.success', {
+                                param: `title=${encodeURIComponent(_vue.language.MODIFY_TYPE)}&text=${encodeURIComponent(_vue.language.MODIFY_SUCCESS)}`,
+                                openCallback: function () {
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('change_nickname', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+            },
+            mounted: function () {
+                plus.key.showSoftKeybord();
+            }
+        });
+    </script>
+</body>
+</html>

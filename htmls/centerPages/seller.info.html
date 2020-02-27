@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/seller.info.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">賣家信息</p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在加载...</p>
+            </div>
+            <div v-else class="container" v-cloak>
+                <div class="seller_info">
+                    <p v-text="language.SELLER_PHONE">賣家電話</p>
+                    <p class="pn">
+                        <span v-text="'+' + pageData.Seller.CountryPhoneCode"></span>
+                        <a v-bind:href="'tel:+' + pageData.Seller.CountryPhoneCode + ' ' + pageData.Seller.Phone" v-text="pageData.Seller.Phone" class="number"></a>
+                    </p>
+                </div>
+                <van-collapse v-model="activeName" accordion class="mt-5">
+                    <van-collapse-item v-if="pageData.ReceiveType === '1'"
+                                       v-bind:title="language.SELLER_BANK_DATA"
+                                       name="1">
+                        <div class="card">
+                            <div class="bg">
+                                <div class="line">
+                                    <p class="text" v-text="pageData.Seller.OfflinePay.BankName"></p>
+                                </div>
+                                <div class="line">
+                                    <p class="text" v-text="pageData.Seller.OfflinePay.BankBranchName"></p>
+                                </div>
+                                <div class="line number">
+                                    <p class="value" v-text="cardNumberFormat(pageData.Seller.OfflinePay.BankCardNumber)"></p>
+                                </div>
+                                <div class="line">
+                                    <p class="text" v-text="pageData.Seller.OfflinePay.BankCardName"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </van-collapse-item>
+                    <!--<van-collapse-item v-if="pageData.Seller.OnlinePay.WeChat2DCode"
+                                       v-bind:title="language.SELLER_WECHAT" name="2" class="wx">
+                        <img v-bind:src="pageData.Seller.OnlinePay.WeChat2DCode" class="image" />
+                    </van-collapse-item>
+                    <van-collapse-item v-if="pageData.Seller.OnlinePay.Alipay2DCode"
+                                       v-bind:title="language.SELLER_ALIPAY" name="3" class="ali">
+                        <img v-bind:src="pageData.Seller.OnlinePay.Alipay2DCode" class="image" />
+                    </van-collapse-item>-->
+                    <van-collapse-item v-else title="USDT" name="4" class="usdt">
+                        <p class="text-center" v-text="pageData.Seller.Usdt.Address"></p>
+                        <button class="confirm_button" @click="copyUsdt" v-textr="language.COPY_ADDRESS">複製地址</button>
+                    </van-collapse-item>
+                </van-collapse>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'activeName': '0',
+                'pageData': {},
+                'request': {
+                    'sId': queryString('sId')
+                },
+                'isLoading': true,
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'copyUsdt': function () {
+                    var wb = plus.webview.getWebviewById('mainPage');
+                    if (wb !== null) {
+                        wb.evalJS('pageScript.setClipBoard("' + this.pageData.Seller.Usdt.Address + '")');
+                        toastMsg(_vue.language.CPOY_SUCCESS); //'已複製到剪貼板'
+                    }
+                },
+                'cardNumberFormat': function (n) {
+                    if (n.length > 13) {
+                        return n.substring(0, 5) + " " + n.substring(5, 9) + " " + n.substring(9, 13) + " " + n.substring(13);
+                    } else {
+                        return n;
+                    }
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPSellDetail',
+                        data: this.request,
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageData = result.Detail;
+                            if (result.Detail.ReceiveType === '1') {
+                                _vue.activeName = '1';
+                            } else {
+                                _vue.activeName = '4';
+                            }
+                            _vue.isLoading = false;
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('seller_info', function (lang) { Vue.set(_vue, "language", lang); });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

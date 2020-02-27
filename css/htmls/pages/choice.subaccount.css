@@ -1,0 +1,103 @@
+﻿.van-field__control {
+    height: 24px;
+}
+
+.list_content {
+}
+
+    .list_content .list_items {
+    }
+
+        .list_content .list_items .list_item {
+            padding: 10px;
+            background-color: white;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+            .list_content .list_items .list_item:active {
+                background-color: #f9f9f9;
+            }
+
+            .list_content .list_items .list_item:last-child {
+                border-bottom: 0;
+            }
+
+            .list_content .list_items .list_item .avatar {
+                float: left;
+                width: 43px;
+                height: 43px;
+                border-radius: 50%;
+                border: 1px solid #efefef;
+            }
+
+            .list_content .list_items .list_item .list_middle {
+                float: left;
+                width: calc(100% - 145px);
+                height: 45px;
+                padding-left: 10px;
+            }
+
+                .list_content .list_items .list_item .list_middle .fn {
+                    font-weight: bold;
+                    font-size: .9em;
+                    line-height: 25px;
+                }
+
+                .list_content .list_items .list_item .list_middle .mn {
+                    font-size: .7em;
+                    line-height: 20px;
+                }
+
+            .list_content .list_items .list_item .list_right {
+                float: left;
+                width: 90px;
+                height: 45px;
+                text-align: center;
+            }
+
+                .list_content .list_items .list_item .list_right .number {
+                    font-size: 1.1em;
+                    line-height: 25px;
+                    font-weight: bold;
+                }
+
+                .list_content .list_items .list_item .list_right .text {
+                    font-size: .7em;
+                    line-height: 20px;
+                }
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+    margin-top: 5px;
+}
+
+.load_more_complete {
+    background-color: white;
+    width: auto;
+    text-align: center;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}

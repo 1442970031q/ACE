@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/answering.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button class="submit-button" @click="checkInput()" v-text="language.BUTTON_1"></button>
+        </div>
+        <div id="app-content">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING"></p>
+            </div>
+            <div v-else v-cloak class="question_content">
+                <div class="question_line">
+                    <p v-text="language.QUESTION_TEXT_1 + getQuestionText(paramObject.Q1)" class="text"></p>
+                    <div class="input-group">
+                        <input type="text" class="input-control" v-model="form.a1" v-bind:placeholder="language.QUESTION_PLACEHOLDER_1" maxlength="10" />
+                    </div>
+                </div>
+                <div class="question_line">
+                    <p v-text="language.QUESTION_TEXT_2 + getQuestionText(paramObject.Q2)" class="text"></p>
+                    <div class="input-group">
+                        <input type="text" class="input-control" v-model="form.a2" v-bind:placeholder="language.QUESTION_PLACEHOLDER_2" maxlength="10" />
+                    </div>
+                </div>
+                <div class="question_line">
+                    <p v-text="language.QUESTION_TEXT_3 + getQuestionText(paramObject.Q3)" class="text"></p>
+                    <div class="input-group">
+                        <input type="text" class="input-control" v-model="form.a3" v-bind:placeholder="language.QUESTION_PLACEHOLDER_3" maxlength="10" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'isLoading': true,
+                'statusbarHeight': 20,
+                'questionList': [],
+                'paramObject': {},
+                'form': {
+                    'account':'',
+                    'q1': '',
+                    'a1': '',
+                    'q2': '',
+                    'a2': '',
+                    'q3': '',
+                    'a3': ''
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'BUTTON_1': '',
+                    'LOADING': '',
+                    'QUESTION_TEXT_1': '',
+                    'QUESTION_TEXT_2': '',
+                    'QUESTION_TEXT_3': '',
+                    'QUESTION_PLACEHOLDER_1': '',
+                    'QUESTION_PLACEHOLDER_2': '',
+                    'QUESTION_PLACEHOLDER_3': '',
+                    'CHECK_MESSAGE_1': '',
+                    'CHECK_MESSAGE_2': '',
+                    'CHECK_MESSAGE_3': '',
+                    'SUBMIT_TEXT': '',
+                    'ERROR_TEXT_1': '',
+                    'ERROR_TITLE_1': '',
+                    'ERROR_TEXT_2': '',
+                    'ERROR_TITLE_2': ''
+                }
+            },
+            methods: {
+                'checkInput': function(){
+                    if (!this.form.a1) {
+                        toastMsg(this.language.CHECK_MESSAGE_1);
+                    } else if (!this.form.a2) {
+                        toastMsg(this.language.CHECK_MESSAGE_2);
+                    } else if (!this.form.a3) {
+                        toastMsg(this.language.CHECK_MESSAGE_3);
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function(){
+                    toastLoading({ 'message': this.language.SUBMIT_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ValidateQuestion',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            } 
+
+                            gotoNewWindow('reset.passwordPage', 'reset.password', {
+                                param: 'account=' + encodeURIComponent(_vue.paramObject.account) +
+                                    '&ct=' + _vue.paramObject.changeType,
+                                openCallback: function () {
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    })
+                },
+                'getQuestionText': function (qId) {
+                    for (var i = 0; i < this.questionList.length; i++) {
+                        if (this.questionList[i].Id == qId) return this.questionList[i].Question;
+                    }
+
+                    plus.nativeUI.alert(this.language.ERROR_TEXT_1, function () {
+                        closeWindow();
+                    }, this.language.ERROR_TITLE_1);
+                },
+                'loadQuestionList': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'QuestionList',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (result.Data.List.length == 0) {
+                                plus.nativeUI.alert(this.language.ERROR_TEXT_2, function () {
+                                    closeWindow();
+                                }, this.language.ERROR_TITLE_2);
+                                return;
+                            }
+
+                            _vue.questionList = result.Data.List;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('answering', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+                var wb = plus.webview.currentWebview();
+                this.paramObject = wb.paramObject.form;
+
+                this.form.account = this.paramObject.account;
+                this.form.q1 = this.paramObject.Q1;
+                this.form.q2 = this.paramObject.Q2;
+                this.form.q3 = this.paramObject.Q3;
+            },
+            mounted: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.loadQuestionList();
+            }
+        });
+    </script>
+</body>
+</html>

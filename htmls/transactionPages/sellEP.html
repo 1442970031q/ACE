@@ -1,0 +1,553 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/sellEP.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading || isLoadingAnswer || isLoadingBank" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING"></p>
+            </div>
+            <div v-else v-cloak>
+                <div class="info_content">
+                    <div class="info_inner">
+                        <ul class="info_ul clearfix">
+                            <li>
+                                <div class="line">
+                                    <p class="value" v-text="numberFormat(currentUser.EP, 2)"></p>
+                                    <p class="txt" v-text="language.INFO_1"></p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="line">
+                                    <p class="value" v-text="currentUser.EPToRMBRate"></p>
+                                    <p class="txt" v-text="language.INFO_2"></p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="line">
+                                    <p class="value" v-text="convertAmountDisplay"></p>
+                                    <p class="txt" v-text="language.INFO_3"></p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <van-collapse v-model="activeNames">
+                    <van-collapse-item name="1">
+                        <div slot="title" class="tip_title">
+                            <i class="iconfont icon-bangzhu"></i>
+                            <span v-text="language.RULE_TITLE"></span>
+                        </div>
+                        <div class="tip">
+                            <ul>
+                                <li v-text="language.RULE_LINE_1"></li>
+                                <li v-text="language.RULE_LINE_2"></li>
+                                <li v-text="language.RULE_LINE_3"></li>
+                            </ul>
+                        </div>
+                    </van-collapse-item>
+                </van-collapse>
+                <div class="input_content">
+                    <div class="warn">
+                        <p class="caption" v-text="language.WARN_TITLE"></p>
+                        <p class="text" v-text="language.WARN_TEXT"></p>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <input type="text" class="input-control w-60" v-model="selectedObject.text" v-bind:placeholder="language.INPUT_PLACEHOLDER_1"
+                               readonly @click="isShow=true" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <!--<div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="text" class="input-control w-60" readonly v-bind:value="paymentDisplay" @click="isPaymentTimeShow=true"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                        <input type="text" class="input-control w-60" readonly v-bind:value="confirmDisplay" @click="isConfirmTimeShow=true"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_3" />
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>-->
+                    <div class="input-group">
+                        <span class="input-text" @click="isCountryNumberShow=true">
+                            <span v-text="countryNumber"></span>
+                            <samp class="down"></samp>
+                        </span>
+                        <input type="text" class="input-control" v-model="form.phone" v-bind:placeholder="language.INPUT_PLACEHOLDER_7" />
+                    </div>
+                </div>
+                <van-tabs v-model="tabIndex" class="mt-5" @change="tabChanged">
+                    <van-tab v-bind:title="language.TAB_1">
+                        <div class="input_content mt-0">
+                            <div class="input-group bb">
+                                <span class="input-text" v-text="language.INPUT_TEXT_11"></span>
+                                <input type="text" class="input-control gray" readonly v-model="currentUser.BankCardName" />
+                            </div>
+                            <div class="input-group bb">
+                                <span class="input-text" v-text="language.INPUT_TEXT_9"></span>
+                                <input type="text"
+                                       class="input-control w-60"
+                                       readonly
+                                       v-model="form.bankName"
+                                       @click="isBankNameShow=true"
+                                       v-bind:placeholder="language.INPUT_PLACEHOLDER_9"
+                                       maxlength="16" />
+                                <i class="iconfont icon-gengduo right_icon"></i>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-text" v-text="language.INPUT_TEXT_8"></span>
+                                <input type="number" class="input-control" v-model="form.bankNumber"
+                                       v-bind:placeholder="language.INPUT_PLACEHOLDER_8" maxlength="25" />
+                            </div>
+                            <div class="bank_number" v-text="bankNumberFormat"></div>
+                        </div>
+                    </van-tab>
+                    <van-tab v-bind:title="language.TAB_2">
+                        <div class="input_content mt-0">
+                            <div class="input-group">
+                                <span class="input-text" v-text="language.INPUT_TEXT_13"></span>
+                                <div class="input-control">1EP = 0.9USDT</div>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-text" v-text="language.INPUT_TEXT_12"></span>
+                                <input type="text" class="input-control w-60" v-model="form.usdtAddress" v-bind:placeholder="language.INPUT_PLACEHOLDER_12"
+                                       maxlength="50" />
+                                <i class="iconfont icon-niantie right_icon" @click="pasteAddress"></i>
+                            </div>
+                        </div>
+                    </van-tab>
+                </van-tabs>
+                <div class="input_content">
+                    <div class="input-group">
+                        <p class="full-text" v-text="questionDisplay"></p>
+                        <input type="text" class="input-control center w-100" v-model="form.answer" v-bind:placeholder="language.INPUT_PLACEHOLDER_5"
+                               maxlength="10" />
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_5"></span>
+                        <input type="text" class="input-control" v-model="form.idcard" v-bind:placeholder="language.INPUT_PLACEHOLDER_6"
+                               maxlength="18" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                        <input type="password" class="input-control" v-model="form.password" v-bind:placeholder="language.INPUT_PLACEHOLDER_4"
+                               maxlength="16" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_14"></span>
+                        <input type="tel"
+                               class="input-control"
+                               v-model="form.gCode"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_14"
+                               maxlength="6" />
+                    </div>
+                </div>
+                <button class="confirm_button" @click="confirmSell" v-text="language.BUTTON_1"></button>
+                <van-popup v-model="isShow" position="bottom">
+                    <van-picker v-bind:columns="items" @cancel="isShow=false" v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                @confirm="selectedItem" show-toolbar="true" v-bind:title="language.PICKER_TITLE_1"></van-picker>
+                </van-popup>
+                <!--<van-popup v-model="isPaymentTimeShow" position="bottom">
+                    <van-picker v-bind:columns="paymentTimeList" @cancel="isPaymentTimeShow=false" v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                @confirm="selectedPaymentTimeItem" show-toolbar="true" v-bind:title="language.PICKER_TITLE_2"></van-picker>
+                </van-popup>-->
+                <!--<van-popup v-model="isConfirmTimeShow" position="bottom">
+                    <van-picker v-bind:columns="confirmTimeList" @cancel="isConfirmTimeShow=false" v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                @confirm="selectedConfirmTimeItem" show-toolbar="true" v-bind:title="language.PICKER_TITLE_2"></van-picker>
+                </van-popup>-->
+                <van-popup v-model="isBankNameShow" position="bottom">
+                    <van-picker v-bind:columns="bankNameList" value-key="Name" @cancel="isBankNameShow=false" v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                @confirm="selectedBankItem" show-toolbar="true" v-bind:title="language.PICKER_TITLE_3"></van-picker>
+                </van-popup>
+                <van-popup v-model="isConfirmDialogShow" class="confirm_dialog">
+                    <div class="confirm_dialog_inner">
+                        <p class="caption" v-text="language.CONFIRM_DIALOG_CAPTION"></p>
+                        <ul>
+                            <li class="clearfix">
+                                <span class="text" v-text="language.INPUT_TEXT_1"></span>
+                                <span class="value" v-text="form.epAmount"></span>
+                            </li>
+                            <!--<li class="clearfix">
+                                <span class="text" v-text="language.INPUT_TEXT_2"></span>
+                                <span class="value" v-text="paymentDisplay"></span>
+                            </li>
+                            <li class="clearfix">
+                                <span class="text" v-text="language.INPUT_TEXT_3"></span>
+                                <span class="value" v-text="confirmDisplay"></span>
+                            </li>-->
+                            <li class="clearfix">
+                                <span class="text" v-text="language.INPUT_TEXT_7"></span>
+                                <span class="value" v-text="form.phone"></span>
+                            </li>
+                            <li class="clearfix">
+                                <span class="text" v-text="language.RECEIVE_TYPE"></span>
+                                <span class="value" v-text="form.receiveType === 1 ? language.TAB_1 : language.TAB_2"></span>
+                            </li>
+                            <li class="clearfix" v-if="form.receiveType === 1">
+                                <span class="text" v-text="language.INPUT_TEXT_9"></span>
+                                <span class="value" v-text="form.bankName"></span>
+                            </li>
+                            <li class="clearfix" v-if="form.receiveType === 1">
+                                <span class="text" v-text="language.INPUT_TEXT_10"></span>
+                                <span class="value" v-text="form.bankBranchName"></span>
+                            </li>
+                            <li class="clearfix" v-if="form.receiveType === 1">
+                                <span class="text" v-text="language.INPUT_TEXT_8"></span>
+                                <span class="value" v-text="form.bankNumber"></span>
+                            </li>
+                            <li class="clearfix" v-if="form.receiveType === 2">
+                                <span class="text" v-text="language.INPUT_TEXT_12"></span>
+                                <span class="value" v-text="form.usdtAddress"></span>
+                            </li>
+                        </ul>
+                        <div class="buttons">
+                            <button class="button" v-text="language.BUTTON_1" @click="doSubmitAjax"></button>
+                            <button class="button cancel" @click="isConfirmDialogShow = false" v-text="language.BUTTON_2"></button>
+                        </div>
+                    </div>
+                </van-popup>
+                <van-popup v-model="isCountryNumberShow" position="bottom">
+                    <van-picker v-bind:columns="countryNumberList" value-key="text" @cancel="isCountryNumberShow=false" v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                @confirm="countryNumberItem" show-toolbar="true" v-bind:title="language.PICKER_TITLE_4"></van-picker>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script src="../../js/country.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isLoadingAnswer': true,
+                'isLoadingBank': true,
+                'selectedObject': {
+                    'text': ''
+                },
+                'tabIndex': 0,
+                'convertAmountDisplay': '0.00',
+                //'paymentDisplay': '',
+                //'confirmDisplay': '',
+                'questionDisplay': '',
+                'isShow': false,
+                //'isPaymentTimeShow': false,
+                //'isConfirmTimeShow': false,
+                'isConfirmDialogShow': false,
+                'isBankNameShow': false,
+                'isCountryNumberShow': false,
+                'bankNumberFormat': '銀行卡號',
+                'form': {
+                    'epAmount': '',
+                    //'limitConfirm': '',
+                    //'limitPayment': '',
+                    'usdtAddress': '',
+                    'qId': 0,
+                    'answer': '',
+                    'idcard': '',
+                    'password': '',
+                    'bankNumber': '',
+                    'phone': '',
+                    'bankName': '',
+                    'bankBranchName': '',
+                    'receiveType': 1,
+                    'gCode': ''
+                },
+                'items': [],
+                //'paymentTimeList': [],
+                //'confirmTimeList': [],
+                'bankNameList': [],
+                'countryNumberList': [],
+                'countryNumber': '+86',
+                'activeNames': ['0'],
+                'language': {},
+                'statusbarHeight': 20
+            },
+            watch: {
+                'form.epAmount': function (value) {
+                    this.convertAmountDisplay = numberFormat(this.currentUser.EPToRMBRate * value, 2);
+                }
+            },
+            methods: {
+                'tabChanged': function (index) {
+                    this.form.receiveType = index + 1;
+                },
+                'pasteAddress': function () {
+                    var mainPage = plus.webview.getWebviewById('mainPage');
+                    if (mainPage !== null) {
+                        mainPage.evalJS('pageScript.getClipBoard("sellEPPage", "_vue.pasteCallback")');
+                    }
+                },
+                'pasteCallback': function (text) {
+                    if (!text || text === null || text === 'null' || text === 'undefined') {
+                        toastMsg(this.language.EMPTY_PASTE);
+                        return;
+                    }
+
+                    this.form.usdtAddress = text;
+                },
+                //'selectedConfirmTimeItem': function (item) {
+                //    this.isConfirmTimeShow = false;
+                //    this.confirmDisplay = item.text;
+                //    this.form.limitConfirm = item.value;
+                //},
+                //'selectedPaymentTimeItem': function (item) {
+                //    this.isPaymentTimeShow = false;
+                //    this.paymentDisplay = item.text;
+                //    this.form.limitPayment = item.value;
+                //},
+                'selectedItem': function (item) {
+                    this.isShow = false;
+
+                    this.selectedObject.text = item.text;
+                    this.form.epAmount = item.value;
+                },
+                'selectedBankItem': function (item) {
+                    this.isBankNameShow = false;
+                    this.form.bankName = item.Name;
+                },
+                'countryNumberItem': function (item) {
+                    this.countryNumber ='+'+item.code;
+                    this.isCountryNumberShow = false;
+                },
+                'loadPageData': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (callback && typeof (callback) == 'function') {
+                                callback(result);
+                            } else {
+                                _vue.currentUser = getUserModel();
+                                _vue.isLoading = false;
+                            }
+                        }
+                    });
+                },
+                'loadAnswer': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetAnswerTitle',
+                        success: function (result) {
+
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.questionDisplay = result.QTitle;
+                            _vue.form.qId = result.Qid;
+                            _vue.isLoadingAnswer = false;
+                        }
+                    })
+                },
+                'loadBankName': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'SupportBanks',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.bankNameList = result.Data;
+                            _vue.isLoadingBank = false;
+                        }
+                    })
+                },
+                'confirmSell': function () {
+                    this.form.bankBranchName = this.form.bankName;
+                    if (!this.form.epAmount) {
+                        toastMsg(this.language.ERROR_1);
+                        return;
+                    }
+
+                    if (this.form.epAmount * 1 > this.currentUser.EP * 1) {
+                        toastMsg(this.language.ERROR_2);
+                        return;
+                    }
+
+                    //if (this.form.limitPayment <= 0) {
+                    //    toastMsg(this.language.ERROR_3);
+                    //    return;
+                    //}
+
+                    //if (this.form.limitConfirm <= 0) {
+                    //    toastMsg(this.language.ERROR_4);
+                    //    return;
+                    //}
+
+                    if (!this.form.phone) {
+                        toastMsg(this.language.ERROR_9);
+                        return;
+                    }
+
+                    if (this.form.receiveType === 1) {
+                        if (!this.form.bankName) {
+                            toastMsg(this.language.ERROR_11);
+                            return;
+                        } else if (!this.form.bankNumber) {
+                            toastMsg(this.language.ERROR_10);
+                            return;
+                        }
+                    }
+
+                    if (this.form.receiveType === 2) {
+                        if (!this.form.usdtAddress) {
+                            toastMsg(this.language.ERROR_13);
+                            return;
+                        } else if (this.form.usdtAddress.length < 27) {
+                            toastMsg(this.language.ERROR_14);
+                            return;
+                        }
+                    }
+
+                    if (!this.form.answer) {
+                        toastMsg(this.language.ERROR_7);
+                        return;
+                    }
+
+                    if (!this.form.idcard) {
+                        toastMsg(this.language.ERROR_8);
+                        return;
+                    }
+
+                    if (!this.form.password) {
+                        toastMsg(this.language.ERROR_5);
+                        return;
+                    }
+
+                    if (this.form.password.length < 6) {
+                        toastMsg(this.language.ERROR_6);
+                        return;
+                    }
+
+                    if (!this.form.gCode) {
+                        toastMsg(this.language.ERROR_15);
+                        return;
+                    }
+
+                    if (this.form.gCode.length !== 6) {
+                        toastMsg(this.language.ERROR_16);
+                        return;
+                    }
+
+                    this.isConfirmDialogShow = true;
+                },
+                'doSubmitAjax': function () {
+                    this.isConfirmDialogShow = false;
+                    toastLoading({
+                        'message': this.language.TOAST_TEXT
+                    });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'EPSell',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.loadPageData(function () {
+                                var transactionPage = plus.webview.getWebviewById('ep.transaction.htmlPage');
+                                transactionPage.evalJS('_vue.initPageData()');
+
+                                gotoNewWindow('sell.successPage', '../success/sell.success', {
+                                    param: 'c=' + _vue.form.epAmount,
+                                    openCallback: function () {
+                                        closeWindow('none');
+                                    }
+                                });
+                            });
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('sell_ep', function (lang) {
+                       Vue.set(_vue, 'language', lang);
+                        _vue.bankNumberFormat = _vue.language.BANK_FORMAT_TEXT;
+
+                        //var times = [15, 30, 60, 120];
+                        //for (var i = 0; i < times.length; i++) {
+                        //    var timeItem = {
+                        //        'text': (times[i] < 60) ? `${times[i]}${_vue.language.TIME_M}` : `${times[i] / 60}${_vue.language.TIME_H}`,
+                        //        'value': times[i]
+                        //    };
+                        //    _vue.paymentTimeList.push(timeItem);
+                        //    _vue.confirmTimeList.push(timeItem);
+                        //}
+                    });
+                } 
+            },
+            watch: {
+                'form.bankNumber': function (v) {
+                    if (!v) {
+                        this.bankNumberFormat = '';
+                        return;
+                    }
+
+                    var len = v.length / 4 + 1;
+                    var display = '';
+                    for (var i = 0; i < len; i++) {
+                        display += v.substring(i * 4, i * 4 + 4) + ' ';
+                    }
+
+                    this.bankNumberFormat = display;
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+
+                for (var i = 150; i <= 1000; i += 50) {
+                    this.items.push({
+                        'text': i + 'EP',
+                        'value': i
+                    });
+                }
+
+                this.countryNumberList = country;
+            },
+            mounted: function () {
+                this.loadPageData();
+                this.loadAnswer();
+                this.loadBankName();
+            }
+        });
+    </script>
+</body>
+</html>

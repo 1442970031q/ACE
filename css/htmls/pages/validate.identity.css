@@ -1,0 +1,35 @@
+﻿html, body {
+    height: 100%;
+    background-color: transparent;
+}
+
+#app {
+    background-color: #f9f9f9;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+    #app .head {
+        background-color: white;
+        text-align: center;
+        height: 49px;
+        line-height: 49px;
+        font-weight: bold;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+.warn {
+    width: calc(100% - 20px);
+    padding: 10px;
+    font-size: .9em;
+    margin: 0 auto;
+    margin-top: 10px;
+    color: #f9bc0b;
+    background-color: #fef7e1;
+    border-color: #fef3d2;
+    text-align: left;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}

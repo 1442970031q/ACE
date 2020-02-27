@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/subaccount.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">子賬戶管理</p>
+            <button class="submit-button" v-if="!isLoading && !currentUser.IsSon" @click="createAccount()" v-text="language.NEW_SUB_ACCOUNT">新增子賬戶</button>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box p60">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else class="container" v-cloak>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA">暫無子賬戶</p>
+                </div>
+                <div v-else>
+                    <ul class="accounts">
+                        <li class="account" v-for="(item,index) in list.data" v-bind:key="index" @click="gotoDetail(item)">
+                            <div class="top_content clearfix">
+                                <img v-lazy="item.AvatarImage" class="avatar" />
+                                <div class="middle_content">
+                                    <p class="nickname" v-text="'ID：' + item.FlowNumber"></p>
+                                    <p class="member_code" v-text="language.LOGIN_NAME + item.MemberNo"></p>
+                                </div>
+                                <div class="right_content">
+                                    <p class="value" v-text="numberFormat(item.AceAmount, 0)"></p>
+                                    <p class="text" v-text="language.ACE_AMOUNT">ACE王牌</p>
+                                </div>
+                            </div>
+                            <div class="data_content van-hairline--top">
+                                <ul class="datas clearfix">
+                                    <li class="data_item van-hairline--right">
+                                        <p class="value" v-text="numberFormat(item.EP, 2)"></p>
+                                        <p class="text" v-text="language.EP_AMOUNT">持有EP</p>
+                                    </li>
+                                    <li class="data_item van-hairline--right">
+                                        <p class="value" v-text="numberFormat(item.RP, 2)"></p>
+                                        <p class="text" v-text="language.RP_AMOUNT">持有RP</p>
+                                    </li>
+                                    <li class="data_item">
+                                        <p class="value" v-text="numberFormat(item.SP, 2)"></p>
+                                        <p class="text" v-text="language.SP_AMOUNT">持有SP</p>
+                                    </li>
+                                </ul>
+                                <div class="create_time clearfix">
+                                    <div class="left">
+                                        <i class="iconfont icon-wujiaoxing1" v-for="i in item.LevelNumber"></i>
+                                    </div>
+                                    <span class="right" v-text="item.CreateTime"></span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="list.isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT">正在載入...</span>
+                    </div>
+                    <div v-if="list.isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NONE_MORE_DATA">沒有更多的數據了...</span>
+                    </div>
+                    <button v-if="!isPasswordInput" class="confirm_button" @click="showDialog()" v-text="language.ONE_KEY_REGRESS">一鍵歸集</button>
+                </div>
+                <van-dialog v-model="isPasswordInput" v-bind:title="language.CONFIRM_TRADE" v-bind:before-close="checkPassword" show-cancel-button>
+                    <input type="password" ref="passwordBox" maxlength="16" class="pwd_box" v-model="form.password" v-bind:placeholder="language.INPUT_TRANSFER_PASSWORD" />
+                </van-dialog>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_avatar.jpg',
+            'error': '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isPasswordInput': false,
+                'isLoading': true,
+                'param': {
+                    'p': 1,
+                    'pageSize': 15,
+                    'account': ''
+                },
+                'list': {
+                    'isLoadMore': false,
+                    'isLoadComplete': false,
+                    'data': []
+                },
+                'form': {
+                    'password': ''
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoDetail': function (item) {
+                    //gotoNewWindow('subaccount.detailPage', 'subaccount.detail', {
+                    //    paramObject: {
+                    //        'item': item
+                    //    }
+                    //})
+                },
+                'showDialog': function () {
+                    this.isPasswordInput = true;
+                    setTimeout(function () {
+                        _vue.$refs['passwordBox'].focus();
+                    }, 50);
+                },
+                'checkPassword': function (action, done) {
+                    if (action == 'confirm') {
+                        if (!this.form.password) {
+                            done(false);
+                            toastMsg(this.language.INPUT_TRANSFER_PASSWORD);//'請輸入交易密碼'
+                        } else if (this.form.password.length < 6) {
+                            done(false);
+                            toastMsg(this.language.TRANSFER_PASSWORD_REQUIRE);//'交易密碼最少6位'
+                        } else {
+                            var pwd = this.form.password;
+                            this.form.password = '';
+                            done();
+
+                            this.doAllInOneAjax(pwd);
+                        }
+                    } else {
+                        done();
+                    }
+                },
+                'doAllInOneAjax': function (pwd) {
+                    toastLoading({ 'message': this.language.REGRESSING });//'正在歸集'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'OneKeyReturn',
+                        data: { 'password': pwd },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                            } else {
+                                _vue.updateInfo(function () {
+                                    closeToastLoading();
+
+                                    _vue.reloadPageData();
+                                    _vue.$toast.success(_vue.language.REGRESS_OK);//'歸集成功！'
+                                });
+                            }
+                        }
+                    });
+                },
+                'updateInfo': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (typeof (callback) == 'function') {
+                                callback();
+                            }
+                        }
+                    })
+                },
+                'loadPageData': function (isAppend) {
+                    if (isAppend) {
+                        this.list.isLoadMore = true;
+                    }
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MySubaccount',
+                        data: this.param,
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.param.p++;
+
+                            if (isAppend) {
+                                _vue.list.data = _vue.list.data.concat(result.Data.List);
+                                _vue.list.isLoadMore = false;
+                                _vue.list.isLoadComplete = (result.Data.List.length < _vue.param.pageSize);
+                            } else {
+                                _vue.list.data = result.Data.List;
+                                _vue.isLoading = false;
+                            }
+                        }
+                    });
+                },
+                'createAccount': function () {
+                    toastLoading({ 'message': _vue.language.AUDITING });//'正在檢查規則'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'IsCanSonDeclarationForm',
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return
+                            }
+
+                            if (!result.CanCreate) {
+                                closeToastLoading();
+                                _vue.$dialog.alert({
+                                    'message': _vue.language.AUDIT_FAIL_MSG_1 + result.CanCreateDate + _vue.language.AUDIT_FAIL_MSG_2,
+                                    'title': _vue.language.AUDIT_FAIL//'不符合規則'
+                                });
+                                return;
+                            }
+
+                            gotoNewWindow('create.accountPage', 'createSubAccount/create.account', {
+                                'openCallback': function () {
+                                    closeToastLoading();
+                                }
+                            });
+                        }
+                    })
+                },
+                'reloadPageData': function () {
+                    this.isLoading = true;
+                    this.param.p = 1;
+                    this.loadPageData(false);
+                },
+                'resetItemValue': function (id, type) {
+                    var item = this.getItemById(id);
+                    if (item != null) {
+                        item[type == 1 ? 'EP' : 'RP'] = 0;
+                    }
+                },
+                'addItemAmountValue': function (toId, type, amount) {
+                    var toUser = this.getItemById(toId);
+                    if (toUser != null) {
+                        toUser[type == 1 ? 'EP' : 'RP'] += amount * 1;
+                    }
+                },
+                'changeItemValue': function (fromId, toId, type, amount) {
+                    var fromUser = this.getItemById(fromId);
+                    var toUser = this.getItemById(toId);
+
+                    var typeName = (type == 1) ? 'EP' : 'RP';
+                    fromUser[typeName] -= amount * 1;
+
+                    if (toUser != null) {
+                        toUser[typeName] += amount * 1;
+                    }
+                },
+                'getItemById': function (id) {
+                    for (var i = 0; i < this.list.data.length; i++) {
+                        if (this.list.data[i].Id == id) return this.list.data[i];
+                    }
+
+                    return null;
+                },
+                'windowScroll': function () {
+                    if (!this.list.isLoadMore && !this.list.isLoadComplete) {
+                        this.loadPageData(true);
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('subaccount', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

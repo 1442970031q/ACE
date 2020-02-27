@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html class="wx">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <style>
+        .input-group .input-control.w-7 {
+            width: calc(100% - 30% - 55px);
+        }
+
+        .input-group .paste {
+            float: left;
+            width: 55px;
+            text-align: center;
+            height: 45px;
+            line-height: 45px;
+        }
+
+            .input-group .paste:active {
+                background-color: #f9f9f9;
+            }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body class="wx">
+    <div id="app">
+        <div id="app-head" class="wx">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">設置ETH</p>
+            <button class="submit-button" @click="doSubmitAjax" v-text="language.CONFIRM_MODIFY">確認更改</button>
+        </div>
+        <div id="app-content" v-cloak>
+            <div class="input_content mt-5">
+                <div class="input-group bb">
+                    <span class="input-text" v-text="language.ETH_ADDRESS">ETH地址</span>
+                    <input type="text" class="input-control w-7" v-model="form.address" maxlength="64" v-bind:placeholder="language.INPUT_ETH_ADDRESS" />
+                    <span class="paste" @click="onPaste" v-text="language.PASTE_ADDRESS">粘貼</span>
+                </div>
+                <div class="input-group">
+                    <span class="input-text" v-text="language.TRANSFER_PWD">交易密碼</span>
+                    <input type="password" class="input-control" v-model="form.password" maxlength="16" v-bind:placeholder="language.INPUT_TRANSFER_PWD" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'form': {
+                    'address': '',
+                    'password': ''
+                },
+                "language": {}
+            },
+            methods: {
+                'doSubmitAjax': function () {
+                    if (!this.form.address) {
+                        toastMsg(_vue.language.INPUT_ETH_ADDRESS); //toastMsg('請輸入ETH地址');
+                    } else if (!this.form.password) {
+                        toastMsg(_vue.language.INPUT_TRANSFER_PWD); //'請輸入交易密碼'
+                    } else if (this.form.password.length < 6) {
+                        toastMsg(_vue.language.TRANSFER_MUST_MORE_CHARS); //'交易密碼最少6位'
+                    } else {
+                        this.doAjax();
+                    }
+                },
+                'doAjax': function () {
+                    toastLoading({ 'message': _vue.language.SUBMIT_PROGRESSING  });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ChangeEthAddress',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel({
+                                'Eth': _vue.form.address
+                            }, [{
+                                'pageName': 'addressPage',
+                                'actionName': '_vue.updateCardInfo()'
+                            }]);
+
+                            gotoNewWindow('change.successPage', '../../success/change.success', {
+                                param: `title=${_vue.language.MODIFY_TYPE}&text=${_vue.language.MODIFY_SUCCESS}`,//'title=修改以太坊ETH&text=修改成功',
+                                openCallback: function () {
+                                    closeWindow('none');
+                                }
+                            })
+                        }
+                    });
+                },
+                'onPaste': function () {
+                    var wb = plus.webview.getWebviewById('mainPage');
+                    wb.evalJS('pageScript.getClipBoard("eth.changePage", "_vue.receivePaste")');
+                },
+                'receivePaste': function (text) {
+                    if (!text || text == 'null') {
+                        toastMsg(_vue.language.CLIPBOARD);
+                    } else {
+                        this.form.address = text;
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('eth_change', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+            },
+        });
+    </script>
+</body>
+</html>

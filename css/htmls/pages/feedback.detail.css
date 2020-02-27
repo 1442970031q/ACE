@@ -1,0 +1,183 @@
+﻿#app-head {
+    border-bottom: 0;
+}
+
+#app-content {
+    padding-bottom: 65px;
+}
+
+.list {
+    margin-top: 10px;
+}
+
+    .list li {
+        padding: 15px;
+    }
+
+        .list li .container {
+            display: flex;
+            position: relative;
+        }
+
+        .list li .avatar {
+            display: block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .list li .content {
+            width: calc(100% - 65px);
+            margin-left: 15px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .list li .container .content .mask {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(51, 51, 51, 0.35);
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: .9em;
+            border-radius: 6px;
+        }
+
+        .list li.service .content {
+            margin-right: 15px;
+        }
+
+        .list li .content .left_arrow {
+            width: 0;
+            height: 0;
+            border-width: 10px;
+            border-style: solid;
+            border-color: transparent #ffffff transparent transparent;
+            position: absolute;
+            left: -20px;
+        }
+
+        .list li.service .content .left_arrow {
+            border-color: transparent transparent transparent white;
+            right: -20px;
+            left: initial;
+        }
+
+        .list li .content .title {
+            font-size: .9em;
+            line-height: 20px;
+        }
+
+        .list li .content .des {
+            font-size: .75em;
+            margin-top: 10px;
+            color: #929292;
+        }
+
+            .list li .content .des.nmt {
+                margin-top: 0;
+            }
+
+        .list li .content .image {
+            height: 70px;
+            margin-top: 15px;
+        }
+
+        .list li .content img {
+            height: 70px;
+            display: block;
+            border-radius: 2px;
+        }
+
+        .list li .content .bottom {
+            height: 20px;
+            line-height: 20px;
+            margin-top: 15px;
+            font-size: .75em;
+        }
+
+            .list li .content .bottom .time {
+                float: right;
+                color: #b5b5b5;
+            }
+
+.actions {
+    height: 55px;
+    background-color: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+    .actions .image {
+        display: block;
+        width: 55px;
+        height: 40px;
+        text-align: center;
+        line-height: 40px;
+        font-size: 1.5em;
+    }
+
+    .actions .input_content {
+        width: calc(100% - 150px);
+        background-color: #f5f5f5;
+        margin-right: 7.5px;
+        height: 40px;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+    }
+
+        .actions .input_content .input_text {
+            height: 40px;
+            width: calc(100% - 40px);
+            padding: 0 10px;
+            box-sizing: border-box;
+            font-size: .8em;
+        }
+
+        .actions .input_content .temp_img {
+            display: block;
+            width: 38px;
+            height: 36px;
+            overflow: hidden;
+            margin-top: 2px;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            position: relative;
+        }
+
+            .actions .input_content .temp_img img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                display: block;
+                margin: auto;
+                right: 0;
+                bottom: 0;
+            }
+
+    .actions .send {
+        width: 80px;
+        height: 40px;
+        line-height: 40px;
+        color: white;
+        font-size: .8em;
+        border-radius: 20px;
+        background-color: #1e81d2;
+    }
+
+        .actions .send:active {
+            background-color: #176baf;
+        }

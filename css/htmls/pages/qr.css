@@ -1,0 +1,84 @@
+﻿html, body, #app {
+    height: 100%;
+}
+
+    html.wx, body.wx {
+        background-color: rgb(34,171,56);
+    }
+
+    html.ali, body.ali {
+        background-color: rgb(1,159,232);
+    }
+
+.van-loading--black circle {
+    stroke: white;
+}
+
+.loading-box .loading-text {
+    color: white;
+}
+
+#app-head {
+    border-bottom: 0;
+}
+
+    #app-head.wx {
+        background-color: rgb(34,171,56);
+    }
+
+    #app-head.ali {
+        background-color: rgb(1,159,232);
+    }
+
+    #app-head .app-head-text,
+    #app-head .right-back {
+        color: white;
+    }
+
+#app-content {
+    height: calc(100% - 65px);
+}
+
+.top_content {
+    padding: 10px;
+    height: 100%;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    position: relative;
+}
+
+    .top_content .qr_box {
+        margin: auto;
+        width: 290px;
+        height: 440px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+
+        .top_content .qr_box .image {
+            width: 100%;
+        }
+
+        .top_content .qr_box .qr_border {
+            width: 100%;
+            text-align: center;
+            height: 440px;
+            line-height: 440px;
+            background-color: white;
+            border-radius: 5px;
+            color: #b1b1b1;
+        }
+
+            .top_content .qr_box .qr_border:active {
+                background-color: #f9f9f9;
+            }
+
+        .top_content .qr_box .text {
+            color: white;
+            text-align: center;
+            margin-bottom: 5px;
+        }

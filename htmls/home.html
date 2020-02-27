@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../css/vant.css" rel="stylesheet" />
+    <link href="../css/base.css" rel="stylesheet" />
+    <link href="../css/htmls/home.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" 
+             class="fixed" 
+             v-bind:class="{'nb':noticeObject.hasOwnProperty('Id')}"
+             v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <button class="right-back" v-text="language.BUTTON_1" @click="gotoLanguage"></button>
+            <p class="app-head-text" v-text="language.TITLE"></p>
+            <button class="submit-button" @click="gotoNoticeList"><i class="iconfont icon-xinxi"></i></button>
+        </div>
+        <div v-if="isLoading" class="loading-box">
+            <van-loading color="black"></van-loading>
+            <p class="loading-text" v-text="language.LOADING"></p>
+        </div>
+        <div v-else v-cloak>
+            <div class="notice" 
+                 v-if="noticeObject.hasOwnProperty('Id')"
+                 v-bind:style="{'top': (45 + statusbarHeight) + 'px'}">
+                <van-notice-bar v-text="noticeObject.Title" @click="gotoNotice"></van-notice-bar>
+            </div>
+            <div id="app-content" 
+                 v-bind:style="{'paddingTop': !noticeObject.hasOwnProperty('Id') ? (45 + statusbarHeight) + 'px' : (36 + 45 + statusbarHeight) + 'px'}">
+                <van-pull-refresh v-model="isPullLoading" @refresh="onRefresh"
+                                  v-bind:pulling-text="language.PULLING_TEXT"
+                                  v-bind:loosing-text="language.LOOSING_TEXT"
+                                  v-bind:loading-text="language.LOADING_TEXT">
+                    <div class="block">
+                        <div class="container asset">
+                            <p class="title">
+                                <i class="iconfont icon-meiyuanqian"></i>
+                                <span v-text="language.BLOCK_TITLE_1"></span>
+                            </p>
+                            <ul class="clearfix">
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.ACECount, 0)"></span><sup class="unit" v-text="language.UNIT">張</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_1"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.TotalACE + currentUser.ACECount, 0)"></span><sup class="unit" v-text="language.UNIT">張</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_2"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.RP, 2)"></span><sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_3"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.EP, 2)"></span><sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_4"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.SP, 2)"></span><sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_5"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.AP, 2)"></span><sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_6"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.WeeklyMoney, 2)"></span><sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_7"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(profitData.TotalProfit, 2)"></span><sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_1_ITEM_8"></p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="price_content">
+                        <div class="price_block">
+                            <p class="price_title">
+                                <i class="iconfont icon-tubiao"></i>
+                                <span v-text="language.BLOCK_TITLE_2"></span>
+                            </p>
+                            <div class="business">
+                                <div class="add_info">
+                                    <p class="title" v-if="!profitData.IsJoin" v-text="language.BLOCK_2_ITEM_1"></p>
+                                    <p class="number red">
+                                        <sup class="unit" v-if="profitData.Percent>0">
+                                            <i class="iconfont icon-shang"></i>
+                                        </sup>
+                                        <span v-text="profitData.Percent"></span><span class="unit">%</span>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_2_ITEM_2"></p>
+                                </div>
+                                <ul class="business_block clearfix">
+                                    <li>
+                                        <p class="number">
+                                            <span v-text="joinCapital"></span><sup class="unit">$</sup>
+                                        </p>
+                                        <p class="text" v-text="language.BLOCK_2_ITEM_3"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number">
+                                            <span v-text="profitData.CurrentACEPrice"></span><sup class="unit">$</sup>
+                                        </p>
+                                        <p class="text" v-text="language.BLOCK_2_ITEM_4"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number">
+                                            <span v-text="numberFormat(profitData.TotalSelledAce, 3)"></span><sup class="unit">$</sup>
+                                        </p>
+                                        <p class="text" v-text="language.BLOCK_2_ITEM_5"></p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="price_block sp">
+                            <p class="price_title">
+                                <i class="iconfont icon-jiaoyijilu"></i>
+                                <span v-text="language.BLOCK_TITLE_3"></span>
+                            </p>
+                            <ul class="clearfix">
+                                <li>
+                                    <p class="number" @click="gotoQueue">
+                                        <span v-text="numberFormat(currentUser.TotalBuyMoney, 2)"></span>
+                                        <sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_3_ITEM_1"></p>
+                                </li>
+                                <li>
+                                    <p class="number">
+                                        <span v-text="numberFormat(currentUser.TotalSellAce * currentUser.CurrentStockPrice, 3)"></span>
+                                        <sup class="unit">$</sup>
+                                    </p>
+                                    <p class="txt" v-text="language.BLOCK_3_ITEM_2"></p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="price_content">
+                        <div class="price_block">
+                            <p class="price_title">
+                                <i class="iconfont icon-tubiao1"></i>
+                                <span v-text="language.BLOCK_TITLE_4"></span>
+                            </p>
+                            <div class="price_block price_now">
+                                <p class="number">
+                                    <span v-text="currentUser.CurrentStockPrice"></span><sup class="unit">$</sup>
+                                </p>
+                                <p class="time" v-text="language.BLOCK_4_ITEM_1 + updateTime"></p>
+                            </div>
+                            <div v-if="isLoadChart" class="loading-box chart">
+                                <van-loading color="black"></van-loading>
+                                <p class="loading-text" v-text="language.LOADING"></p>
+                            </div>
+                            <div v-else id="container1">
+
+                            </div>
+                        </div>
+                    </div>
+                </van-pull-refresh>
+            </div>
+        </div>
+        <van-popup v-model="isShow" v-bind:close-on-click-overlay="false" v-cloak>
+            <div class="dialog_box">
+                <h3 class="title" v-text="language.DIALOG_TITLE_2"></h3>
+                <p class="text" v-text="language.DIALOG_2_DES"></p>
+                <button class="confirm_button"
+                        v-bind:class="{'dis':resetConfig.questions.isComplete}"
+                        @click="!resetConfig.questions.isComplete && gotoQuestions()"
+                        v-text="resetConfig.questions.isComplete ? language.DIALOG_2_BUTTON_1 : language.DIALOG_2_BUTTON_2"></button>
+            </div>
+            <div class="dialog_box">
+                <h3 class="title" v-text="language.DIALOG_TITLE_1"></h3>
+                <p class="text" v-text="language.DIALOG_1_DES"></p>
+                <button class="confirm_button"
+                        v-bind:class="{'dis':resetConfig.trans.isComplete}"
+                        @click="!resetConfig.trans.isComplete && gotoResetPassword()"
+                        v-text="resetConfig.trans.isComplete ? language.DIALOG_1_BUTTON_1 : language.DIALOG_1_BUTTON_2"></button>
+            </div>
+            <div class="actions clearfix">
+                <button class="action" @click="gotoLogin" v-text="language.BUTTON_2"></button>
+            </div>
+        </van-popup>
+    </div>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/vant.js"></script>
+    <script src="../js/hightcharts.js"></script>
+    <script src="../js/highcharts-zh_CN.js"></script>
+    <script src="../js/base.js"></script>
+    <script src="../js/pages/home.js"></script>
+</body>
+</html>

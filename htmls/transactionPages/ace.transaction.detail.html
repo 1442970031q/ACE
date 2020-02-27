@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/detail.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/ace.transaction.detail.css" rel="stylesheet" />
+    <style>
+        .line_content {
+            padding-top: 15px;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-cloak v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else class="container">
+                <div class="seller_content mt-5">
+                    <div class="top_content clearfix">
+                        <img v-lazy="pageModel.User.Avatar" class="avatar" />
+                        <div class="right_content">
+                            <p class="nn" v-text="pageModel.User.FlowNumber"></p>
+                        </div>
+                    </div>
+                    <div class="info_content">
+                        <ul class="ace clearfix">
+                            <li>
+                                <p class="number">
+                                    <span v-text="pageModel.ReadonlyStockCount"></span>
+                                    <sup>ACE</sup>
+                                </p>
+                                <p class="text" v-text="language.TOP_ITEM_1"></p>
+                            </li>
+                            <li>
+                                <p class="number">
+                                    <span v-text="pageModel.SinglePrice"></span>
+                                    <sup>$</sup>
+                                </p>
+                                <p class="text" v-text="language.TOP_ITEM_2"></p>
+                            </li>
+                            <li>
+                                <p class="number">
+                                    <span v-text="numberFormat(pageModel.ReadonlyStockCount * pageModel.SinglePrice, 3)"></span>
+                                    <sup>$</sup>
+                                </p>
+                                <p class="text" v-text="language.TOP_ITEM_3"></p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="line_content">
+                    <div class="head">
+                        <p class="sell" v-text="language.DETAIL_TITLE"></p>
+                        <span class="sub" v-text="language.DETAIL_ITEM_1"></span>
+                        <span class="number" v-text="numberFormat(pageModel.StockCount, 0)"></span>
+                        <span class="sub">ACE</span>
+                        <div class="bottom clearfix">
+                            <span class="state green" v-text="language.DETAIL_ITEM_2"></span>
+                            <span class="time" v-text="pageModel.CreateTime"></span>
+                        </div>
+                    </div>
+                    <p class="sell" v-text="language.SELL_TITLE_TEXT"></p>
+                    <div class="list_content">
+                        <div v-if="isLoadBuy" class="loading-box">
+                            <van-loading color="black"></van-loading>
+                            <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+                        </div>
+                        <div v-else>
+                            <div v-if="buyList.data.length==0" class="none-data">
+                                <i class="iconfont icon-wushuju"></i>
+                                <p class="none-data-text" v-text="language.NOMORE"></p>
+                            </div>
+                            <div v-else>
+                                <ul class="buy_list">
+                                    <li class="clearfix" v-for="(item,index) in buyList.data" v-bind:key="index">
+                                        <img v-lazy="item.User.Avatar" class="avatar" />
+                                        <p class="user" v-text="item.User.NickName + '(' + item.User.FlowNumber + ')'"></p>
+                                        <div class="right_content clearfix">
+                                            <div class="info_block">
+                                                <p class="text" v-text="language.LIST_ITEM_1"></p>
+                                                <p class="number" v-text="item.SinglePrice"></p>
+                                            </div>
+                                            <div class="info_block">
+                                                <p class="text" v-text="language.LIST_ITEM_2"></p>
+                                                <p class="number" v-text="item.AceAmount.toFixed(0)"></p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_avatar.jpg',
+            'error': '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'statusbarHeight': 20,
+                'isLoading': true,
+                'isLoadBuy': true,
+                'pageModel': {
+                    'Id': queryString('tId')
+                },
+                'buyList': {
+                    'pageIndex': 1,
+                    'pageSize': 10,
+                    'data': []
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'TOP_ITEM_1': '',
+                    'TOP_ITEM_2': '',
+                    'TOP_ITEM_3': '',
+                    'DETAIL_TITLE': '',
+                    'DETAIL_ITEM_1': '',
+                    'DETAIL_ITEM_2': '',
+                    'SELL_TITLE_TEXT': '',
+                    'NOMORE': '',
+                    'LIST_ITEM_1': '',
+                    'LIST_ITEM_2': ''
+                }
+            },
+            methods: {
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ACETradingDetail',
+                        data: {
+                            'tId': this.pageModel.Id
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel = Object.assign({}, _vue.pageModel, result.Data);
+                            _vue.isLoading = false;
+                            _vue.loadBuyList();
+                        }
+                    });
+                },
+                'loadBuyList': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TradingList',
+                        data: {
+                            'p': this.buyList.pageIndex,
+                            'pageSize': this.buyList.pageSize,
+                            'tId': this.pageModel.Id,
+                            'uId': this.pageModel.User.Id
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.buyList.data = result.Data;
+                            _vue.isLoadBuy = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('ace_transaction_detail', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

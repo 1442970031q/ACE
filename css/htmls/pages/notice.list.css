@@ -1,0 +1,113 @@
+﻿.notice_content {
+    margin-top: 5px;
+}
+
+    .notice_content ul {
+    }
+
+        .notice_content ul li {
+            padding: 10px;
+            background-color: white;
+            margin-bottom: 5px;
+        }
+
+            .notice_content ul li:active {
+                background-color: #f9f9f9;
+            }
+
+            .notice_content ul li:last-child {
+                border-bottom: 0;
+            }
+
+            .notice_content ul li .left_content {
+                float: left;
+                width: calc(100% - 45px);
+            }
+
+                .notice_content ul li .left_content .title {
+                    font-size: 1em;
+                    color: #3c3c3c;
+                    height: 30px;
+                    line-height: 30px;
+                    width: 100%;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+
+                .notice_content ul li .left_content .text {
+                    font-size: .8em;
+                    color: #939393;
+                    line-height: 16px;
+                    height: 32px;
+                    overflow: hidden;
+                    margin-top: 10px;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                    display: -webkit-box;
+                    text-indent: 2em;
+                }
+
+                .notice_content ul li .left_content .time {
+                    height: 25px;
+                    line-height: 25px;
+                    text-align: right;
+                    font-size: .8em;
+                    margin-top: 10px;
+                    color: #b1b1b1;
+                }
+
+                    .notice_content ul li .left_content .time .iconfont {
+                        float: left;
+                        color: #fd2b2b;
+                        margin-left: 20px;
+                    }
+
+                    .notice_content ul li .left_content .time .time_txt {
+                        float: left;
+                    }
+
+            .notice_content ul li .right_content {
+                float: left;
+                width: 45px;
+                height: 107px;
+                line-height: 107px;
+                text-align: right;
+                color: #a2a2a2;
+            }
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+    margin-top: 5px;
+}
+
+.load_more_complete {
+    background-color: white;
+    width: auto;
+    text-align: center;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}

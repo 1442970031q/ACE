@@ -1,0 +1,125 @@
+﻿#app-head {
+    border-bottom: 0;
+}
+
+.top_content {
+    padding: 10px 20px;
+    background-color: white;
+}
+
+    .top_content .top_block {
+        width: 33.33333%;
+        float: left;
+        text-align: center;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    .top_content .txt {
+        color: #616161;
+        font-size: .8em;
+    }
+
+    .top_content .number {
+        margin-top: 10px;
+        font-size: 1.1em;
+        line-height: 20px;
+        color: #1e81d2;
+    }
+
+.star_list {
+    margin-top: 5px;
+    padding: 10px;
+    padding-bottom: 5px;
+    background-color: white;
+}
+
+    .star_list .title {
+        font-size: 1em;
+        font-weight: bold;
+    }
+
+    .star_list .van-radio {
+        border-bottom: 1px solid #f9f9f9;
+    }
+
+        .star_list .van-radio:last-child {
+            border-bottom: 0;
+        }
+
+    .star_list .van-radio-group {
+        margin-top: 10px;
+        padding: 0 10px;
+    }
+
+    .star_list .van-radio__input {
+        height: auto;
+    }
+
+    .star_list .van-radio .van-icon-checked {
+        color: #1e81d2;
+    }
+
+    .star_list .van-radio .van-icon {
+        line-height: 45px;
+    }
+
+    .star_list .van-radio__label {
+        margin-left: 5px;
+        font-size: 1em;
+    }
+
+    .star_list .desc {
+        font-size: .8em;
+        color: #929292;
+        padding: 10px;
+    }
+
+    .star_list .demo {
+        width: 90%;
+        margin: 0 auto;
+        border: 1px solid #f1f1f1;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+        .star_list .demo legend {
+            padding: 0 5px;
+            font-size: .8em;
+            color: #929292;
+        }
+
+        .star_list .demo .rules {
+            padding-left: 8px;
+        }
+
+            .star_list .demo .rules li {
+                list-style-type: disc;
+                font-size: .8em;
+                margin-bottom: 2px;
+                color: #929292;
+            }
+
+.input_content {
+    margin-top: 5px;
+}
+
+.max_content {
+    text-align: center;
+    padding: 10px;
+    padding-bottom: 20px;
+    background-color: white;
+    color: #8e8e8e;
+}
+
+    .max_content .iconfont {
+        font-size: 3em;
+    }
+
+    .max_content .txt {
+        text-align: center;
+        margin-top: 5px;
+        font-size: .9em;
+    }

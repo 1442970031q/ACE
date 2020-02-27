@@ -1,0 +1,518 @@
+{
+  "index.html": {
+    "refer": [
+      "htmls/main.html",
+      "htmls/account/login.html",
+      "htmls/centerPages/profilePages/change.trans.password.html"
+    ],
+    "resources": [
+      "font/iconfont.css",
+      "js/base.js",
+      "js/fast.click.js"
+    ]
+  },
+  "htmls/main.html": {
+    "resources": [
+      "htmls/center.html",
+      "css/vant.css",
+      "css/bottom.menus.css",
+      "css/base.css",
+      "font/iconfont.css",
+      "js/base.js",
+      "js/pages/main.js"
+    ],
+    "refer": [
+      "htmls/team.html",
+      "htmls/home.html",
+      "htmls/center.html",
+      "htmls/transaction.html",
+      "htmls/ace.transction.html",
+      "htmls/ep.transaction.html",
+      "htmls/subPages/hot.screen.html"
+    ]
+  },
+  "htmls/center.html": {
+    "refer": [
+      "htmls/centerPages/profile.html",
+      "htmls/transactionPages/sell.html",
+      "htmls/centerPages/new.user.html",
+      "htmls/centerPages/recharge.html",
+      "htmls/centerPages/buy.stocks.html",
+      "htmls/centerPages/exchange.rp.html",
+      "htmls/centerPages/upgrade.html",
+      "htmls/centerPages/my.team.html",
+      "htmls/centerPages/my.tree.html",
+      "htmls/centerPages/recharg.record.html",
+      "htmls/centerPages/exchange.record.html",
+      "htmls/centerPages/transaction.record.html",
+      "htmls/centerPages/my.ep.html",
+      "htmls/transactionPages/sellEP.html",
+      "htmls/centerPages/my.sell.ep.html",
+      "htmls/centerPages/my.buy.ep.html",
+      "htmls/centerPages/subaccount.html",
+      "htmls/centerPages/createNewAccount/new.user.html",
+      "htmls/centerPages/ep.to.sp.html",
+      "htmls/transactionPages/check.out.html",
+      "htmls/centerPages/check.out.record.html",
+      "htmls/centerPages/ep.record.html",
+      "htmls/centerPages/rp.give.html",
+      "htmls/centerPages/setting/set.up.html",
+      "htmls/centerPages/income.detail.html",
+      "htmls/centerPages/sp.record.html",
+      "htmls/centerPages/rp.record.html",
+      "htmls/centerPages/ep.give.html",
+      "htmls/centerPages/rp.to.sp.html",
+      "htmls/account/login.html",
+      "htmls/centerPages/profilePages/change.login.password.html",
+      "htmls/centerPages/profilePages/change.trans.password.html",
+      "htmls/centerPages/my.tree.new.html",
+      "htmls/centerPages/split.record.html",
+      "htmls/centerPages/ace.buy.record.html",
+      "htmls/centerPages/guide.sell.record.html",
+      "htmls/centerPages/feedback.html",
+      "htmls/centerPages/new.recharge.html",
+      "htmls/centerPages/google.auth.html",
+      "htmls/centerPages/activation.code.html"
+    ],
+    "resources": [
+      "img/default_avatar.jpg"
+    ]
+  },
+  "htmls/transaction.html": {
+    "refer": [
+      "htmls/transactionPages/detail.html",
+      "htmls/transactionPages/sell.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/new.user.html": {
+    "refer": [
+      "htmls/centerPages/choose.nodal.person.html",
+      "htmls/centerPages/new.user.step_2.html"
+    ],
+    "resources": []
+  },
+  "htmls/account/login.html": {
+    "refer": [
+      "htmls/main.html",
+      "htmls/account/forgot.html",
+      "htmls/subPages/language.html"
+    ],
+    "resources": [
+      "css/vant.css",
+      "css/base.css",
+      "css/htmls/account/login.css",
+      "js/vue.min.js",
+      "js/vant.js",
+      "js/base.js",
+      "img/logo_white_530.png"
+    ]
+  },
+  "htmls/centerPages/profile.html": {
+    "refer": [
+      "htmls/account/login.html",
+      "htmls/centerPages/profilePages/change.login.password.html",
+      "htmls/centerPages/profilePages/change.trans.password.html",
+      "htmls/centerPages/croppa.html",
+      "htmls/centerPages/profilePages/bank.card.html",
+      "htmls/centerPages/profilePages/change.nickname.html",
+      "htmls/centerPages/profilePages/address.html",
+      "htmls/centerPages/security.html"
+    ],
+    "resources": []
+  },
+  "htmls/home.html": {
+    "refer": [
+      "htmls/subPages/notice.detail.html",
+      "htmls/account/login.html",
+      "htmls/centerPages/profilePages/questions.html",
+      "htmls/subPages/notice.list.html",
+      "htmls/centerPages/profilePages/change.trans.password.html",
+      "htmls/subPages/purchase.queue.html",
+      "htmls/subPages/language.html",
+      "htmls/centerPages/profilePages/change.login.password.html"
+    ],
+    "resources": [
+      "img/top_bg.png",
+      "css/base.css",
+      "css/vant.css",
+      "css/htmls/home.css",
+      "js/vue.min.js",
+      "js/vant.js",
+      "js/hightcharts.js",
+      "js/highcharts-zh_CN.js",
+      "js/base.js",
+      "js/pages/home.js"
+    ]
+  },
+  "htmls/transactionPages/sell.html": {
+    "refer": [
+      "htmls/success/sell.success.html",
+      "htmls/account/login.html",
+      "htmls/centerPages/createSubAccount/choice.subaccount.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/exchange.rp.html": {
+    "refer": [
+      "htmls/success/exchange.success.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/buy.stocks.html": {
+    "refer": [
+      "htmls/success/buy.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/upgrade.html": {
+    "refer": [
+      "htmls/success/upgrade.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/bank.card.html": {
+    "refer": [
+      "htmls/centerPages/profilePages/change.bank.card.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/change.trans.password.html": {
+    "refer": [
+      "htmls/success/change.success.html",
+      "htmls/centerPages/profilePages/questions.html"
+    ],
+    "resources": [
+      "css/vant.css",
+      "css/base.css",
+      "css/htmls/pages/change.trans.password.css",
+      "js/vue.min.js",
+      "js/vant.js",
+      "js/base.js"
+    ]
+  },
+  "htmls/centerPages/profilePages/change.nickname.html": {
+    "refer": [
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/new.user.step_2.html": {
+    "refer": [
+      "htmls/success/new.user.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/change.bank.card.html": {
+    "refer": [
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/address.html": {
+    "refer": [
+      "htmls/centerPages/profilePages/change.bank.card.html",
+      "htmls/centerPages/profilePages/wx.qr.html",
+      "htmls/centerPages/profilePages/ali.qr.html",
+      "htmls/centerPages/profilePages/usdt.change.html",
+      "htmls/centerPages/profilePages/eth.change.html",
+      "htmls/centerPages/profilePages/btc.change.html"
+    ],
+    "resources": []
+  },
+  "htmls/success/buy.ep.success.html": {
+    "refer": [
+      "htmls/centerPages/my.buy.ep.html"
+    ],
+    "resources": []
+  },
+  "htmls/transactionPages/detail.html": {
+    "refer": [
+      "htmls/success/buy.ep.success.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/my.buy.ep.html": {
+    "refer": [
+      "htmls/centerPages/seller.info.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/subaccount.html": {
+    "refer": [
+      "htmls/centerPages/createSubAccount/create.account.html",
+      "htmls/centerPages/subaccount.detail.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/createSubAccount/create.account.html": {
+    "refer": [
+      "htmls/centerPages/choose.nodal.person.html",
+      "htmls/centerPages/createSubAccount/create.account_2.html",
+      "htmls/success/new.user.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/createSubAccount/create.account_2.html": {
+    "refer": [
+      "htmls/success/new.user.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/subaccount.detail.html": {
+    "refer": [
+      "htmls/centerPages/choose.nodal.person.html",
+      "htmls/centerPages/choose.sub.account.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/security.html": {
+    "refer": [
+      "htmls/centerPages/profilePages/questions.html",
+      "htmls/centerPages/profilePages/change.login.password.html",
+      "htmls/centerPages/profilePages/change.trans.password.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/account/forgot.html": {
+    "refer": [
+      "htmls/account/answering.html"
+    ],
+    "resources": []
+  },
+  "htmls/account/answering.html": {
+    "refer": [
+      "htmls/account/reset.password.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/questions.html": {
+    "refer": [
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/ep.to.sp.html": {
+    "refer": [
+      "htmls/success/exchange.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/ep.record.html": {
+    "refer": [
+      "htmls/centerPages/ep.week.detail.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/rp.give.html": {
+    "refer": [
+      "htmls/centerPages/choose.receive.person.html",
+      "htmls/success/change.success.html",
+      "htmls/centerPages/choose.batch.person.html",
+      "htmls/account/login.html",
+      "htmls/centerPages/profilePages/change.trans.password.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/income.detail.html": {
+    "refer": [
+      "htmls/centerPages/ep.week.detail.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/ep.give.html": {
+    "refer": [
+      "htmls/centerPages/choose.receive.person.html",
+      "htmls/account/login.html",
+      "htmls/success/change.success.html",
+      "htmls/centerPages/profilePages/questions.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/createNewAccount/new.user.html": {
+    "refer": [
+      "htmls/centerPages/choose.nodal.person.html",
+      "htmls/centerPages/createNewAccount/new.user.step_2.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/createNewAccount/new.user.step_2.html": {
+    "refer": [
+      "htmls/success/new.user.success.html",
+      "htmls/centerPages/choose.nodal.person.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/transactionPages/sellEP.html": {
+    "refer": [
+      "htmls/success/sell.success.html",
+      "htmls/account/login.html",
+      "htmls/centerPages/profilePages/change.trans.password.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/my.team.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/my.tree.html": {
+    "refer": [
+      "htmls/account/login.html",
+      "htmls/centerPages/createNewAccount/new.user.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/rp.to.sp.html": {
+    "refer": [
+      "htmls/success/exchange.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/ep.week.detail.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/rp.record.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/my.sell.ep.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/ep.transaction.html": {
+    "refer": [
+      "htmls/transactionPages/detail.html",
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/ace.transction.html": {
+    "refer": [
+      "htmls/account/login.html",
+      "htmls/transactionPages/ace.transaction.detail.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/my.tree.new.html": {
+    "refer": [
+      "htmls/account/login.html",
+      "htmls/centerPages/createNewAccount/new.user.html",
+      "htmls/centerPages/createSubAccount/create.account.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/choose.nodal.person.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/split.record.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/transactionPages/ace.transaction.detail.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/createSubAccount/choice.subaccount.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/subPages/notice.list.html": {
+    "refer": [
+      "htmls/subPages/notice.detail.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/usdt.change.html": {
+    "refer": [
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/subPages/purchase.queue.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/transaction.record.html": {
+    "refer": [
+      "htmls/account/login.html",
+      "htmls/centerPages/transaction.detail.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/btc.change.html": {
+    "refer": [
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/eth.change.html": {
+    "refer": [
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/profilePages/change.login.password.html": {
+    "refer": [
+      "htmls/account/login.html",
+      "htmls/success/change.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/recharge.html": {
+    "refer": [
+      "htmls/centerPages/my.recharge.html",
+      "htmls/centerPages/new.recharge.html",
+      "htmls/centerPages/recharge.calc.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/new.recharge.html": {
+    "refer": [
+      "htmls/success/submit.recharge.success.html"
+    ],
+    "resources": []
+  },
+  "htmls/centerPages/activation.code.html": {
+    "refer": [
+      "htmls/account/login.html"
+    ]
+  },
+  "htmls/centerPages/google.auth.html": {
+    "refer": [
+      "htmls/centerPages/bind.google.html"
+    ]
+  },
+  "htmls/centerPages/bind.google.html": {
+    "refer": [
+      "htmls/centerPages/bind.google.success.html"
+    ]
+  }
+}

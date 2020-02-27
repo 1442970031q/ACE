@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/my.recharge.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="bg"></div>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else v-cloak>
+                <div v-if="pageModel.list.length === 0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA">暫無反饋信息</p>
+                </div>
+                <div v-else>
+                    <ul class="list">
+                        <li v-for="(item,index) in pageModel.list"
+                            v-bind:key="index">
+                            <div class="line first clearfix">
+                                <span class="type_name" v-text="language.CAPTION_1 + numberFormat(item.UserInputAmount, 2)"></span>
+                                <span class="reply_state yellow" v-if="item.Status === 1" v-text="item.StatusName"></span>
+                                <span class="reply_state green" v-else-if="item.Status === 2" v-text="item.StatusName"></span>
+                                <span class="reply_state red" v-else-if="item.Status === 4" v-text="item.StatusName"></span>
+                            </div>
+                            <div class="line hash" v-if="item.TxHash">
+                                <p v-text="language.CAPTION_2 + item.TxHash"></p>
+                            </div>
+                            <div class="line images" v-if="item.ImageAddress">
+                                <div class="image">
+                                    <img v-lazy="item.ImageAddress" @click="viewImage(item.ImageAddress)" />
+                                </div>
+                            </div>
+                            <div class="line reject" v-if="item.Status === 4">
+                                <p v-text="language.CAPTION_3 +item.RejectReason"></p>
+                            </div>
+                            <div class="line clearfix">
+                                <span v-if="item.Status === 2" class="amount" v-text="'+' + item.RealRP + ' RP'"></span>
+                                <span class="time" v-text="item.CreateTime"></span>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="pageModel.isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT">正在載入...</span>
+                    </div>
+                    <div v-if="pageModel.isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NONE_MORE_DATA">沒有更多的數據了...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_feedback.png',
+            'error': '../../img/default_feedback.png',
+            'attempt': 1
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'pageModel': {
+                    'isLoadMore': false,
+                    'isLoadComplete': false,
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'list': []
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'viewImage': function (url) {
+                    vant.ImagePreview([url]);
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'Recharges',
+                        data: {
+                            'p': this.pageModel.pageIndex,
+                            'pageSize': this.pageModel.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.pageIndex++;
+                            _vue.pageModel.list = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'loadMore': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'Recharges',
+                        data: {
+                            'p': this.pageModel.pageIndex,
+                            'pageSize': this.pageModel.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.pageIndex++;
+                            _vue.pageModel.list = _vue.pageModel.list.concat(result.Data);
+                            _vue.pageModel.isLoadMore = false;
+                            if (result.Data.length < _vue.pageModel.pageSize) {
+                                _vue.pageModel.isLoadComplete = true;
+                            }
+                        }
+                    });
+                },
+                'windowScroll': function () {
+                    if (!this.pageModel.isLoadMore && !this.pageModel.isLoadComplete) {
+                        this.pageModel.isLoadMore = true;
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('my_recharge', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

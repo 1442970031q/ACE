@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../css/vant.css" rel="stylesheet" />
+    <link href="../font/iconfont.css" rel="stylesheet" />
+    <link href="../css/base.css" rel="stylesheet" />
+    <link href="../css/bottom.menus.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="panel pos van-hairline--top">
+            <div id="mask"></div>
+            <ul id="bottom-menus-items" class="menus clearfix">
+                <li id="m1" class="active" onclick="pageScript.switchPage(0, this)">
+                    <i class="iconfont icon-home"></i>
+                    <p id="TEXT_1" class="menus-text"></p>
+                </li>
+                <li onclick="pageScript.switchPage(1, this)">
+                    <i class="iconfont icon-ace"></i>
+                    <p id="TEXT_2" class="menus-text"></p>
+                </li>
+                <li onclick="pageScript.switchPage(2, this)">
+                    <i class="iconfont icon-jiaoyi"></i>
+                    <p id="TEXT_3" class="menus-text"></p>
+                </li>
+                <li onclick="pageScript.switchPage(3, this)">
+                    <i class="iconfont icon-yonghuming"></i>
+                    <p id="TEXT_4" class="menus-text"></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script src="../js/base.js"></script>
+    <script src="../js/pages/main.js"></script>
+</body>
+</html>

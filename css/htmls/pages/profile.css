@@ -1,0 +1,53 @@
+﻿.van-cell {
+    font-size: .95em;
+}
+
+.van-cell__title .van-cell__text {
+    font-size: 1.1em;
+}
+
+.van-cell__value span {
+    color: #848484;
+}
+
+.van-cell.avatar .van-icon {
+    line-height: 62px !important;
+}
+
+.app-avatar {
+    width: 60px;
+    height: 60px;
+    display: block;
+    border-radius: 50%;
+    border: 1px solid #ececec;
+}
+
+.quit_button {
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    color: #333;
+    background-color: white;
+}
+
+    .quit_button:active {
+        background-color: #f9f9f9;
+    }
+
+.glory_name {
+    font-size: .9em;
+    color: #848484;
+}
+
+.aTag:first-child {
+    margin-left: 10px;
+}
+
+.aTag {
+    background-color: #a90101;
+    color: white;
+    font-size: .6em;
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin-left: 3px;
+}

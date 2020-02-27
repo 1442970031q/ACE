@@ -1,0 +1,49 @@
+﻿#app-head {
+    background-color: #1e81d2;
+    border-bottom:0;
+}
+
+    #app-head .right-back,
+    #app-head .app-head-text {
+        color: white;
+    }
+
+.van-tab {
+    background-color: #1e81d2;
+    color: white;
+}
+
+    .van-tabs__line,
+    .van-tab:active,
+    .van-tabs__nav {
+        background-color: #44cbea;
+    }
+
+.van-hairline--top-bottom::after {
+    border-width: 0;
+}
+
+.top_content {
+    padding: 10px 20px;
+    background-color: #1e81d2;
+}
+
+    .top_content .top_block {
+        width: 100%;
+        text-align: left;
+        color: white;
+    }
+
+    .top_content .txt {
+        font-size: .8em;
+    }
+
+    .top_content .number {
+        margin-top: 10px;
+        font-size: 2em;
+        font-weight: bold;
+    }
+
+.input_content {
+    margin-top: 10px;
+}

@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover" />
+    <title></title>
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/new.feedback.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app">
+            <div id="app-head" class="fixed van-hairline--bottom" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+                <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+                <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+            </div>
+            <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+                <div class="input_group">
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_1">留言分類</span>
+                        <div class="input_control r-1"
+                             v-bind:class="{'gray': !form.type}"
+                             @click="isShow = true"
+                             v-text="!form.type ? language.INPUT_PLACEHOLDER_1 : display.typeName"></div>
+                        <span class="arrow iconfont icon-gengduo"></span>
+                    </div>
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_2">留言標題</span>
+                        <input type="text"
+                               maxlength="50"
+                               v-model="form.title"
+                               class="input_control"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                    </div>
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_3">上傳憑證</span>
+                        <div class="input_control r-1"
+                             v-bind:class="{'gray': !fileName}"
+                             v-text="fileName ? fileName : language.INPUT_PLACEHOLDER_3"></div>
+                        <i class="arrow iconfont icon-upload" @click="choiceImage"></i>
+                    </div>
+                    <div class="input_line full">
+                        <textarea class="full_control"
+                                  v-bind:placeholder="language.INPUT_PLACEHOLDER_4"
+                                  maxlength="500"
+                                  v-model="form.text"></textarea>
+                    </div>
+                </div>
+                <button class="confirm_button" @click="checkData">確認提交</button>
+                <van-popup v-model="isShow" position="bottom">
+                    <van-picker v-bind:columns="items" @cancel="isShow = false"
+                                v-bind:confirm-button-text="language.CONFIRM_BUTTON_TEXT"
+                                v-bind:cancel-button-text="language.CANCEL_BUTTON_TEXT"
+                                @confirm="selectedItem"
+                                show-toolbar="true"
+                                v-bind:title="language.PICKER_TITLE_1"></van-picker>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isShow': false,
+                'fileName': '',
+                'choiceFilePath': '',
+                'items': [{
+                    'text': '密碼問題',
+                    'value': 1
+                }, {
+                    'text': '充值問題',
+                    'value': 2
+                }, {
+                    'text': '資料修正',
+                    'value': 3
+                }, {
+                    'text': '其他',
+                    'value': 4
+                }],
+                'display': {
+                    'typeName': ''
+                },
+                'form': {
+                    'title': '',
+                    'text': '',
+                    'type': '',
+                    'imgBase64_1': ''
+                },
+                'statusbarHeight': 20,
+                'language': {}
+            },
+            methods: {
+                'checkData': function () {
+                    if (!this.form.type) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!this.form.title) {
+                        toastMsg(this.language.ERROR_2);
+                    } else if (!this.form.text) {
+                        toastMsg(this.language.ERROR_3);
+                    } else {
+                        toastLoading({ 'message': this.language.SUBMIT_TOAST_TEXT });
+
+                        if (this.choiceFilePath) {
+                            this.compressImage();
+                        } else {
+                            this.doSubmitAjax();
+                        }
+                    }
+                },
+                'compressImage': function () {
+                    plus.zip.compressImage({
+                        'src': this.choiceFilePath,
+                        'dst': '_downloads/feedback.jpg',
+                        'overwrite': true,
+                        'format': 'jpg',
+                        'width': 'auto',
+                        'height': 'auto',
+                        'quality': 90
+                    }, function (event) {
+                        _vue.compressComplete(event);
+                    }, function (error) {
+                        closeToastLoading();
+                        toastMsg(error.message);
+                    });
+                },
+                'compressComplete': function (event) {
+                    var reader = new plus.io.FileReader();
+
+                    reader.onloadend = function (e) {
+                        var base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                        _vue.form.imgBase64_1 = encodeURIComponent(base64);
+                        _vue.doSubmitAjax();
+                    };
+
+                    reader.onerror = function (fe) {
+                        closeToastLoading();
+                        toastMsg('Error:' + fe.error);
+                    };
+
+                    var f = event.target.replace('file://', '');
+                    reader.readAsDataURL(f);
+                },
+                'doSubmitAjax': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'SubmitCommits',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (CONFIG.IS_RUNTIME) {
+                                var wb = plus.webview.getWebviewById('feedbackPage');
+                                wb.evalJS('_vue.reloadPageData()');
+                            }
+
+                            toastMsg('提交成功');
+                            closeWindow();
+                        }
+                    });
+                },
+                'choiceImage': function () {
+                    plus.key.hideSoftKeybord();
+                    setTimeout(function () {
+                        plus.gallery.pick(_vue.resolveFile);
+                    }, 100);
+                },
+                'resolveFile': function (captureFile) {
+                    plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                        var filePath = entry.toLocalURL();
+                        entry.file(function (file) {
+                            if (file.size > 5 * (1024 * 1024)) {
+                                toastMsg('截图必须在5MB以内');
+                                return;
+                            }
+
+                            _vue.fileName = file.name;
+                            _vue.choiceFilePath = filePath;
+                        });
+                    });
+                },
+                'selectedItem': function (item) {
+                    this.isShow = false;
+                    this.form.type = item.value;
+                    this.display.typeName = item.text;
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'CommitsList',
+                        data: {
+                            'p': this.pageModel.pageIndex,
+                            'pageSize': this.pageModel.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.pageIndex++;
+                            _vue.pageModel.list = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('new_feedback', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+
+            }
+        });
+    </script>
+</body>
+</html>

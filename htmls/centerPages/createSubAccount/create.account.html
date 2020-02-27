@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/new.user.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <div class="input_content">
+                    <div class="warn text-left" v-if="isFirstReport">
+                        <b>
+                            <i class="iconfont icon-warning-line"></i>
+                            <span v-text="language.WARNING_TITLE"></span>
+                        </b>
+                        <p v-text="language.WARNING_TEXT"></p>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                        <div class="input-control w-60" @click="isShowMoney=true">
+                            <span v-bind:class="{'ht':form.investmentAmount==''}" v-html="starDisplay"></span>
+                        </div>
+                        <i class="iconfont icon-gengduo right_icon"></i>
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                        <input type="text"
+                               v-bind:readonly="isFirstReport"
+                               class="input-control"
+                               v-model="nodaPersonDisplay"
+                               @blur="!isFirstReport && searchPlayer()"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                    </div>
+                    <div class="input-group bb">
+                        <span class="input-text" v-text="language.PLAYER_NICKNAME">玩家昵稱</span>
+                        <van-loading v-if="isPlayerLoading" color="black" class="search_player"></van-loading>
+                        <span v-else class="input-control" v-bind:class="{'warning_color': isNotFound}" v-text="playerNickname"></span>
+                    </div>
+                    <div class="input-group" v-if="!isFirstReport">
+                        <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                        <div class="input-control border clearfix">
+                            <div class="input-inline left" v-bind:class="{'selected':form.position==1}" @click="form.position=1">
+                                <i class="iconfont icon-duihao"></i>
+                                <span v-text="language.POSISTION_LEFT"></span>
+                            </div>
+                            <div class="input-inline right" v-bind:class="{'selected':form.position==2}" @click="form.position=2">
+                                <span v-text="language.POSISTION_RIGHT"></span>
+                                <i class="iconfont icon-duihao"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input_content">
+                    <div class="input-group">
+                        <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                        <input type="password" 
+                               class="input-control" 
+                               v-model="form.mPassword" 
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_4" />
+                    </div>
+                </div>
+                <button class="confirm_button" @click="checkData" v-text="language.BUTTON_1"></button>
+                <van-popup v-model="isShow" position="bottom">
+                    <van-picker v-bind:columns="countryCode" 
+                                @cancel="isShow=false" 
+                                @confirm="selectedItem" 
+                                show-toolbar="true" 
+                                v-bind:title="language.COUNTRY_TITLE"></van-picker>
+                </van-popup>
+                <van-popup v-model="isShowMoney" position="bottom">
+                    <van-picker v-bind:columns="moneyList" show-toolbar="true" 
+                                v-bind:title="language.LEVEL_TITLE" 
+                                v-bind:confirm-button-text="language.LEVEL_BUTTON" 
+                                @confirm="confirmMoney" 
+                                @cancel="isShowMoney=false"></van-picker>
+                </van-popup>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/country.code.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isShow': false,
+                'isShowMoney': false,
+                'isLoading': true,
+                'isPlayerLoading': false,
+                'isNotFound': false,
+                'playerNickname': '',
+                'starDisplay': '',
+                'moneyList': [],
+                'nodaPersonDisplay': '',
+                'isFirstReport': false,
+                'form': {
+                    'investmentAmount': '',
+                    'nodalPersonId': '',
+                    'position': '1',
+                    'mPassword': ''
+                },
+                'request': {
+                    'fromTree': queryString('fromTree'),
+                    'parentId': queryString('parentId'),
+                    'display': queryString('display'),
+                    'parentDisplay': queryString('parentDisplay'),
+                    'pos': queryString('pos')
+                },
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'searchPlayer': function () {
+                    if (this.nodaPersonDisplay.length >= 5) {
+                        this.form.nodalPersonId = '';
+                        this.isPlayerLoading = true;
+
+                        ajax({
+                            url: CONFIG.BASE_URL + 'GetNodalPersonList',
+                            data: {
+                                'code': this.nodaPersonDisplay
+                            },
+                            success: function (result) {
+                                if (result.Error) {
+                                    toastMsg(result.Msg);
+                                } else if (result.Data.List.length == 0) {
+                                    _vue.isNotFound = true;
+                                    _vue.playerNickname = _vue.language.PLAYER_NOTFOUND;
+                                } else {
+                                    _vue.isNotFound = false;
+                                    _vue.playerNickname = result.Data.List[0].NickName + '(' + _vue.nodaPersonDisplay + ')';
+                                    _vue.form.nodalPersonId = result.Data.List[0].Id;
+                                }
+
+                                _vue.isPlayerLoading = false;
+                            }
+                        });
+                    }
+                },
+                'confirmMoney': function (item) {
+                    this.isShowMoney = false;
+                    this.starDisplay = item.text;
+                    this.form.investmentAmount = item.value;
+                },
+                //'gotoChoose': function () {
+                //    gotoNewWindow('choose.nodal.personPage', '../choose.nodal.person', {
+                //        param: 'fromPage=' + encodeURIComponent('create.accountPage')
+                //    });
+                //},
+                //'confirmHandover': function (memberNo, display) {
+                //    this.nodaPersonDisplay = display;
+                //    this.form.nodalPersonId = memberNo;
+                //},
+                'selectedItem': function (item) {
+                    this.isShow = false;
+                    this.form.countryCode = item.code;
+                },
+                'checkData': function () {
+                    if (CONFIG.IS_DOING) return;
+
+                    CONFIG.IS_DOING = true;
+                    if (!this.form.investmentAmount) {
+                        CONFIG.IS_DOING = false;
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!this.form.nodalPersonId || this.form.nodalPersonId <= 0) {
+                        CONFIG.IS_DOING = false;
+                        toastMsg(this.language.ERROR_2);
+                    } else if (!this.form.mPassword) {
+                        CONFIG.IS_DOING = false;
+                        toastMsg(this.language.ERROR_3);
+                    } else if (this.form.mPassword.length < 6) {
+                        CONFIG.IS_DOING = false;
+                        toastMsg(this.language.ERROR_4);
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({
+                        'message': this.language.SUBMIT_TOAST_TEXT
+                    });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'DeclarationSonForm',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                CONFIG.IS_DOING = false;
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            var isChange = (result.Data.NodalPerson.Id != _vue.form.nodalPersonId);
+                            if (isChange) {
+                                _vue.nodaPersonDisplay = result.Data.NodalPerson.NickName + '(' + result.Data.NodalPerson.FlowNumber + ')';;
+                            }
+
+                            gotoNewWindow('new.user.successPage', '../../success/new.user.success', {
+                                param: 'mn=' + encodeURIComponent(result.Data.NewPerson.MemberNo) +
+                                    '&nn=' + encodeURIComponent(result.Data.NewPerson.NickName) +
+                                    '&ia=' + encodeURIComponent(_vue.starDisplay) +
+                                    '&np=' + encodeURIComponent(_vue.nodaPersonDisplay) +
+                                    '&in=' + result.Data.NodalPerson.FlowNumber +
+                                    '&pos=' + _vue.form.position +
+                                    '&ic=' + isChange +
+                                    '&fn=' + result.Data.NewPerson.FlowNumber,
+                                openCallback: function () {
+                                    var wb = plus.webview.getWebviewById('subaccountPage');
+                                    if (wb != null) {
+                                        wb.evalJS('_vue.reloadPageData()');
+                                    }
+
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    });
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'InvestmentAmountList',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            for (var i = 0; i < result.Data.List.length; i++) {
+                                _vue.moneyList.push({
+                                    'text': _vue.getStar(result.Data.List[i]),
+                                    'value': result.Data.List[i].InvestmentAmount,
+                                    'disabled': result.Data.List[i].IsDisable
+                                });
+                            }
+
+                            var item = _vue.moneyList[0];
+                            _vue.starDisplay = item.text;
+                            _vue.form.investmentAmount = item.value;
+
+                            _vue.checkFirstReport();
+                        }
+                    });
+                },
+                'checkFirstReport': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'IsFirstReport',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (result.IsFirst) {
+                                _vue.nodaPersonDisplay = result.Data.NickName + '(' + result.Data.FlowNumber + ')';
+                                _vue.playerNickname = _vue.nodaPersonDisplay;
+                                _vue.form.nodalPersonId = result.Data.Id;
+                                _vue.form.position = 1;
+                            }
+
+                            _vue.isFirstReport = result.IsFirst;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'getStar': function (item) {
+                    var starHtml = '&nbsp;';
+                    for (var i = 0; i < item.StarNumber; i++) {
+                        starHtml += '<i class="iconfont icon-wujiaoxing1"></i>';
+                    }
+
+                    var text = item.Name + '&nbsp;' + item.InvestmentAmount + '$';
+                    return text + '&nbsp;' + starHtml;
+                },
+                'changeLanguage': function () {
+                    LSE.install('create_account', function (lang) {
+                        Vue.set(_vue, "language", lang);
+
+                        if (!_vue.request.fromTree) {
+                            _vue.playerNickname = lang.PLAYER_DEFAULT;
+                        }
+                        
+                        //_vue.starDisplay = _vue.language.STAR_DISPLAY;
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+
+                if (this.request.fromTree) {
+                    this.nodaPersonDisplay = this.request.display;
+                    this.form.nodalPersonId = this.request.parentId;
+                    this.form.position = this.request.pos;
+                    this.playerNickname = this.request.parentDisplay;
+                }
+            },
+            mounted: function () {
+                this.loadPageData();
+            }
+        });
+    </script>
+</body>
+</html>

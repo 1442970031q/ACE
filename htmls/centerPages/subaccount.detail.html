@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/subaccount.detail.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">子賬戶詳情</p>
+        </div>
+        <div id="app-content">
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else v-cloak>
+                <div class="top_content clearfix">
+                    <img v-lazy="item.AvatarImage" class="avatar" />
+                    <div class="right_content">
+                        <p class="nickname" v-text="item.FlowNumber"></p>
+                        <p class="member_code" v-text="language.LOGIN_NAME + item.MemberNo"></p>
+                    </div>
+                </div>
+                <div class="datas">
+                    <ul class="clearfix">
+                        <li class="clearfix">
+                            <div class="left">
+                                <p class="number" v-text="numberFormat(item.EP, 2)"></p>
+                                <p class="text" v-text="language.HODING+'EP'">持有EP</p>
+                            </div>
+                            <div class="right">
+                                <van-button type="default" size="small" plain @click="showInputBox(1)" v-text="language.TURN_OUT+'EP'">轉出EP</van-button>
+                                <van-button type="default" size="small" plain @click="allInOne(1)"  v-text="language.ONE_KEY_REGRESS">一鍵歸主</van-button>
+                            </div>
+                        </li>
+                        <li class="clearfix">
+                            <div class="left">
+                                <p class="number" v-text="numberFormat(item.RP, 2)"></p>
+                                <p class="text" v-text="language.HODING+'RP'">持有RP</p>
+                            </div>
+                            <div class="right">
+                                <van-button type="default" size="small" plain @click="showInputBox(2)"  v-text="language.TURN_OUT+'RP'">轉出RP</van-button>
+                                <van-button type="default" size="small" plain @click="allInOne(2)" v-text="language.ONE_KEY_REGRESS">一鍵歸主</van-button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <van-dialog v-model="isInputBox" v-bind:title="language.TURN_OUT_ASSETS" v-bind:before-close="checkInput" show-cancel-button>
+                    <div class="input_group">
+                        <div class="input-group">
+                            <span class="input-text bb" v-text="language.SUB_ACCOUNT">子賬戶</span>
+                            <input type="text" class="input-control w-60" readonly @click="chooseSubAccount()" v-model="memberDisplay" v-bind:placeholder="language.INPUT_SUB_ACCOUNT" />
+                            <i class="iconfont icon-gengduo right_icon"></i>
+                        </div>
+                        <div class="input-group bb">
+                            <span class="input-text"  v-text="language.TURN_OUT_AMOUNT">轉出數量</span>
+                            <input type="number" class="input-control" v-model="form.amount" v-bind:placeholder="language.INPUT_AMOUNT" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-text"  v-text="language.TRANSFER_PASSWORD">交易密碼</span>
+                            <input type="password" class="input-control" v-model="form.password" maxlength="16" v-bind:placeholder="language.INPUT_TRANSFER_PASSWORD" />
+                        </div>
+                    </div>
+                </van-dialog>
+                <van-dialog v-model="isPasswordInput" v-bind:title="language.CONFIRM_TRANSFER" v-bind:before-close="checkPassword" show-cancel-button>
+                    <input type="password" ref="passwordBox" maxlength="16" class="pwd_box" v-model="form.password" v-bind:placeholder="language.INPUT_CONFIRM_TRANSFER_PASSWORD" />
+                </van-dialog>
+                <van-dialog v-model="isTransBox" v-bind:title="language.TURN_IN + (this.form.type == 1 ? 'EP' : 'RP') + language.ASSETS" v-bind:before-close="checkTransInput" show-cancel-button>
+                    <div class="input_group">
+                        <div class="input-group bb">
+                            <span class="input-text"  v-text="language.TURN_IN_AMOUNT">轉入數量</span>
+                            <input type="number" ref="trans_amount" class="input-control" v-model="form.amount" v-bind:placeholder="language.INPUT_AMOUNT" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-text"  v-text="language.TRANSFER_PASSWORD">交易密碼</span>
+                            <input type="password" class="input-control" v-model="form.password" maxlength="16" v-bind:placeholder="language.INPUT_TRANSFER_PASSWORD" />
+                        </div>
+                    </div>
+                </van-dialog>
+            </div>
+            <div class="bottom_buttons" v-if="!isTransBox && !isInputBox && !isPasswordInput">
+                <button class="btn" @click="transIn(1)" v-text="language.TURN_IN+'EP'">轉入EP</button>
+                <button class="btn" @click="transIn(2)" v-text="language.TURN_IN+'RP'">轉入RP</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_avatar.jpg',
+            'error': '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isInputBox': false,
+                'isPasswordInput': false,
+                'isTransBox': false,
+                'item': {},
+                'memberDisplay': '',
+                'form': {
+                    'type': '',
+                    'recipientId': '',
+                    'amount': '',
+                    'password': ''
+                },
+                'language': {}
+            },
+            methods: {
+                'transIn': function (type) {
+                    this.isTransBox = true;
+                    this.form.type = type;
+
+                    setTimeout(function () {
+                        _vue.$refs['trans_amount'].focus();
+                    }, 50);
+                },
+                'checkTransInput': function (action, done) {
+                    if (action == 'confirm') {
+                        if (!this.form.amount) {
+                            done(false);
+                            //'請輸入轉入' + (this.form.type == 1 ? 'EP' : 'RP') + '數量'
+                            toastMsg(`${this.language.INPUT_TURN_IN}${(this.form.type == 1 ? 'EP' : 'RP')}${this.language.AMOUNT}`);
+                        } else if (this.form.amount <= 0) {
+                            done(false);
+                            //'轉入數量必須大於0'
+                            toastMsg(this.language.AMOUNT_MUST_MORE_CHARS);
+                        } else if (!this.form.password) {
+                            done(false);
+                            //'請輸入交易密碼'
+                            toastMsg(this.language.INPUT_TRANSFER_PASSWORD);
+                        } else if (this.form.password.length < 6) {
+                            done(false);
+                            //'交易密碼最少6位'
+                            toastMsg(this.language.PWD_MUST_MORE_CHARS);
+                        } else {
+                            done();
+                            this.doTranInAjax();
+                        }
+                    } else {
+                        done();
+
+                        setTimeout(function () {
+                            _vue.resetForm();
+                        }, 200);
+                    }
+                },
+                'doTranInAjax': function () {
+                    //'正在轉入'
+                    toastLoading({ 'message': this.language.TRUN_IN_PROGRESSING });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'TransferToSubaccount',
+                        data: {
+                            'type': this.form.type,
+                            'recipientId': this.item.Id,
+                            'amount': this.form.amount,
+                            'password': this.form.password
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                _vue.resetForm();
+                                return;
+                            }
+
+                            if (_vue.form.type == 1) {
+                                _vue.item.EP += _vue.form.amount * 1;
+                            } else {
+                                _vue.item.RP += _vue.form.amount * 1;
+                            }
+
+                            var wb = plus.webview.getWebviewById('subaccountPage');
+                            wb.evalJS('_vue.addItemAmountValue("' + _vue.item.Id + '", "' + _vue.form.type + '", "' + _vue.form.amount + '")');
+
+                            _vue.resetForm();
+                            _vue.updateInfo(function () {
+                                closeToastLoading();
+                                _vue.$toast.success(vue.language.TRUN_IN_SUCCESS);//'轉入成功'
+                            });
+                        }
+                    })
+                },
+                'showInputBox': function (type) {
+                    this.form.type = type;
+                    this.isInputBox = true;
+                },
+                'chooseSubAccount': function () {
+                    gotoNewWindow('choose.sub.accountPage', 'choose.sub.account', {
+                        param: 'fromId=' + this.item.Id
+                    });
+                },
+                'confirmAccount': function (id, display) {
+                    this.memberDisplay = display;
+                    this.form.recipientId = id;
+                },
+                'checkInput': function (action, done) {
+                    if (action == 'confirm') {
+                        if (!this.form.recipientId) {
+                            done(false);
+                            toastMsg(_vue.language.MUST_SELECT_SUB_ACCOUNT); //'請選擇子賬戶'
+                        } else if (!this.form.amount) {
+                            done(false);
+                            toastMsg(_vue.language.INPUT_AMOUNT); //'請輸入轉出數量'
+                        } else if (this.form.amount <= 0) {
+                            done(false);
+                            toastMsg(_vue.language.MUST_INPUT_IN_OUT_AMOUNT); //'轉出數量必須大於0'
+                        } else if (this.form.type == 1 && this.form.amount > this.item.EP) {
+                            done(false);
+                            toastMsg(_vue.language.EP_TURN_OUT_AMOUNT_MORE_CHARS); //'EP數量不足'
+                        } else if (this.form.type == 2 && this.form.amount > this.item.RP) {
+                            done(false);
+                            toastMsg(_vue.language.RP_TURN_OUT_AMOUNT_MORE_CHARS); //'RP數量不足'
+                        } else if (!this.form.password) {
+                            done(false);
+                            toastMsg(_vue.language.INPUT_TRANSFER_PASSWORD); //'請輸入交易密碼'
+                        } else if (this.form.password.length < 6) {
+                            done(false);
+                            toastMsg(_vue.language.PWD_MUST_MORE_CHARS); //'交易密碼最少6位'
+                        } else {
+                            done();
+                            this.doTranAjax();
+                        }
+                    } else {
+                        done();
+
+                        this.resetForm();
+                    }
+                },
+                'doTranAjax': function () {
+                    toastLoading({ 'message': _vue.language.TURN_OUT_PROGRESSING }); //'正在轉出'
+
+                    this.form['transferPersonId'] = this.item.Id;
+                    ajax({
+                        url: CONFIG.BASE_URL + 'CrossRotation',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                _vue.resetForm();
+                                return;
+                            }
+
+                            if (_vue.form.type == 1) {
+                                _vue.item.EP -= _vue.form.amount * 1;
+                            } else {
+                                _vue.item.RP -= _vue.form.amount * 1;
+                            }
+
+                            var wb = plus.webview.getWebviewById('subaccountPage');
+                            wb.evalJS('_vue.changeItemValue("' + _vue.item.Id + '",  "' + _vue.form.recipientId + '", "' + _vue.form.type + '", "' + _vue.form.amount + '")');
+
+                            _vue.resetForm();
+                            closeToastLoading();
+                            _vue.$toast.success(_vue.language.TURN_OUT_SUCCESS);//'轉出成功'
+                        }
+                    })
+                },
+                'allInOne': function (type) {
+                    this.form.type = type;
+                    this.isPasswordInput = true;
+
+                    setTimeout(function () {
+                        _vue.$refs['passwordBox'].focus();
+                    }, 50);
+                },
+                'checkPassword': function (action, done) {
+                    if (action == 'confirm') {
+                        if (!this.form.password) {
+                            done(false);
+                            toastMsg(_vue.language.INPUT_TRANSFER_PASSWORD); '請輸入交易密碼'
+                        } else if (this.form.password.length < 6) {
+                            done(false);
+                            toastMsg(_vue.language.PWD_MUST_MORE_CHARS); '交易密碼最少6位'
+                        } else {
+                            done();
+                            this.doAllInOneAjax();
+                        }
+                    } else {
+                        done();
+
+                        this.resetForm();
+                    }
+                },
+                'doAllInOneAjax': function () {
+                    toastLoading({ 'message': _vue.language.TURN_OUT_PROGRESSING });// '正在轉出'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'SubaccountOneKeyReturn',
+                        data: {
+                            'type': this.form.type,
+                            'transferPersonId': this.item.Id,
+                            'password': this.form.password
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                _vue.resetForm();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (_vue.form.type == 1) {
+                                _vue.item.EP = 0;
+                            } else {
+                                _vue.item.RP = 0;
+                            }
+
+                            var wb = plus.webview.getWebviewById('subaccountPage');
+                            wb.evalJS('_vue.resetItemValue("' + _vue.item.Id + '", "' + _vue.form.type + '")');
+
+                            _vue.resetForm();
+
+                            _vue.updateInfo(function () {
+                                closeToastLoading();
+                                _vue.$toast.success(_vue.language.TURN_OUT_SUCCESS); //'轉出成功'
+                            });
+                        }
+                    })
+                },
+                'resetForm': function () {
+                    for (var i in this.form) {
+                        this.form[i] = '';
+                    }
+
+                    this.memberDisplay = '';
+                },
+                'updateInfo': function (callback) {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            if (typeof (callback) == 'function') {
+                                callback();
+                            }
+                        }
+                    })
+                },
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'GetSpecificData',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel(result.Data, [{
+                                'pageName': 'home.htmlPage',
+                                'actionName': '_vue.updateAmount()'
+                            }]);
+
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('subaccount_detail', function (lang) {
+                        //Object.assign(_vue.language, lang);
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+                this.loadPageData();
+
+                var wb = plus.webview.currentWebview();
+                this.item = wb.paramObject.item;
+            }
+        });
+    </script>
+</body>
+</html>

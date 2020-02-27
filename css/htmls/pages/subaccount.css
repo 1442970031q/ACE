@@ -1,0 +1,189 @@
+﻿.container {
+    padding: 5px 0;
+    padding-bottom: 50px;
+}
+
+    .container .accounts {
+    }
+
+        .container .accounts .account {
+            padding: 10px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            background-color: white;
+        }
+
+            .container .accounts .account .top_content {
+                padding-bottom: 10px;
+            }
+
+            .container .accounts .account:last-child {
+                border-bottom: 0;
+            }
+
+            .container .accounts .account .avatar {
+                float: left;
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: 2px solid #efefef;
+            }
+
+            .container .accounts .account .middle_content {
+                float: left;
+                width: calc(100% - 140px);
+                height: 40px;
+                padding-left: 10px;
+            }
+
+                .container .accounts .account .middle_content .nickname {
+                    font-size: .9em;
+                    font-weight: bold;
+                    line-height: 20px;
+                    height: 20px;
+                    width: 100%;
+                    display: block;
+                    white-space: normal;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+
+                .container .accounts .account .middle_content .member_code {
+                    font-size: .7em;
+                    line-height: 20px;
+                    height: 20px;
+                    color: #9c9c9c;
+                }
+
+            .container .accounts .account .right_content {
+                float: left;
+                width: 90px;
+                text-align: center;
+            }
+
+                .container .accounts .account .right_content p {
+                    height: 20px;
+                    line-height: 20px;
+                }
+
+                    .container .accounts .account .right_content p.text {
+                        font-size: .6em;
+                        color: #969696;
+                    }
+
+                    .container .accounts .account .right_content p.value {
+                        font-size: .9em;
+                        font-weight: bold;
+                    }
+
+            .container .accounts .account .data_content {
+                padding-top: 5px;
+            }
+
+                .container .accounts .account .data_content.van-hairline--top::after {
+                    border-color: #f9f9f9 !important;
+                }
+
+                .container .accounts .account .data_content .datas {
+                }
+
+                .container .accounts .account .data_content .create_time {
+                    font-size: .7em;
+                    color: #9a9a9a;
+                    margin-top: 10px;
+                    height: 20px;
+                    line-height: 20px;
+                    border-top: 1px solid #f9f9f9;
+                    padding-top: 10px;
+                }
+
+                    .container .accounts .account .data_content .create_time span {
+                        display: inline-block;
+                    }
+
+                    .container .accounts .account .data_content .create_time .left {
+                        float: left;
+                        color: #c30059;
+                    }
+
+                    .container .accounts .account .data_content .create_time .right {
+                        float: right;
+                    }
+
+                .container .accounts .account .data_content .datas .data_item {
+                    width: 33.33333%;
+                    float: left;
+                }
+
+                    .container .accounts .account .data_content .datas .data_item.van-hairline--right::after {
+                        border-color: #f9f9f9 !important;
+                    }
+
+                    .container .accounts .account .data_content .datas .data_item p {
+                        text-align: center;
+                    }
+
+                    .container .accounts .account .data_content .datas .data_item .text {
+                        font-size: .6em;
+                        color: #9a9a9a;
+                        height: 15px;
+                        line-height: 15px;
+                    }
+
+                    .container .accounts .account .data_content .datas .data_item .value {
+                        font-size: .8em;
+                        font-weight: bold;
+                        height: 20px;
+                        line-height: 20px;
+                    }
+
+.pwd_box {
+    height: 55px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: #f9f9f9;
+    font-size: .9em;
+    margin-top: 15px;
+    border-top: 1px solid #f4f4f4;
+}
+
+.confirm_button {
+    position: fixed;
+    bottom: 0;
+    border-radius: 0;
+    width: 100%;
+    margin-top: 0;
+    height: 50px;
+}
+
+.load_more,
+.load_more_complete {
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.load_more_complete {
+    width: auto;
+    text-align: center;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}

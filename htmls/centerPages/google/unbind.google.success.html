@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/htmls/pages/google/unbind.google.success.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="bg"></div>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <!--<i id="app-back-button" class="iconfont icon-fanhui right-back"></i>-->
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div class="box">
+                <i class="iconfont icon-duihao"></i>
+                <p class="caption" v-text="language.BOX_CAPTION">解綁成功</p>
+                <p class="des" v-text="language.BOX_DES">您的谷歌驗證已解綁，目前無法進行資產操作，如果需要操作請重新綁定您的谷歌驗證碼。</p>
+            </div>
+            <button class="confirm_button" v-text="language.BUTTON_TEXT" @click="closePage">返回登錄</button>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'closePage': function () {
+                    removeItem(CONFIG.USER_MODEL_KEY);
+                    plus.runtime.restart()
+                },
+                'changeLanguage': function () {
+                    LSE.install('unbind_google_success', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

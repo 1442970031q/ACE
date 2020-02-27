@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/htmls/transaction.css" rel="stylesheet" />
+    <style>
+        .tran_box .list .item:active{
+            background-color:white!important;
+        }
+
+        .buy li{
+            width:33.33333% !important;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}" v-cloak>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else>
+                <div v-if="list.data.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="tran_box">
+                    <ul class="list">
+                        <li class="item ep" v-for="(item,index) in list.data" v-bind:key="index">
+                            <div class="detail">
+                                <div class="seller ace clearfix">
+                                    <img v-lazy="item.Seller.Avatar" class="avatar" />
+                                    <div class="right_text clearfix">
+                                        <p class="nn" v-text="item.Seller.FlowNumber"></p>
+                                        <span class="state green" v-text="language.STATE_NAME"></span>
+                                    </div>
+                                </div>
+                                <ul class="ace buy clearfix">
+                                    <li>
+                                        <p class="number" v-text="numberFormat(item.AceAmount, 0)"></p>
+                                        <p class="txt" v-text="language.BUY_ITEM_1"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number" v-text="item.SinglePrice"></p>
+                                        <p class="txt" v-text="language.BUY_ITEM_2"></p>
+                                    </li>
+                                    <li>
+                                        <p class="number" v-text="numberFormat(item.AceAmount * item.SinglePrice, 2)"></p>
+                                        <p class="txt" v-text="language.BUY_ITEM_3"></p>
+                                    </li>
+                                </ul>
+                                <p v-text="item.CreateTime" class="time"></p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="isLoadMore" class="load_more clearfix">
+                        <van-loading color="black"></van-loading>
+                        <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                    </div>
+                    <div v-if="isLoadComplete" class="load_more_complete">
+                        <span class="load_text" v-text="language.NOMORE"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_avatar.jpg',
+            'error': '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isLoadMore': false,
+                'isLoadComplete': false,
+                'list': {
+                    'pageIndex': 1,
+                    'pageSize': 15,
+                    'data':[]
+                },
+                'statusbarHeight': 20,
+                'language': {
+                    'TITLE_TEXT': '',
+                    'LOADING_TEXT': '',
+                    'NONE_DATA': '',
+                    'STATE_NAME': '',
+                    'BUY_ITEM_1': '',
+                    'BUY_ITEM_2': '',
+                    'BUY_ITEM_3': '',
+                    'NOMORE': ''
+                }
+            },
+            methods: {
+                'loadPageData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyBuyTrades',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.list.data = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'windowScroll': function () {
+                    if (!this.isLoadMore && !this.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'loadMore': function () {
+                    this.isLoadMore = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyBuyTrades',
+                        data: {
+                            'p': this.list.pageIndex,
+                            'pageSize': this.list.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.list.pageIndex++;
+                            _vue.isLoadMore = false;
+                            _vue.list.data = _vue.list.data.concat(result.Data);
+
+                            if (result.Data.length < _vue.list.pageSize) {
+                                _vue.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('ace_buy_record', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

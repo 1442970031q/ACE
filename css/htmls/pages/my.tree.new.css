@@ -1,0 +1,220 @@
+﻿.van-search {
+    background-color: white !important;
+}
+
+    .van-search .van-cell {
+        background-color: #f9f9f9;
+    }
+
+.van-field__control {
+    height: 24px;
+}
+
+.van-search {
+    padding: 10px;
+}
+
+.van-search--show-action {
+    padding-right: 0;
+}
+
+.submit-button i {
+    font-size: 1.3em;
+}
+
+.van-field__control::-webkit-input-placeholder {
+    font-size: .9em;
+}
+
+.top_content .left_search {
+    float: left;
+    width: calc(100% - 80px);
+}
+
+.top_content .right_button {
+    background-color: white;
+    float: left;
+    width: 80px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    padding: 10px;
+    padding-left: 0;
+    padding-right: 5px;
+    line-height: 30px;
+    height: 50px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+    .top_content .right_button span {
+        display: block;
+        width: 75px;
+        height: 30px;
+        line-height: 30px;
+        background-color: #1e81d2;
+        color: white;
+        border-radius: 3px;
+        font-size: .9em;
+    }
+
+        .top_content .right_button span:active {
+            background-color: #176baf;
+        }
+
+.head {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+    .head ul li {
+        float: left;
+        width: 20%;
+        font-weight: bold;
+        padding: 10px 0;
+        font-size: .9em;
+        text-align: center;
+        line-height: 25px;
+    }
+
+.list {
+    color: #6f6f6f;
+}
+
+    .list ul li {
+        float: left;
+        width: 20%;
+        text-align: center;
+        font-size: .9em;
+        line-height: 25px;
+        padding: 10px 0;
+        background-color: white;
+    }
+
+        .list ul li.blue {
+            color: #1e81d2;
+        }
+
+            .list ul li.blue span {
+                text-decoration: underline;
+            }
+
+    .list .line {
+        border: 0;
+        border-bottom: 5px solid #f2f2f2;
+        margin: 0;
+    }
+
+    .list .actions {
+        text-align: right;
+        display:flex;
+    }
+
+        .list .actions .btn {
+            padding: 15px 0;
+            font-weight: bold;
+            width: 50%;
+            color: grey;
+            background-color: #ffffff;
+            text-align: center;
+            font-size: .8em;
+            border-top: 1px solid #f9f9f9;
+        }
+
+            .list .actions .btn:active {
+                background-color: #f9f9f9;
+            }
+
+.bottom_button {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    color: white;
+    height: 50px;
+    line-height: 50px;
+    background-color: #1e81d2;
+    font-size: .9em;
+}
+
+    .bottom_button:active {
+        background-color: #176baf;
+    }
+
+ul li.first {
+    width: 50px;
+}
+
+ul li.l2 {
+    width: 65px;
+}
+
+    ul li.l2.full {
+        width: calc(100% - 50px);
+        text-align: left;
+    }
+
+        ul li.l2.full .btn {
+            padding: 5px;
+            background-color: #1e81d2;
+            color: white;
+            font-size: .9em;
+            border-radius: 3px;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+            ul li.l2.full .btn:active {
+                background-color: #176baf;
+            }
+
+ul li.l3 {
+    width: calc(100% - 115px - 40%);
+}
+
+.van-popup {
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.tip {
+    background-color: white;
+    padding: 10px;
+}
+
+    .tip .image {
+        margin: 10px 0;
+        width: 250px;
+        height: 250px;
+    }
+
+    .tip .msg {
+        font-size: .85em;
+        color: #929292;
+    }
+
+.tip_bottom {
+    text-align: right;
+    padding: 0 10px;
+}
+
+    .tip_bottom .van-checkbox__icon--checked .van-icon {
+        border-color: #1e81d2;
+        background-color: #1e81d2;
+        font-size: .9em;
+    }
+
+    .tip_bottom .van-checkbox__icon {
+        font-size: 1.2em;
+    }
+
+    .tip_bottom .van-checkbox__label {
+        margin-left: 2px;
+        font-size: .9em;
+    }
+
+.confirm_button {
+    width: 100%;
+    border-radius: 0;
+}

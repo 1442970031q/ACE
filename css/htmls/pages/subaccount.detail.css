@@ -1,0 +1,132 @@
+﻿.top_content {
+    margin-top: 5px;
+    padding: 10px;
+    background-color: white;
+}
+
+    .top_content .avatar {
+        border: 2px solid #efefef;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        float: left;
+    }
+
+    .top_content .right_content {
+        float: left;
+        width: calc(100% - 74px);
+        height: 60px;
+        padding-left: 10px;
+        padding-top: 4px;
+    }
+
+        .top_content .right_content .nickname {
+            font-weight: bold;
+            font-size: 1em;
+            line-height: 25px;
+            width: 100%;
+            display: block;
+            white-space: normal;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .top_content .right_content .member_code {
+            margin-top: 5px;
+        }
+
+.datas {
+    margin-top: 5px;
+    padding: 5px 0;
+    background-color: white;
+}
+
+    .datas ul {
+    }
+
+        .datas ul li {
+            float: left;
+            width: 50%;
+            padding: 10px;
+            background-color: white;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            border-right: 1px solid #f9f9f9;
+            text-align: center;
+        }
+
+            .datas ul li .van-button {
+                margin-top: 10px;
+            }
+
+            .datas ul li:last-child {
+                border-right: 0;
+            }
+
+            .datas ul li p {
+                text-align: center;
+            }
+
+            .datas ul li .number {
+                font-weight: bold;
+                font-size: 1.3em;
+            }
+
+            .datas ul li .text {
+                font-size: .7em;
+                margin-top: 2px;
+                color: #9a9a9a;
+            }
+
+.pwd_box {
+    height: 55px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: #f9f9f9;
+    font-size: .9em;
+    margin-top: 15px;
+    border-top: 1px solid #f4f4f4;
+}
+
+.input_group {
+    margin-top: 15px;
+}
+
+.input-group .right_icon {
+    display: block;
+    float: right;
+    width: 10%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #ababab;
+}
+
+.bottom_buttons {
+    height: 50px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+    .bottom_buttons .btn {
+        float: left;
+        width: 50%;
+        height: 50px;
+        text-align: center;
+        color: white;
+        background-color: #1e81d2;
+    }
+
+        .bottom_buttons .btn:first-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bottom_buttons .btn:active {
+            background-color: #176baf
+        }

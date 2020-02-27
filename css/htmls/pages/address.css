@@ -1,0 +1,35 @@
+﻿.text {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    font-size: .8em;
+    color: #8c8c8c;
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-size: 16px auto;
+    padding-left: 18px;
+}
+
+    .text.wx {
+        background-image: url('../../../img/logos/wx_pay.png');
+    }
+
+    .text.ali {
+        background-image: url('../../../img/logos/ali_pay.png');
+    }
+
+    .text.bank {
+        background-image: url('../../../img/logos/yl_pay.png');
+    }
+
+    .text.usdt {
+        background-image: url('../../../img/logos/usdt_pay.png');
+    }
+
+    .text.bitc {
+        background-image: url('../../../img/logos/bit_pay.png');
+    }
+
+    .text.eth {
+        background-image: url('../../../img/logos/eth_pay.png');
+    }

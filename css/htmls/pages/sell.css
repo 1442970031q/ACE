@@ -1,0 +1,76 @@
+﻿#app-head {
+    background-color: #1e81d2;
+    border-bottom: 0;
+}
+
+    #app-head .right-back,
+    #app-head .app-head-text {
+        color: white;
+    }
+
+.input_content .input-group .right_icon {
+    display: block;
+    float: right;
+    width: 10%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-size: 1em;
+    color: #ababab;
+}
+
+.input_content {
+    margin-top: 10px;
+}
+
+    .input_content .input-control.blue {
+        color: #1e81d2;
+    }
+
+.info_content {
+    background-color: #1e81d2;
+    padding: 10px;
+    color: white;
+}
+
+    .info_content .info_inner {
+    }
+
+        .info_content .info_inner .info_ul {
+        }
+
+            .info_content .info_inner .info_ul li {
+                float: left;
+                width: 33.33333%;
+            }
+
+        .info_content .info_inner li .line {
+            line-height: 25px;
+            font-size: .9em;
+            text-align: center;
+        }
+
+            .info_content .info_inner li .line .txt {
+                font-size: .8em;
+            }
+
+            .info_content .info_inner li .line .value {
+                font-size: 1.4em;
+            }
+
+.van-popup {
+    background-color: transparent;
+}
+
+.van-number-keyboard {
+    position: relative !important;
+}
+
+.van-password-input {
+    bottom: 100px;
+}
+
+.van-password-input__security {
+    overflow: hidden;
+    border-radius: 5px;
+}

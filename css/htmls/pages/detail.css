@@ -1,0 +1,361 @@
+﻿#app-head {
+    border-bottom: 1px solid #f9f9f9;
+}
+
+    #app-head .icon-bangzhu {
+        font-size: 1.2em;
+    }
+
+.van-cell__title,
+.van-cell__value {
+    font-size: .9em;
+}
+
+.seller_content {
+    padding: 10px;
+    background-color: white;
+    padding-bottom: 10px;
+}
+
+    .seller_content .top_content {
+        height: 30px;
+    }
+
+        .seller_content .top_content .avatar {
+            width: 28px;
+            height: 28px;
+            float: left;
+            border-radius: 50%;
+            border: 1px solid #efefef;
+        }
+
+        .seller_content .top_content .right_content {
+            float: left;
+            padding-left: 10px;
+            width: calc(100% - 40px);
+            height: 30px;
+        }
+
+            .seller_content .top_content .right_content p {
+                line-height: 30px;
+                float: left;
+            }
+
+                .seller_content .top_content .right_content p.nn {
+                    font-size: .9em;
+                }
+
+            .seller_content .top_content .right_content .pay_content {
+                height: 30px;
+                float: left;
+                background-color: white;
+                position: relative;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+                padding: 0 10px;
+            }
+
+                .seller_content .top_content .right_content .pay_content.top {
+                    z-index: 4;
+                }
+
+                .seller_content .top_content .right_content .pay_content img {
+                    width: 20px;
+                    height: 20px;
+                    float: left;
+                    margin-top: 5px;
+                }
+
+                .seller_content .top_content .right_content .pay_content .tip-text {
+                    position: absolute;
+                    color: #525252;
+                    line-height: 20px;
+                    top: 28px;
+                    left: 0;
+                    width: 200px;
+                    font-size: .8em;
+                    border: 1px solid white;
+                    border-radius: 3px;
+                    padding: 10px;
+                    background-color: white;
+                }
+
+                .seller_content .top_content .right_content .pay_content .close_button {
+                    position: absolute;
+                    width: 120px;
+                    height: 35px;
+                    line-height: 35px;
+                    color: white;
+                    border: 1px solid white;
+                    bottom: -145px;
+                    border-radius: 3px;
+                    font-size: .9em;
+                    left: 0;
+                }
+
+    .seller_content .info_content {
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+        .seller_content .info_content ul {
+            text-align: center;
+        }
+
+            .seller_content .info_content ul li {
+                float: left;
+                width: 33.33333%;
+                text-align: center;
+            }
+
+                .seller_content .info_content ul li .number {
+                    font-size: 1em;
+                    height: 20px;
+                    display: block;
+                    line-height: 20px;
+                }
+
+                    .seller_content .info_content ul li .number.c {
+                        font-size: .6em;
+                        color: red;
+                    }
+
+                .seller_content .info_content ul li .text {
+                    font-size: .7em;
+                    color: #b5b5b5;
+                    line-height: 20px;
+                }
+
+.head {
+    text-align: center;
+    border-bottom: 1px solid #f9f9f9;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+    .head .sub {
+        font-size: .6em;
+        color: #c7c7c7;
+    }
+
+    .head .number {
+        font-size: 3em;
+        color: #1e81d2;
+        font-weight: bold;
+    }
+
+    .head .bottom {
+        line-height: 20px;
+        margin-top: 15px;
+        padding: 0 15px;
+    }
+
+        .head .bottom .state {
+            float: left;
+            font-size: .7em;
+            background-color: #1e81d2;
+            color: white;
+            padding: 0 5px;
+            border-radius: 3px;
+        }
+
+            .head .bottom .state.green {
+                background-color: green;
+            }
+
+        .head .bottom .time {
+            font-size: .8em;
+            text-align: right;
+            color: #bdbdbd;
+            float: right;
+        }
+
+.line_content {
+    background-color: white;
+    padding: 15px;
+}
+
+    .line_content .sell {
+        margin-bottom: 15px;
+        text-align: left;
+        font-size: .9em;
+        border-left: 5px solid #1e81d2;
+        padding-left: 5px;
+        line-height: .9em;
+    }
+
+    .line_content .price li.line {
+        float: left;
+        width: 50%;
+        text-align: center;
+    }
+
+        .line_content .price li.line .title {
+            font-size: .7em;
+            color: #b5b5b5;
+            margin-top: 5px;
+        }
+
+        .line_content .price li.line .value {
+            font-size: 1.2em;
+        }
+
+            .line_content .price li.line .value.blue {
+                color: #1e81d2;
+                font-weight: bold;
+            }
+
+.rule_content {
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+    .rule_content .title {
+        padding-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .rule_content ul {
+        padding-left: 20px;
+        list-style-type: disc;
+    }
+
+        .rule_content ul li {
+            font-size: .8em;
+            letter-spacing: .5px;
+            margin-bottom: 5px;
+            color: #a0a0a0;
+        }
+
+.confirm_button {
+    position: fixed;
+    bottom: 0;
+    border-radius: 0;
+    width: 100%;
+    margin-top: 0;
+    height: 50px;
+}
+
+.pwd_box {
+    height: 55px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: #f9f9f9;
+    font-size: .9em;
+    margin-top: 15px;
+    border-top: 1px solid #f4f4f4;
+}
+
+.mask {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    background-color: rgba(0,0,0,.85);
+}
+
+.actions {
+    height: 50px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
+
+.input-area {
+    width: 100%;
+    padding: 10px;
+    height: 150px;
+    box-sizing: border-box;
+}
+
+.bottom_buttons {
+    border-top: 1px solid #f9f9f9;
+}
+
+    .bottom_buttons .btn {
+        float: left;
+        width: 50%;
+        height: 45px;
+        line-height: 45px;
+        text-align: center;
+    }
+
+        .bottom_buttons .btn.btn_confirm {
+            background-color: #1e81d2;
+            color: white;
+        }
+
+            .bottom_buttons .btn.btn_confirm:active {
+                background-color: #176baf;
+            }
+
+        .bottom_buttons .btn.btn_cancel {
+            background-color: #ececec;
+        }
+
+            .bottom_buttons .btn.btn_cancel:active {
+                background-color: #dedede;
+            }
+
+.proof_content {
+    padding: 10px 5px;
+}
+
+    .proof_content .fieldset_content {
+        padding: 5px;
+        border: 1px solid #f9f9f9;
+        width: calc(50% - 2.5px);
+        margin: 0 auto;
+        float: left;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+        .proof_content .fieldset_content.left {
+            margin-right: 2.5px;
+        }
+
+            .proof_content .fieldset_content.left .image_items {
+                height: 150px;
+            }
+
+                .proof_content .fieldset_content.left .image_items .add {
+                    width: 100%;
+                    display: block;
+                    height: 150px;
+                    line-height: 150px;
+                    text-align: center;
+                    font-size: 2em;
+                    background-color: #f9f9f9;
+                    color: #bfbfbf;
+                    border-radius: 3px;
+                }
+
+                .proof_content .fieldset_content.left .image_items .proofImage {
+                    width: 100%;
+                    display: block;
+                    height: 150px;
+                    border-radius: 3px;
+                }
+
+        .proof_content .fieldset_content.right {
+            margin-left: 2.5px;
+        }
+
+        .proof_content .fieldset_content legend {
+            font-size: .9em;
+            padding: 0 5px;
+        }
+
+        .proof_content .fieldset_content.right .input-area {
+            font-size: .9em;
+            padding: 5px;
+            height: 146px;
+        }

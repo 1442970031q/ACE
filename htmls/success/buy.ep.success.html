@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/success.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content">
+            <div class="box">
+                <i class="iconfont icon-zhengque"></i>
+                <p class="text" v-text="language.SUCCESS_TEXT"></p>
+            </div>
+            <div class="list_content">
+                <p class="title" v-text="language.SUCCESS_TITLE"></p>
+                <ul>
+                    <li>
+                        <span class="first" v-text="language.SUCCESS_1_ITEM_TEXT"></span>
+                        <span class="last" v-text="request.flowNumber"></span>
+                    </li>
+                    <li>
+                        <span class="first" v-text="language.SUCCESS_2_ITEM_TEXT"></span>
+                        <span class="last" v-text="request.amount"></span>
+                    </li>
+                </ul>
+            </div>
+            <button class="confirm_button" @click="gotoMy()" v-text="language.BUTTON_1"></button>
+            <button class="confirm_button normal" @click="close()" v-text="language.BUTTON_2"></button>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'request': {
+                    'flowNumber': queryString('fn'),
+                    'amount': queryString('am')
+                },
+                'statusbarHeight': 20,
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SUCCESS_TEXT': '',
+                    'SUCCESS_TITLE': '',
+                    'SUCCESS_1_ITEM_TEXT': '',
+                    'SUCCESS_2_ITEM_TEXT': '',
+                    'BUTTON_1': '',
+                    'BUTTON_2': ''
+                }
+            },
+            methods: {
+                'gotoMy': function(){
+                    gotoNewWindow('my.buy.epPage', '../centerPages/my.buy.ep', {
+                        openCallback: function () {
+                            closeWindow('none');
+                        }
+                    });
+                },
+                'close': function () {
+                    closeWindow();
+                },
+                'changeLanguage': function () {
+                    LSE.install('buy_ep_success', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

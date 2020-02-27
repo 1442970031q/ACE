@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/my.team.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <i v-if="teamList.length!=0" class="iconfont icon-iconset0432 right-back_action" @click="gotoBack"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">好友列表</p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}" v-cloak>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT">正在載入...</p>
+            </div>
+            <div v-else>
+                <div class="top_user clearfix" v-bind:style="{'top': (45 + statusbarHeight) + 'px'}">
+                    <div class="top_user_left clearfix">
+                        <form action="/">
+                            <van-search v-bind:placeholder="language.INPUT_PLAYER_ID"
+                                        v-model="serachKey"
+                                        @search="doSearchAjax"
+                                        @cancel="searchCancel">
+                            </van-search>
+                        </form>
+                        <div class="pd clearfix">
+                            <div class="left_content">
+                                <img v-lazy="currentTopUser.Avatar" class="image" />
+                                <span class="subaccount" v-if="currentTopUser.IsSon" v-text="language.SUBACCOUNT">子</span>
+                                <span class="index">0</span>
+                            </div>
+                            <div class="right_content">
+                                <p class="nn">
+                                    <span v-text="currentTopUser.NickName + '(' + currentTopUser.FlowNumber + ')'"></span>
+                                    <span class="star">
+                                        <i class="iconfont icon-wujiaoxing1" v-for="i in currentTopUser.Level"></i>
+                                    </span>
+                                </p>
+                                <p class="member_code">
+                                    <span class="t" v-text="currentTopUser.MemberNo"></span>
+                                    <span class="v" v-text="'F' + currentTopUser.F + ' / S' + currentTopUser.S"></span>
+                                </p>
+                                <p class="member_code">
+                                    <span class="t" v-text="'L：' + numberFormat(currentTopUser.L, 0) + ' / R：' + numberFormat(currentTopUser.R, 0)"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="pageList.list.length!=0">
+                    <div class="list_content">
+                        <ul>
+                            <li class="pd-left clearfix" v-for="(item,index) in pageList.list" v-bind:key="index" @click="choiceUser(item)">
+                                <div class="clearfix">
+                                    <div class="left_content">
+                                        <img v-lazy="item.Avatar" class="image" />
+                                        <span class="subaccount" v-if="item.IsSon">子</span>
+                                        <span class="index" v-text="index+1"></span>
+                                    </div>
+                                    <div class="right_content">
+                                        <p class="nn">
+                                            <span v-text="item.NickName + '(' + item.FlowNumber + ')'"></span>
+                                            <span class="star">
+                                                <i class="iconfont icon-wujiaoxing1" v-for="i in item.Level"></i>
+                                            </span>
+                                        </p>
+                                        <p class="member_code">
+                                            <span class="t" v-text="item.MemberNo"></span>
+                                            <span class="v" v-text="'F' + item.F + ' / S' + item.S"></span>
+                                        </p>
+                                        <p class="member_code">
+                                            <span class="t" v-text="'L' + numberFormat(item.L, 0) + '/R' + numberFormat(item.R, 0)"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="time" v-text="item.CreateTime"></p>
+                            </li>
+                        </ul>
+                        <div v-if="isLoadMore" class="load_more clearfix">
+                            <van-loading color="black"></van-loading>
+                            <span class="load_text" v-text="language.LOADING_TEXT">正在載入...</span>
+                        </div>
+                        <div v-if="isLoadComplete" class="load_more_complete">
+                            <span class="load_text" v-text="language.NONE_MORE_DATA">沒有更多的數據了...</span>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA">暫無推薦人</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_avatar.jpg',
+            'error': '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'isLoadMore': false,
+                'isLoadComplete': false,
+                'serachKey': '',
+                'currentTopUser': {},
+                'pageList': {
+                    'pageIndex': 1,
+                    'pageSize': 10,
+                    'list': []
+                },
+                'teamList': [],
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'gotoBack': function () {
+                    var index = this.teamList.length - 1;
+                    this.currentTopUser = this.teamList[index];
+                    this.teamList.splice(index, 1);
+
+                    toastLoading({ 'message': _vue.language.LOADING_TEXT }); // '正在載入'
+                    this.loadPageData();
+                },
+                'choiceUser': function (item) {
+                    this.teamList.push(this.currentTopUser);
+                    this.currentTopUser = item;
+
+                    toastLoading({ 'message': _vue.language.LOADING_TEXT }); // '正在載入'
+                    this.pageList.list = [];
+                    this.loadPageData();
+                },
+                'loadPageData': function () {
+                    this.pageList.pageIndex = 1;
+                    this.isLoadComplete = false;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyRecommendUserList',
+                        data: {
+                            'p': this.pageList.pageIndex,
+                            'pageSize': this.pageList.pageSize,
+                            'rId': this.currentTopUser.Id
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            window.scroll(0, 0);
+                            _vue.pageList.list = result.Data.List;
+                            _vue.pageList.pageIndex++;
+                            _vue.isLoading = false;
+
+                            closeToastLoading();
+                        }
+                    })
+                },
+                'loadMore': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyRecommendUserList',
+                        data: {
+                            'p': this.pageList.pageIndex,
+                            'pageSize': this.pageList.pageSize,
+                            'rId': this.currentTopUser.Id,
+                            'fn': this.serachKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageList.list = _vue.pageList.list.concat(result.Data.List);
+                            _vue.pageList.pageIndex++;
+
+                            if (result.Data.List.length < _vue.pageList.pageSize) {
+                                _vue.isLoadComplete = true;
+                            }
+
+                            _vue.isLoadMore = false;
+                        }
+                    })
+                },
+                'doSearchAjax': function () {
+                    this.pageList.pageIndex = 1;
+                    this.isLoadComplete = false;
+                    toastLoading({ 'message': _vue.language.LOADING_TEXT }); // '正在載入'
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'MyRecommendUserList',
+                        data: {
+                            'p': this.pageList.pageIndex,
+                            'pageSize': this.pageList.pageSize,
+                            'fn': this.serachKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            window.scroll(0, 0);
+                            var userModel = _vue.getSearchUserModel(_vue.serachKey);
+                            _vue.teamList.push(_vue.currentTopUser);
+                            _vue.currentTopUser = userModel;
+
+                            _vue.pageList.list = result.Data.List;
+                            _vue.pageList.pageIndex++;
+                            _vue.isLoading = false;
+
+                            closeToastLoading();
+                        }
+                    })
+                },
+                'getSearchUserModel': function (fn) {
+                    for (var i = 0; i < this.pageList.list.length; i++) {
+                        if (this.pageList.list[i].FlowNumber == fn)
+                            return this.pageList.list[i];
+                    }
+
+                    return null;
+                },
+                'searchCancel': function () {
+                    this.currentTopUser = this.currentUser;
+                    this.currentTopUser['Level'] = this.currentUser.InvestmentLevel.StarNumber;
+                    this.teamList = [];
+
+                    toastLoading({ 'message': _vue.language.LOADING_TEXT }); // '正在載入'
+
+                    this.loadPageData();
+                },
+                'windowScroll': function () {
+                    if (!this.isLoadMore && !this.isLoadComplete) {
+                        this.isLoadMore = true;
+                        this.loadMore();
+                    }
+                },
+                'changeLanguage': function () {
+                    LSE.install('my_team', function (lang) {
+                        Vue.set(_vue, "language", lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+                this.currentTopUser = this.currentUser;
+                this.currentTopUser['Level'] = this.currentUser.InvestmentLevel.StarNumber;
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

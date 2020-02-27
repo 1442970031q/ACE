@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/language.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}" v-cloak>
+            <p class="current_text" v-text="language.LABEL_CURRENT_LANGUAGE"></p>
+            <div class="current_panel">
+                <img v-bind:src="currentLanguage.img" class="current_img" />
+                <p class="current_p" v-text="currentLanguage.text"></p>
+            </div>
+            <p class="current_text" v-text="language.LABEL_SELECT_LANGUAGE"></p>
+            <ul class="items">
+                <li class="clearfix" 
+                    v-for="(item,index) in langList" 
+                    v-bind:key="index"
+                    @click="selectLanguage(item.id)">
+                    <img v-bind:src="item.img" />
+                    <p v-text="item.text"></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentLanguage': {
+                    'img': '',
+                    'text': ''
+                },
+                'statusbarHeight': 20,
+                'langList': [{
+                    'img': '../../img/flags/cn.jpg',
+                    'text': '繁體中文',
+                    'id': 'cn'
+                }, {
+                    'img': '../../img/flags/en.jpg',
+                    'text': 'English',
+                    'id': 'en'
+                }],
+                'request':{
+                    'from':queryString('from')
+                },
+                'language': {
+                    'TITLE_TEXT': 'TITLE_TEXT',
+                    'LABEL_CURRENT_LANGUAGE': 'LABEL_CURRENT_LANGUAGE',
+                    'LABEL_SELECT_LANGUAGE': 'LABEL_SELECT_LANGUAGE'
+                }
+            },
+            methods: {
+                'selectLanguage': function (name) {
+                    LSE.switchLanguage(name);
+
+                    if (!this.request.from) {
+                        var mainPage = plus.webview.getWebviewById('mainPage');
+                        if (mainPage != null) {
+                            mainPage.evalJS('pageScript.reloadLanguage()');
+                        }
+                    }
+                    
+                    closeWindow();
+                },
+                'getLanguageById': function (id) {
+                    for (var i = 0; i < this.langList.length; i++) {
+                        if (this.langList[i].id == id) return this.langList[i];
+                    }
+
+                    return this.langList[0];
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                LSE.install('language', function (lang) {
+                    Object.assign(_vue.language, lang);
+                });
+
+                var curLang = LSE.currentLanguage()
+                this.currentLanguage = this.getLanguageById(curLang);
+            }
+        });
+    </script>
+</body>
+</html>

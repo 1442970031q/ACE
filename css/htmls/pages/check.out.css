@@ -1,0 +1,87 @@
+﻿#app-head {
+    background-color: #1e81d2;
+    border-bottom: 0;
+}
+
+    #app-head .right-back,
+    #app-head .app-head-text {
+        color: white;
+    }
+
+.warn {
+    padding: 10px;
+    font-size: .8em;
+    margin-top: 10px;
+    color: #f9bc0b;
+    background-color: #fef7e1;
+    border-color: #fef3d2;
+    text-align: center;
+}
+
+.input-group .right_icon {
+    display: block;
+    float: right;
+    width: 10%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-size: 1em;
+    color: #ababab;
+}
+
+.top_content {
+    padding: 10px 20px;
+    background-color: #1e81d2;
+}
+
+    .top_content .top_block {
+        width: 100%;
+        text-align: left;
+        color: white;
+    }
+
+    .top_content.center .top_block {
+        text-align: center;
+    }
+
+    .top_content .top_block.fl {
+        float: left;
+        width: 100%;
+    }
+
+    .top_content .txt {
+        display: block;
+        height: 20px;
+        line-height: 20px;
+        text-align: left;
+        font-size: .8em;
+    }
+
+    .top_content .number {
+        text-align: left;
+        font-size: 1.6em;
+        margin-top: 5px;
+        font-weight: bold;
+        height: 30px;
+        line-height: 30px;
+    }
+
+.input_content {
+    margin-top: 10px;
+}
+
+.input_count {
+    font-size: .8em;
+    padding: 5px 10px;
+    color: #afafaf;
+    border-top: 1px solid #f9f9f9;
+}
+
+    .input_count .num {
+        font-style: italic;
+        color: #1e81d2;
+    }
+
+    .input_count .red {
+        color: red;
+    }

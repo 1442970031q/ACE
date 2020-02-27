@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/new.recharge.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="bg"></div>
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <div class="app-head-text" v-text="language.TITLE_TEXT"></div>
+            <button v-show="!(isUsdtLoading || isQrLoading)" class="submit-button" @click="gotoNewWindow('my.rechargePage', 'my.recharge')">我的充值</button>
+        </div>
+        <div id="app-content"
+             v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}"
+             v-bind:class="{'safe': isSafe}">
+
+            <div v-if="isUsdtLoading || isQrLoading" class="loading-box p60">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING"></p>
+            </div>
+            <div v-else v-cloak>
+                <div class="input_group">
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_1">充值數量</span>
+                        <input class="input_control bold r-1"
+                               type="number"
+                               v-model="form.amount"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_1" />
+                        <span class="arrow dis">USDT</span>
+                    </div>
+                    <!--<div class="input_line van-hairline--bottom">
+        <span class="input_text" v-text="language.INPUT_TEXT_4">USDT价格</span>
+        <div class="input_control r-1" v-text="pageModel.USDTPrice"></div>
+        <span class="arrow dis">CNY</span>
+    </div>-->
+                    <div class="input_line">
+                        <span class="input_text" v-text="language.INPUT_TEXT_5">需購買</span>
+                        <div class="input_control r-1" v-text="displayAmount"></div>
+                        <span class="arrow dis">RP</span>
+                    </div>
+                </div>
+                <p class="input_group" style="background:#f3f3f3;color:#969696;font-size:0.9em">可獲得RP仅供参考，以实际到账数为准。</p>
+                <div class="input_group">
+                    <div class="input_line full">
+                        <span class="input_text text_line" v-text="language.INPUT_TEXT_6">充值地址(USDT)</span>
+                        <img v-bind:src="pageModel.ImageAddress" class="qr">
+                        <div class="input_control full_control" v-text="pageModel.Address"></div>
+                        <div class="bottom_buttons">
+                            <van-button type="info" size="small" v-text="language.BUTTON_4" @click="saveGallery">保存至相冊</van-button>
+                            <van-button type="info" size="small" v-text="language.BUTTON_5" @click="copyAddress">複製收款碼</van-button>
+                        </div>
+                    </div>
+                </div>
+                <div class="input_group">
+                    <div class="warn" v-text="language.WARNING_TEXT"></div>
+                    <div class="input_line van-hairline--bottom">
+                        <span class="input_text" v-text="language.INPUT_TEXT_2">交易Hash</span>
+                        <input class="input_control r-1"
+                               v-model="form.hash"
+                               v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                        <i class="arrow iconfont icon-copy" @click="pasteHex"></i>
+                    </div>
+                    <div class="input_line">
+                        <span class="input_text" v-text="language.INPUT_TEXT_3">上傳憑證</span>
+                        <div class="input_control r-1 gray" v-text="fileName ? fileName : language.INPUT_PLACEHOLDER_3"></div>
+                        <i class="arrow iconfont icon-upload" @click="choiceImage"></i>
+                    </div>
+                </div>
+                <button class="confirm_button" v-text="language.BUTTON_1" @click="checkData">確認提交</button>
+            </div>
+            <div v-show="isShowDiloag" class="van-dialog" style="z-index: 2000;">
+                <div class="van-dialog__header" v-text="language.ALERT_TITLE1"></div><div class="van-dialog__content"><div class="van-dialog__message van-dialog__message--has-title" v-text="language.ALERT_MESSAGE1"> </div></div><div class="van-hairline--top van-dialog__footer">
+                    <button class="van-button van-button--default van-button--large van-dialog__cancel" style="display: none;">
+                        <span class="van-button__text">
+                        </span>
+                    </button>
+                    <button @click="isShowDiloag = false" class="van-button van-button--default van-button--large van-dialog__confirm">
+                        <span class="van-button__text" @click="isShowDiloag = false" v-text="language.ALERT_CONFIRM_BUTTON1">
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isUsdtLoading': true,
+                'isQrLoading': true,
+                'fileName': '',
+                'choiceFilePath': '',
+                'displayAmount': '',
+                'pageModel': {
+                    'ImageAddress': '',
+                    'Address': '',
+                    'RPPrice': '',
+                    'USDTPrice': ''
+                },
+                'form': {
+                    'amount': '',
+                    'hash': '',
+                    'imgBase64': ''
+                },
+                'language': {},
+                'statusbarHeight': 20,
+                'isShowDiloag':false
+            },
+            methods: {
+                'loadUSDTData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'USDTCalc',
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.RPPrice = result.Data.RPPrice;
+                            _vue.pageModel.USDTPrice = result.Data.USDTPrice;
+                            _vue.isUsdtLoading = false;
+
+                            _vue.$dialog.alert({
+                                'title': _vue.language.ALERT_TITLE,
+                                'message': _vue.language.ALERT_MESSAGE,
+                                'confirmButtonText': _vue.language.ALERT_CONFIRM_BUTTON
+                            });
+                        }
+                    });
+                },
+                'saveGallery': function () {
+                    toastLoading({ 'message': this.language.SAVE_TOAST_TEXT });
+
+                    var index = this.pageModel.ImageAddress.lastIndexOf('/');
+                    var fileName = this.pageModel.ImageAddress.substring(index + 1);
+                    var downloader = plus.downloader.createDownload(this.pageModel.ImageAddress, {
+                        'filename': '_downloads/' + fileName,
+                        'timeout': 60000
+                    }, function (d, status) {
+                        if (status !== 200) {
+                            closeToastLoading();
+                            toastMsg(_vue.language.SAVE_ERROR);
+                            return;
+                        }
+
+                        plus.gallery.save(d.filename, function () {
+                            closeToastLoading();
+                            toastMsg(_vue.language.SAVE_COMPLETE_TEXT);
+                        }, function (err) {
+                            closeToastLoading();
+                            toastMsg(err.message);
+                        });
+                    });
+
+                    downloader.addEventListener('statechanged', this.downloadChanged);
+                    downloader.start();
+                },
+                'downloadChanged': function (download, status) {
+                    if (download.state === 2 && status === 404) {
+                        download.abort();
+
+                        closeToastLoading();
+                        toastMsg(this.language.SAVE_ERROR);
+                    }
+                },
+                'copyAddress': function () {
+                    var mainPage = plus.webview.getWebviewById('mainPage');
+                    if (CONFIG.IS_RUNTIME && mainPage !== null) {
+                        mainPage.evalJS('pageScript.setClipBoard("' + this.pageModel.Address + '")');
+                    }
+
+                    toastMsg(this.language.COPY_TOAST_TEXT);
+                },
+                'loadQRData': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'USDTAddress',
+                        success: function (result) {
+                            if (result.Error) {
+                                if (result.isSellOut) {
+                                    _vue.isShowDiloag = true;
+                                    return;
+                                }
+
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.pageModel.ImageAddress = result.ImageAddress;
+                            _vue.pageModel.Address = result.Address;
+                            _vue.isQrLoading = false;
+                        }
+                    });
+                },
+                'pasteHex': function () {
+                    var mainPage = plus.webview.getWebviewById('mainPage');
+                    mainPage.evalJS('pageScript.getClipBoard("new.rechargePage", "_vue.pasteCallback")');
+                },
+                'pasteCallback': function (result) {
+                    if (result === null || result === 'null' || !result) {
+                        toastMsg(this.language.NONE_CLIPBOARD);
+                    } else {
+                        this.form.hash = result;
+                    }
+                },
+                'checkData': function () {
+                    if (!this.form.amount) {
+                        toastMsg(this.language.ERROR_1);
+                    }else if (this.form.amount<10000) {
+                        toastMsg(this.language.ERROR_3);
+                    } else if (!this.form.hash && !this.choiceFilePath) {
+                        toastMsg(this.language.ERROR_2);
+                    } else {
+                        toastLoading({ 'message': this.language.TOAST_TEXT });
+
+                        if (this.choiceFilePath) {
+                            this.compressImage();
+                        } else {
+                            this.doSubmitAjax();
+                        }
+                    }
+                },
+                'compressImage': function () {
+                    plus.zip.compressImage({
+                        'src': this.choiceFilePath,
+                        'dst': '_downloads/recharge.jpg',
+                        'overwrite': true,
+                        'format': 'jpg',
+                        'width': 'auto',
+                        'height': 'auto',
+                        'quality': 90
+                    }, function (event) {
+                        _vue.compressComplete(event);
+                    }, function (error) {
+                        closeToastLoading();
+                        toastMsg(error.message);
+                    });
+                },
+                'compressComplete': function (event) {
+                    var reader = new plus.io.FileReader();
+
+                    reader.onloadend = function (e) {
+                        var base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                        _vue.form.imgBase64 = encodeURIComponent(base64);
+                        _vue.doSubmitAjax();
+                    };
+
+                    reader.onerror = function (fe) {
+                        closeToastLoading();
+                        toastMsg('Error:' + fe.error);
+                    };
+
+                    var f = event.target.replace('file://', '');
+                    reader.readAsDataURL(f);
+                },
+                'doSubmitAjax': function () {
+                    ajax({
+                        url: CONFIG.BASE_URL + 'SubmitRecharge',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            gotoNewWindow('submit.recharge.successPage', '../success/submit.recharge.success', {
+                                'openCallback': function () {
+                                    closeWindow('none');
+                                }
+                            });
+                        }
+                    });
+                },
+                'choiceImage': function () {
+                    plus.key.hideSoftKeybord();
+                    setTimeout(function () {
+                        plus.gallery.pick(_vue.resolveFile);
+                    }, 100);
+                },
+                'resolveFile': function (captureFile) {
+                    plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                        var filePath = entry.toLocalURL();
+                        entry.file(function (file) {
+                            if (file.size > 5 * (1024 * 1024)) {
+                                toastMsg('截图必须在5MB以内');
+                                return;
+                            }
+
+                            _vue.fileName = file.name;
+                            _vue.choiceFilePath = filePath;
+                        });
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('new_recharge', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+
+                        _vue.displayAmount = lang.INPUT_PLACEHOLDER_5;
+                    });
+                }
+            },
+            watch: {
+                'form.amount': function (value) {
+                    if (!value || value <= 0) {
+                        this.displayAmount = this.language.INPUT_PLACEHOLDER_5;
+                    } else {
+                        this.displayAmount = numberFormat(value * this.pageModel.USDTPrice*1 /this.pageModel.RPPrice*1 , 2);
+                    }
+                }
+            },
+            computed: {
+                'isSafe': function () {
+                    return CONFIG.IPHONE.isIPhoneX || CONFIG.IPHONE.isIPhoneXR || CONFIG.IPHONE.isIPhoneXSMax;
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadQRData();
+                this.loadUSDTData();
+            }
+        });
+    </script>
+</body>
+</html>

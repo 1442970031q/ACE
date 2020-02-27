@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/puchase.queue.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" class="fixed" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+        </div>
+        <div id="app-content" v-bind:style="{'paddingTop': (45 + statusbarHeight) + 'px'}">
+            <div class="head_content">
+                <form action="/">
+                    <van-search v-bind:placeholder="language.SEARCH_PLACEHOLDER"
+                                show-action
+                                v-model="searchKey"
+                                @cancel="loadPageData"
+                                @search="doSearchAjax"
+                                @focus="isShow=false"
+                                @blur="isShow=true">
+                        <div slot="action" @click="loadPageData" v-text="language.SEARCH">搜索</div>
+                    </van-search>
+                </form>
+                <ul class="head clearfix">
+                    <li class="first" v-text="language.HEAD_TEXT_1"></li>
+                    <li class="id" v-text="language.HEAD_TEXT_2"></li>
+                    <li class="mo" v-text="language.HEAD_TEXT_3"></li>
+                    <li class="time" v-text="language.HEAD_TEXT_4"></li>
+                </ul>
+            </div>
+            <div v-if="isLoading" class="loading-box">
+                <van-loading color="black"></van-loading>
+                <p class="loading-text" v-text="language.LOADING_TEXT"></p>
+            </div>
+            <div v-else v-cloak>
+                <div v-if="queue.list.length==0" class="none-data">
+                    <i class="iconfont icon-wushuju"></i>
+                    <p class="none-data-text" v-text="language.NONE_DATA"></p>
+                </div>
+                <div v-else class="container">
+                    <div class="list_container">
+                        <ul class="queue clearfix" 
+                            v-bind:class="{'odd': index%2!=0}" 
+                            v-for="(item,index) in queue.list" 
+                            v-bind:key="index">
+                            <li class="first" v-text="queueCount - ((lastFlowNumber - item.FlowNumber) + 1) + 1"></li>
+                            <li class="id" v-text="item.FlowNumber"></li>
+                            <li class="mo" v-text="'$ ' + item.AP"></li>
+                            <li class="time" v-text="item.CreateTime"></li>
+                        </ul>
+                        <div v-if="queue.isLoadMore" class="load_more clearfix">
+                            <van-loading color="black"></van-loading>
+                            <span class="load_text" v-text="language.LOADING_TEXT"></span>
+                        </div>
+                        <div v-if="queue.isLoadComplete" class="load_more_complete">
+                            <span class="load_text" v-text="language.NOMORE"></span>
+                        </div>
+                    </div>
+                    <div class="info" v-show="isShow">
+                        <ul class="clearfix">
+                            <li>
+                                <p class="number" v-text="lastFlowNumber"></p>
+                                <p class="text" v-text="language.BOTTOM_TEXT_1"></p>
+                            </li>
+                            <li>
+                                <p class="number" v-text="queueCount"></p>
+                                <p class="text" v-text="language.BOTTOM_TEXT_2"></p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'isLoading': true,
+                'searchKey': '',
+                'queueCount': '',
+                'lastFlowNumber': '',
+                'isShow': true,
+                'queue': {
+                    'isLoadMore': false,
+                    'isLoadComplete': false,
+                    'pageIndex': 1,
+                    'pageSize': 25,
+                    'list': []
+                },
+                'language': {
+                    'TITLE_TEXT': '',
+                    'SEARCH_PLACEHOLDER': '',
+                    'HEAD_TEXT_1': '',
+                    'HEAD_TEXT_2': '',
+                    'HEAD_TEXT_3': '',
+                    'HEAD_TEXT_4': '',
+                    'LOADING_TEXT': '',
+                    'NONE_DATA': '',
+                    'NOMORE': '',
+                    'BOTTOM_TEXT_1': '',
+                    'BOTTOM_TEXT_2': '',
+                    'ERROR_1': '',
+                    'ERROR_2': '',
+                    'ERROR_3': ''
+                },
+                'statusbarHeight':20
+            },
+            methods: {
+                'loadPageData': function () {
+                    this.isLoading = true;
+                    this.queue.pageIndex = 1;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'Waiteds',
+                        data: {
+                            'p': this.queue.pageIndex,
+                            'pageSize': this.queue.pageSize
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            if (_vue.queue.pageIndex == 1) {
+                                _vue.lastFlowNumber = result.LastFlowNumber;
+                                _vue.queueCount = result.Count;
+                            }
+
+                            _vue.queue.pageIndex++;
+                            _vue.queue.list = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'loadMore': function () {
+                    this.queue.isLoadMore = true;
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'Waiteds',
+                        data: {
+                            'p': this.queue.pageIndex,
+                            'pageSize': this.queue.pageSize,
+                            'searchKey': this.searchKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.queue.pageIndex++;
+                            _vue.queue.isLoadMore = false;
+                            _vue.queue.list = _vue.queue.list.concat(result.Data);
+
+                            if (result.Data.length < _vue.queue.pageSize) {
+                                _vue.queue.isLoadComplete = true;
+                            }
+                        }
+                    })
+                },
+                'windowScroll': function () {
+                    if (this.queue.list.length > 0 && !this.queue.isLoadMore && !this.queue.isLoadComplete) {
+                        this.loadMore();
+                    }
+                },
+                'doSearchAjax': function () {
+                    if (!this.searchKey) {
+                        toastMsg(this.language.ERROR_1);
+                        return;
+                    } else if (this.searchKey.length < 5) {
+                        toastMsg(this.language.ERROR_2);
+                        return;
+                    } else if (!/^[0-9]*$/.test(this.searchKey)) {
+                        toastMsg(this.language.ERROR_3);
+                        return;
+                    }
+
+                    this.isLoading = true;
+                    this.queue.list = [];
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'Waiteds',
+                        data: {
+                            'p': 1,
+                            'pageSize': this.queue.pageSize,
+                            'searchKey': this.searchKey
+                        },
+                        success: function (result) {
+                            if (result.Error) {
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            _vue.lastFlowNumber = result.LastFlowNumber;
+                            _vue.queueCount = result.Count;
+                            _vue.queue.list = result.Data;
+                            _vue.isLoading = false;
+                        }
+                    });
+                },
+                'changeLanguage': function () {
+                    LSE.install('purchase_queue', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            },
+            mounted: function () {
+                this.loadPageData();
+                window.scrollBottom = this.windowScroll;
+            }
+        });
+    </script>
+</body>
+</html>

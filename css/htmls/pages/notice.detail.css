@@ -1,0 +1,26 @@
+﻿.html_container {
+    padding: 10px;
+}
+
+    .html_container .title {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .html_container .time {
+        font-size: .8em;
+        margin-top: 5px;
+        color: #7d7d7d;
+    }
+
+    .html_container .text {
+        padding: 5px;
+        margin-top: 15px;
+        overflow:hidden;
+    }
+
+    .html_container .text img{
+        display:block;
+        margin:0 auto;
+        max-width:100% !important;
+    }

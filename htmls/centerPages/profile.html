@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/profile.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head" v-bind:style="{'paddingTop': statusbarHeight + 'px'}">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT">個人信息</p>
+        </div>
+        <div id="app-content" class="pd-10" v-cloak>
+            <van-cell-group>
+                <van-cell class="avatar" is-link @click="showActions=true">
+                    <template slot="title">
+                        <img v-lazy="currentUser.AvatarImage" class="app-avatar" />
+                    </template>
+                </van-cell>
+            </van-cell-group>
+            <van-cell-group class="mt-10">
+                <van-cell v-bind:title="language.HONOR_NAME">
+                    <template slot="right-icon">
+                        <p class="glory_name" v-html="getGlory"></p>
+                    </template>
+                </van-cell>
+                <van-cell v-bind:title="language.NICK_NAME" is-link v-bind:value="currentUser.NickName" @click="newWindow('change.nicknamePage', 'profilePages/change.nickname')"></van-cell>
+                <van-cell v-bind:title="language.LOGIN_NAME" v-bind:value="currentUser.MemberNo"></van-cell>
+                <van-cell v-bind:title="language.NATIONALITY" v-bind:value="getCountryName(currentUser.NationalityCode)"></van-cell>
+                <van-cell v-bind:title="language.CERT_TYPE" v-bind:value="getIDTypeName(currentUser.IDType)"></van-cell>
+            </van-cell-group>
+            <van-cell-group class="mt-10">
+                <van-cell is-link v-bind:title="language.ACCOUNT_SECURITY" @click="newWindow('securityPage', 'security')"></van-cell>
+                <van-cell is-link v-bind:title="language.RECEIVE_DATA" @click="newWindow('addressPage', 'profilePages/address')"></van-cell>
+            </van-cell-group>
+        </div>
+        <van-actionsheet v-model="showActions" v-bind:actions="actions" v-bind:cancel-text="language.CANCEL"></van-actionsheet>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/country.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(vant.Lazyload, {
+            'loading': '../../img/default_avatar.jpg',
+            'error': '../../img/default_avatar.jpg'
+        });
+
+        var _vue = new Vue({
+            el: '#app',
+            data:{
+                'currentUser': getUserModel(),
+                'showActions': false,
+                'actions': [],
+                'language': {},
+                'statusbarHeight': 20
+            },
+            methods: {
+                'getIDTypeName': function (typeId) {
+                    if (typeId == 1) {
+                        return this.language.IDCARD;//'身份證';
+                    } else if (typeId == 2) {
+                        return this.language.PASSPORT;//'護照';
+                    } else if (typeId == 4) {
+                        return this.language.DRIVER_LICENSE;//'駕照';
+                    } else if (typeId == 8) {
+                        return this.language.TAIWAN_LICENSE;//'台胞證';
+                    } else if (typeId == 16) {
+                        return this.language.HOME_VISIT_LICENSE;//'回鄉證';
+                    } else {
+                        return this.language.UNSELECTED;//'未選擇';
+                    }
+                },
+                'newWindow': function (id, page) {
+                    gotoNewWindow(id, page);
+                },
+                'fromCamera': function () {
+                    this.showActions = false;
+
+                    var camera = plus.camera.getCamera();
+                    camera.captureImage(function (captureFile) {
+                        plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                            _vue.gotoCroppa(entry.toLocalURL());
+                        });
+                    }, function () { }, {
+                            index: 1
+                        });
+                },
+                'fromGallery': function () {
+                    this.showActions = false;
+
+                    plus.gallery.pick(function (captureFile) {
+                        plus.io.resolveLocalFileSystemURL(captureFile, function (entry) {
+                            _vue.gotoCroppa(entry.toLocalURL());
+                        });
+                    });
+                },
+                'gotoCroppa': function (file) {
+                    toastLoading({ 'message': this.language.LOADING_TEXT });
+
+                    gotoNewWindow('croppaPage', 'croppa', {
+                        ani: 'slide-in-bottom',
+                        param: 'fn=' + encodeURIComponent(file),
+                        openCallback: function () {
+                            closeToastLoading();
+                            plus.navigator.setStatusBarStyle('light');
+                        },
+                        closeCallback: function () {
+                            plus.navigator.setStatusBarStyle('dark');
+                        }
+                    });
+                },
+                'updateInfo': function () {
+                    this.currentUser = getUserModel();
+                },
+                'getCountryName': function (code) {
+                    for (var i = 0; i < country.length; i++) {
+                        if (country[i].code == code) return country[i].text;
+                    }
+
+                    return _vue.language.UNKNOW;//'未知的';
+                },
+                'changeLanguage': function () {
+                    LSE.install('profile', function (lang) {
+                        Vue.set(_vue, 'language', lang);
+
+                        _vue.actions.push({
+                            'name': _vue.language.TAKE_A_PHOTO,//'拍照選擇',
+                            'callback': _vue.fromCamera
+                        });
+
+                        _vue.actions.push({
+                            'name': _vue.language.TAKE_A_GALLERY,//'相冊選擇',
+                            'callback': _vue.fromGallery
+                        });
+                    });
+                }
+            },
+            computed: {
+                'getGlory': function () {
+                    var name = this.currentUser.HonorName ? this.currentUser.HonorName : 'error';
+                    var aTag = '';
+
+                    for (var i = 0; i < this.currentUser.HonorLevel; i++) {
+                        aTag += '<span class="aTag">A</span>';
+                    }
+
+                    return name + aTag;
+                }
+            },
+            created: function () {
+                if (CONFIG.IS_RUNTIME) {
+                    this.statusbarHeight = plus.navigator.getStatusbarHeight();
+                }
+
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

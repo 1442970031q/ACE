@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../css/vant.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/htmls/vue-croppa.min.css" rel="stylesheet" />
+    <link href="../../css/htmls/pages/croppa.css" rel="stylesheet" />
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button class="submit-button" @click="confirm()" v-text="language.BUTTON_1"></button>
+        </div>
+        <div id="app-content">
+            <croppa class="center"
+                    v-model="myCroppa"
+                    placeholder=""
+                    v-bind:width="300"
+                    v-bind:height="300"
+                    v-bind:canvas-color="'default'"
+                    v-bind:accept="'image/*'"
+                    v-bind:file-size-limit="0"
+                    v-bind:zoom-speed="5"
+                    v-bind:disabled="false"
+                    v-bind:disable-drag-and-drop="false"
+                    v-bind:disable-click-to-choose="false"
+                    v-bind:disable-drag-to-move="false"
+                    v-bind:disable-scroll-to-zoom="false"
+                    v-bind:disable-rotation="false"
+                    v-bind:prevent-white-space="true"
+                    v-bind:reverse-scroll-to-zoom="false"
+                    v-bind:show-remove-button="false"
+                    v-bind:initial-image="fileName"></croppa>
+        </div>
+    </div>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/vant.js"></script>
+    <script src="../../js/vue-croppa.min.js"></script>
+    <script src="../../js/base.js"></script>
+    <script>
+        Vue.use(Croppa);
+
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'myCroppa': {},
+                'currentUser': getUserModel(),
+                'fileName': queryString('fn'),
+                'language': {
+                    'TITLE_TEXT': '',
+                    'BUTTON_1': '',
+                    'TOAST_TEXT': ''
+                }
+            },
+            methods: {
+                'confirm': function () {
+                    this.myCroppa.generateBlob((blob) => {
+                        toastLoading({ 'message': _vue.language.TOAST_TEXT })
+
+                        var reader = new FileReader();
+                        reader.onload = _vue.loadComplete;
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg', 0.8) // 80% compressed jpeg file
+                },
+                'loadComplete': function (e) {
+                    var base64 = e.target.result.toString().replace('data:image/jpeg;base64,', '');
+                    var encode = encodeURIComponent(base64);
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'UploadAvatarImage',
+                        data: {
+                            'base64AvatarImage': encode
+                        },
+                        timeout: 120000,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                            } else {
+                                updateUserModel({
+                                    'AvatarImage': result.AvatarImage
+                                }, [{
+                                    'pageName': 'profilePage',
+                                    'actionName': '_vue.updateInfo()'
+                                }, {
+                                    'pageName': 'center.htmlPage',
+                                    'actionName': '_vue.updateInfo()'
+                                }]);
+                                closeWindow();
+                            }
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('croppa', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

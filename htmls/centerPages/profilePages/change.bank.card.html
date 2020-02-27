@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <link href="../../../css/vant.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" />
+    <style>
+        .input_content {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="html5plus://ready"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="app-head">
+            <i id="app-back-button" class="iconfont icon-fanhui right-back"></i>
+            <p class="app-head-text" v-text="language.TITLE_TEXT"></p>
+            <button class="submit-button" @click="checkData()" v-text="language.BUTTON_1"></button>
+        </div>
+        <div id="app-content">
+            <div class="input_content">
+                <div class="input-group bb">
+                    <span class="input-text" v-text="language.INPUT_TEXT_1"></span>
+                    <input type="text" class="input-control" v-bind:value="currentUser.BankCardName" readonly />
+                </div>
+                <div class="input-group bb">
+                    <span class="input-text" v-text="language.INPUT_TEXT_2"></span>
+                    <input type="text" class="input-control" v-model="form.bankName" maxlength="30" 
+                           v-bind:placeholder="language.INPUT_PLACEHOLDER_2" />
+                </div>
+                <div class="input-group bb">
+                    <span class="input-text" v-text="language.INPUT_TEXT_3"></span>
+                    <input type="text" class="input-control" v-model="form.bankBranchName" maxlength="30" 
+                           v-bind:placeholder="language.INPUT_PLACEHOLDER_3" />
+                </div>
+                <div class="input-group">
+                    <span class="input-text" v-text="language.INPUT_TEXT_4"></span>
+                    <input type="number" class="input-control" v-model="form.bankCardNumber" maxlength="20" 
+                           v-bind:placeholder="language.INPUT_PLACEHOLDER_4" />
+                </div>
+            </div>
+            <div class="input_content">
+                <div class="input-group">
+                    <span class="input-text" v-text="language.INPUT_TEXT_5"></span>
+                    <input type="password" class="input-control" v-model="form.password" maxlength="16" 
+                           v-bind:placeholder="language.INPUT_PLACEHOLDER_5" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../../js/vue.min.js"></script>
+    <script src="../../../js/vant.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script>
+        var _vue = new Vue({
+            el: '#app',
+            data: {
+                'currentUser': getUserModel(),
+                'form': {
+                    'bankCardName': '',
+                    'bankName': '',
+                    'bankBranchName': '',
+                    'bankCardNumber': '',
+                    'password': ''
+                },
+                'language':{
+                    'TITLE_TEXT': '',
+                    'BUTTON_1': '',
+                    'INPUT_TEXT_1': '',
+                    'INPUT_TEXT_2': '',
+                    'INPUT_PLACEHOLDER_2': '',
+                    'INPUT_TEXT_3': '',
+                    'INPUT_PLACEHOLDER_3': '',
+                    'INPUT_TEXT_4': '',
+                    'INPUT_PLACEHOLDER_4': '',
+                    'INPUT_TEXT_5': '',
+                    'INPUT_PLACEHOLDER_5': '',
+                    'ERROR_1': '',
+                    'ERROR_2': '',
+                    'ERROR_3': '',
+                    'ERROR_4': '',
+                    'SUBMIT_TOAST_TEXT': '',
+                    'SUCCESS_TITLE': '',
+                    'SUCCESS_TEXT': ''
+                }
+            },
+            methods: {
+                'checkData': function () {
+                    if (!this.form.bankName) {
+                        toastMsg(this.language.ERROR_1);
+                    } else if (!this.form.bankBranchName) {
+                        toastMsg(this.language.ERROR_2);
+                    } else if (!this.form.bankCardNumber) {
+                        toastMsg(this.language.ERROR_3);
+                    } else if (!this.form.password) {
+                        toastMsg(this.language.ERROR_4);
+                    } else {
+                        this.doSubmitAjax();
+                    }
+                },
+                'doSubmitAjax': function () {
+                    toastLoading({ 'message': this.language.SUBMIT_TOAST_TEXT });
+
+                    ajax({
+                        url: CONFIG.BASE_URL + 'ChangeBankCard',
+                        data: this.form,
+                        success: function (result) {
+                            if (result.Error) {
+                                closeToastLoading();
+                                toastMsg(result.Msg);
+                                return;
+                            }
+
+                            updateUserModel({
+                                'BankName': _vue.form.bankName,
+                                'BankCardNumber': _vue.form.bankCardNumber,
+                                'BankBranchName': _vue.form.bankBranchName
+                            }, [{
+                                'pageName': 'addressPage',
+                                'actionName': '_vue.updateCardInfo()'
+                            }]);
+
+                            gotoNewWindow('change.successPage', '../../success/change.success', {
+                                param:`title=${_vue.language.SUCCESS_TITLE}&text=${_vue.language.SUCCESS_TEXT}`,
+                                openCallback: function () {
+                                    closeWindow('none');
+                                }
+                            })
+                        }
+                    })
+                },
+                'changeLanguage': function () {
+                    LSE.install('change_bank_card', function (lang) {
+                        Object.assign(_vue.language, lang);
+                    });
+                }
+            },
+            created: function () {
+                this.changeLanguage();
+            }
+        });
+    </script>
+</body>
+</html>

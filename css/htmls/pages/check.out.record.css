@@ -1,0 +1,121 @@
+﻿[class*=van-hairline]::after {
+    border: 0 !important;
+}
+
+.van-collapse-item__content {
+    padding: 10px 0;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.list_content {
+}
+
+.list_container {
+    margin-top: 5px;
+}
+
+.list_content ul {
+}
+
+    .list_content ul li {
+        margin-bottom: 5px;
+        background-color: white;
+        padding: 10px;
+    }
+
+        .list_content ul li:last-child {
+            border-bottom: 0;
+        }
+
+        .list_content ul li .line {
+            line-height: 25px;
+        }
+
+            .list_content ul li .line .left {
+                float: left;
+                font-size: .9em;
+            }
+
+                .list_content ul li .line .left.ep {
+                    font-size: 1.1em;
+                }
+
+                    .list_content ul li .line .left.ep sup {
+                        font-size: .7em;
+                        font-style: italic;
+                        color: #bfbfbf;
+                    }
+
+            .list_content ul li .line .right {
+                float: right;
+            }
+
+            .list_content ul li .line .number {
+                font-weight: bold;
+                font-size: 1.1em;
+            }
+
+                .list_content ul li .line .number sup {
+                    font-size: .7em;
+                    font-weight: normal;
+                    font-style: italic;
+                    color: #bfbfbf;
+                }
+
+            .list_content ul li .line .time {
+                color: #a5a5a5;
+                font-size: .8em;
+            }
+
+.card_line {
+    margin-bottom: 3px;
+    font-size: .9em;
+}
+
+    .card_line .left-text {
+        display: inline-block;
+        width: 100px;
+        text-align: right;
+        font-weight: bold;
+    }
+
+.none-data {
+    background-color: #f3f3f3;
+}
+
+.load_more,
+.load_more_complete {
+    background-color: white;
+    text-align: center;
+    line-height: 30px;
+    width: 115px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.load_more_complete {
+    width: auto;
+    text-align: center;
+    margin-top: 5px;
+}
+
+    .load_more_complete .load_text {
+        float: none;
+        color: #828282;
+        font-size: .9em;
+    }
+
+.load_more .van-loading {
+    float: left;
+}
+
+.load_more .load_text {
+    float: left;
+    margin-left: 5px;
+    color: #828282;
+}
+
+.load_more .van-loading--black circle {
+    stroke: #a5a5a5;
+}
